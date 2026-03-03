@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import api from "../api/apiClient";
 import extractError from "../utils/extractError";
 
@@ -10,54 +10,67 @@ export const AuthProvider = ({ children }) => {
 
   const isAuthenticated = !!user;
 
-  const bootstrap = async () => {
+  /**
+   * Bootstraps user session using HttpOnly cookie
+   */
+  const bootstrap = useCallback(async () => {
     try {
-      const res = await api.get("/me/");
+      const res = await api.get("/accounts/me/");
       setUser(res.data);
     } catch (err) {
-      if (err.response?.status === 401) {
-        localStorage.clear();
-        setUser(null);
-      }
+      setUser(null);
     } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (localStorage.getItem("access")) {
-      bootstrap();
-    } else {
       setLoading(false);
     }
   }, []);
 
+  /**
+   * Run bootstrap on first load
+   * Browser automatically sends cookies
+   */
+  useEffect(() => {
+    bootstrap();
+  }, [bootstrap]);
+
+  /**
+   * Login
+   * Backend sets HttpOnly cookies
+   */
   const login = async (email, password) => {
     try {
-      const res = await api.post("/login/", { email, password });
-
-      localStorage.setItem("access", res.data.access);
-      localStorage.setItem("refresh", res.data.refresh);
+      await api.post("/accounts/login/", { email, password });
 
       setLoading(true);
       await bootstrap();
     } catch (err) {
-      throw extractError(err);
+      setLoading(false);
+      return Promise.reject(extractError(err));
     }
   };
 
+  /**
+   * Signup
+   */
   const signup = async (payload) => {
     try {
-      await api.post("/signup/", payload);
+      await api.post("/accounts/signup/", payload);
     } catch (err) {
-      throw extractError(err);
+      return Promise.reject(extractError(err));
     }
   };
 
-  const logout = () => {
-    localStorage.clear();
+  /**
+   * Logout
+   * Calls backend to clear cookies
+   */
+  const logout = async () => {
+    try {
+      await api.post("/accounts/logout/");
+    } catch {
+      // ignore network failure
+    }
+
     setUser(null);
-    setLoading(false);
   };
 
   return (
