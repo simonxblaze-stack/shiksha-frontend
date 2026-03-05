@@ -9,6 +9,7 @@ import "../css/Contact.css";
 
 const Contact = () => {
   return (
+
     <div className="contact2-container">
       {/* Header */}
       <header className="contact2-header">

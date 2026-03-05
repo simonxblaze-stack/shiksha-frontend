@@ -1,7 +1,4 @@
 import { Routes, Route } from 'react-router-dom';
-import DailyTopics from "./DailyTopics";
-
-<Route path="/daily-topics" element={<DailyTopics />} />
 
 import Dashboard from './Dashboard';
 import ProtectedRoute from '../routes/ProtectedRoute';
@@ -43,6 +40,8 @@ import Payment from "./Payment";
 
 import ThreadListPage from '../forum/ThreadListPage';
 import ThreadDetailPage from '../forum/ThreadDetailPage';
+import { useAuth } from "../contexts/AuthContext";
+import { Navigate } from "react-router-dom";
 
 function Page({ children }) {
   return (
@@ -55,27 +54,29 @@ function Page({ children }) {
 }
 
 function App() {
+  const { isAuthenticated, user, loading } = useAuth();
+
+  if (loading) return null; // or spinner
   return (
     <div className="app">
       <Routes>
 
         {/* ===== HOME ===== */}
-        <Route
-          path="/"
-          element={
-            <div className="page-content overflow-x-hidden">
-              <Navbar />
-              <div className="home-scale-wrapper mx-auto max-w-[1400px]">
-                <LandingHeader />
-                <MainGrid />
-                <LowerGrid />
-                <ExploreServices />
-                <Feedback />
-              </div>
-              <Footer />
-            </div>
-          }
-        />
+       {/* ===== ROOT DOMAIN CONTROL ===== */}
+<Route
+  path="/"
+  element={
+    isAuthenticated ? (
+      user?.role === "student" ? (
+        <Navigate to="/dashboard" />
+      ) : (
+        <Navigate to="/login" />
+      )
+    ) : (
+      <Navigate to="/login" />
+    )
+  }
+/>
 
         {/* ===== DASHBOARD (PROTECTED) ===== */}
         <Route
