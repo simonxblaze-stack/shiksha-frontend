@@ -19,7 +19,11 @@ const handleSubmit = async (e) => {
   try {
     const loggedInUser = await login(email, password);
 
-    const role = (loggedInUser?.role || user?.role || "").toLowerCase();
+    const roles = loggedInUser?.roles || user?.roles || [];
+
+    const isTeacher = roles.some(
+  (r) => r.toLowerCase() === "teacher"
+            );
 
     console.log("Logged in user:", loggedInUser);
     console.log("Role detected:", role);
