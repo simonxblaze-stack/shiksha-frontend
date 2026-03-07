@@ -11,33 +11,37 @@ const Login = () => {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setSubmitting(true);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault(); 
-    setError(""); 
-    setSubmitting(true);
+  try {
+    const loggedInUser = await login(email, password);
 
-    try {
-      // login now returns the authenticated user object, but we can also
-      // read it from context after the promise resolves
-      const loggedInUser = await login(email, password);
-const role = (loggedInUser?.role || user?.role || "").toLowerCase();
-      // Role-based redirect
-      if (role === "teacher") {
-        window.location.href = "https://teacher.shikshacom.com";
-      } else {
-        window.location.href = "https://app.shikshacom.com";
-      }
-    } catch (err) {
-      const message =
-        err?.response?.data?.detail ||
-        err?.message ||
-        "Login failed";
-      setError(message);
-    } finally {
-      setSubmitting(false);
+    const role = (loggedInUser?.role || user?.role || "").toLowerCase();
+
+    console.log("Logged in user:", loggedInUser);
+    console.log("Role detected:", role);
+
+    if (role === "teacher") {
+      window.location.href = "https://teacher.shikshacom.com";
+    } else {
+      window.location.href = "https://app.shikshacom.com";
     }
-  };
+
+  } catch (err) {
+    const message =
+      err?.response?.data?.detail ||
+      err?.message ||
+      "Login failed";
+
+    setError(message);
+  } finally {
+    setSubmitting(false);
+  }
+};
+ 
 
   return (
     <div className="login-container">

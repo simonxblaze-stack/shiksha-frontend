@@ -77,9 +77,18 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  /**
+   * Check if user has a specific role
+   */
+  const hasRole = (role) => {
+    if (!user) return false;
+    const userRole = (user.role || "").toLowerCase();
+    return userRole === role.toLowerCase();
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, loading, login, signup, logout }}
+      value={{ user, isAuthenticated, loading, login, signup, logout, hasRole }}
     >
       {children}
     </AuthContext.Provider>
