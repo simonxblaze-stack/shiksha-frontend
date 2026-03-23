@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
 import "../css/Navbar.css";
 
 import { useLanguage } from "../contexts/LanguageContext";
@@ -8,7 +7,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 const Navbar = () => {
   const { t, switchLanguage } = useLanguage();
-  const { isAuthenticated, user, loading } = useAuth();
+  const { isAuthenticated, user, loading, logout } = useAuth();
   const navigate = useNavigate();
 
   const [fontSize, setFontSize] = useState(1);
@@ -48,31 +47,32 @@ const Navbar = () => {
     navigate("/login", { replace: true });
   };
 
- const handleDashboard = () => {
-  if (!user) return;
+  const handleDashboard = () => {
+    if (!user) return;
 
-  const roles = Array.isArray(user?.roles) ? user.roles : [];
-  const normalizedRoles = roles.map((r) => String(r).toLowerCase());
-  const singleRole = String(user?.role || "").toLowerCase();
+    const roles = Array.isArray(user?.roles) ? user.roles : [];
+    const normalizedRoles = roles.map((r) => String(r).toLowerCase());
+    const singleRole = String(user?.role || "").toLowerCase();
 
-  const isTeacher =
-    normalizedRoles.includes("teacher") || singleRole === "teacher";
+    const isTeacher =
+      normalizedRoles.includes("teacher") || singleRole === "teacher";
 
-  const isStudent =
-    normalizedRoles.includes("student") || singleRole === "student";
+    const isStudent =
+      normalizedRoles.includes("student") || singleRole === "student";
 
-  if (isTeacher) {
-    window.location.href = "https://teacher.shikshacom.com/teacher/dashboard";
-    return;
-  }
+    if (isTeacher) {
+      window.location.href = "https://teacher.shikshacom.com/teacher/dashboard";
+      return;
+    }
 
-  if (isStudent) {
+    if (isStudent) {
+      window.location.href = "https://app.shikshacom.com/";
+      return;
+    }
+
     window.location.href = "https://app.shikshacom.com/";
-    return;
-  }
+  };
 
-  window.location.href = "https://app.shikshacom.com/";
-};
   const displayName =
     user?.name ||
     user?.full_name ||
@@ -114,33 +114,6 @@ const Navbar = () => {
         </div>
 
         <div className="header-right">
-          <div className="header-social">
-            <a
-              href="https://www.facebook.com"
-              className="social-icon"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaFacebookF />
-            </a>
-            <a
-              href="https://www.instagram.com"
-              className="social-icon"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaInstagram />
-            </a>
-            <a
-              href="https://www.youtube.com"
-              className="social-icon"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaYoutube />
-            </a>
-          </div>
-
           <div className="header-auth">
             {isAuthenticated && user ? (
               <>
@@ -152,6 +125,14 @@ const Navbar = () => {
                   onClick={handleDashboard}
                 >
                   Dashboard
+                </button>
+
+                <button
+                  type="button"
+                  className="header-login-btn"
+                  onClick={handleLogout}
+                >
+                  Logout
                 </button>
               </>
             ) : (
