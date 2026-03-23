@@ -115,7 +115,7 @@ const Navbar = () => {
 
         <div className="header-right">
           <div className="header-auth">
-            {isAuthenticated && user ? (
+           {isAuthenticated && user ? (
   <div className="header-auth">
     <button
       type="button"
