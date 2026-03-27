@@ -92,57 +92,13 @@ const ThreadListPage = () => {
                 className="tl-notification-btn"
                 type="button"
                 aria-label="Notifications"
-                onClick={() => setIsNotificationOpen((prev) => !prev)}
+                onClick={() => navigate('/forum/notifications')}
               >
                 <IoNotificationsOutline />
                 {unreadCount > 0 && (
                   <span className="tl-notification-badge">{unreadCount}</span>
                 )}
               </button>
-
-              {isNotificationOpen && (
-                <div className="tl-notification-dropdown">
-                  <div className="tl-notification-header">
-                    <span>Notifications</span>
-                    {notifications.length > 0 && (
-                      <button
-                        type="button"
-                        className="tl-mark-read-btn"
-                        onClick={markAllAsRead}
-                      >
-                        Mark all read
-                      </button>
-                    )}
-                  </div>
-
-                  {notifications.length === 0 ? (
-                    <div className="tl-notification-empty">
-                      No notifications yet
-                    </div>
-                  ) : (
-                    <div className="tl-notification-list">
-                      {notifications.map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          className={`tl-notification-item ${item.is_read ? "" : "unread"}`}
-                          onClick={() => {
-                            markAsRead(item.id);
-                            if (item.thread_id) navigate(`/forum/${item.thread_id}`);
-                          }}
-                        >
-                          <div className="tl-notification-message">
-                            {item.message}
-                          </div>
-                          <div className="tl-notification-time">
-                            {new Date(item.created_at).toLocaleString()}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </>
         )}
