@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import api from "../api/apiClient";
 import "./Login.css";
 
 const EyeIcon = () => (
@@ -29,7 +28,6 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [resending, setResending] = useState(false);
 
   // ✅ SHOW MESSAGE FROM SIGNUP
   useEffect(() => {
@@ -67,31 +65,6 @@ const Login = () => {
 
       setError(message);
       setSubmitting(false);
-    }
-  };
-
-  // ✅ RESEND EMAIL HANDLER
-  const handleResend = async () => {
-    if (!email) {
-      setError("Enter your email first");
-      return;
-    }
-
-    setResending(true);
-    setError("");
-    setStatusMessage("");
-
-    try {
-      await api.post("/accounts/resend-verification/", { email });
-
-      setStatusMessage("Verification email sent again. Check your inbox.");
-    } catch (err) {
-      setError(
-        err?.response?.data?.detail ||
-        "Failed to resend email"
-      );
-    } finally {
-      setResending(false);
     }
   };
 
@@ -143,18 +116,6 @@ const Login = () => {
           </div>
 
           {error && <p className="login-error">{error}</p>}
-
-          {/* ✅ RESEND BUTTON */}
-          {error === "Email not verified." && (
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={resending}
-              style={{ marginTop: "10px" }}
-            >
-              {resending ? "Sending..." : "Resend verification email"}
-            </button>
-          )}
 
           {statusMessage && !error && (
             <p className="login-status">{statusMessage}</p>

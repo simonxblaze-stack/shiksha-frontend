@@ -47,12 +47,9 @@ const Signup = () => {
 
       // ✅ DO NOT auto-login
       // ✅ Redirect to login with info message
-      navigate("/login", {
+      navigate("/verify-email", {
         replace: true,
-        state: {
-          message:
-            "Account created successfully. Please verify your email before logging in.",
-        },
+        state: { email },
       });
     } catch (err) {
       const raw = err?.message ?? err;

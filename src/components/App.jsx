@@ -30,6 +30,8 @@ import TermsCondition from './TermsCondition';
 
 import Login from '../auth/Login';
 import Signup from '../auth/Signup';
+import VerifyEmail from '../auth/VerifyEmail';
+import EmailVerified from '../auth/EmailVerified';
 
 import Insight from './Insight';
 import Training from './Training';
@@ -102,6 +104,8 @@ function App() {
         {/* ===== AUTH ===== */}
         <Route path="/login" element={<Page><Login /></Page>} />
         <Route path="/signup" element={<Page><Signup /></Page>} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/email-verified" element={<EmailVerified />} />
 
         {/* ===== STATIC ===== */}
         <Route path="/about" element={<Page><About2 /><About /></Page>} />
