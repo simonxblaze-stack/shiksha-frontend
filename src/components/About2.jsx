@@ -75,7 +75,7 @@ const About2 = () => {
       </section>
 
       {/* ── 2. Our Vision ── */}
-      <section className="ap-section ap-alt">
+      <section id="vision" className="ap-section ap-alt">
         <div className="ap-section-inner">
           <div className="ap-section-label ap-reveal" ref={ref}>Vision</div>
           <h2 className="ap-heading ap-reveal" ref={ref}>Our Vision</h2>
@@ -105,7 +105,7 @@ const About2 = () => {
       </section>
 
       {/* ── 3. Our Mission ── */}
-      <section className="ap-section">
+      <section id="mission" className="ap-section">
         <div className="ap-section-inner">
           <div className="ap-section-label ap-reveal" ref={ref}>Mission</div>
           <h2 className="ap-heading ap-reveal" ref={ref}>Our Mission</h2>
@@ -132,7 +132,7 @@ const About2 = () => {
       </section>
 
       {/* ── 4. Our Value ── */}
-      <section className="ap-section ap-alt">
+      <section id="values" className="ap-section ap-alt">
         <div className="ap-section-inner">
           <div className="ap-section-label ap-reveal" ref={ref}>Values</div>
           <h2 className="ap-heading ap-reveal" ref={ref}>Our Value</h2>
@@ -166,7 +166,7 @@ const About2 = () => {
       </section>
 
       {/* ── 5. Why Choose ShikshaCom? ── */}
-      <section className="ap-section ap-why-section">
+      <section id="why-shiksha" className="ap-section ap-why-section">
         <div className="ap-section-inner">
           <div className="ap-section-label ap-reveal" ref={ref}>Why Us</div>
           <h2 className="ap-heading ap-reveal" ref={ref}>Why Choose ShikshaCom?</h2>

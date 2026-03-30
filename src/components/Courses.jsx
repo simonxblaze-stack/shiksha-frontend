@@ -5,22 +5,22 @@ import SubjectList from './SubjectList';
 import ChapterDetail from './ChapterDetail';
 import { courseData } from '../data/courseData';
 
-const BOARDS = ['CBSE', 'MBSC', 'State Board', 'Other State Boards'];
+const BOARDS = ['CBSE', 'MBSE'];
 
 const CLASSES = [
-  { id: 'class8',          title: 'Class 8',            desc: 'Complete Class 8 academic program.' },
-  { id: 'class9',          title: 'Class 9',            desc: 'Complete Class 9 academic program.' },
-  { id: 'class10',         title: 'Class 10',           desc: 'Complete Class 10 academic program.' },
-  { id: 'class11science',  title: 'Class 11 (Science)',  desc: 'Physics, Chemistry, Biology, Maths.' },
+  { id: 'class8', title: 'Class 8', desc: 'Complete Class 8 academic program.' },
+  { id: 'class9', title: 'Class 9', desc: 'Complete Class 9 academic program.' },
+  { id: 'class10', title: 'Class 10', desc: 'Complete Class 10 academic program.' },
+  { id: 'class11science', title: 'Class 11 (Science)', desc: 'Physics, Chemistry, Biology, Maths.' },
   { id: 'class11commerce', title: 'Class 11 (Commerce)', desc: 'Accountancy, Business Studies, Economics.' },
-  { id: 'class11arts',     title: 'Class 11 (Arts)',     desc: 'History, Political Science, Geography.' },
-  { id: 'class12science',  title: 'Class 12 (Science)',  desc: 'Physics, Chemistry, Biology, Maths.' },
+  { id: 'class11arts', title: 'Class 11 (Arts)', desc: 'History, Political Science, Geography.' },
+  { id: 'class12science', title: 'Class 12 (Science)', desc: 'Physics, Chemistry, Biology, Maths.' },
   { id: 'class12commerce', title: 'Class 12 (Commerce)', desc: 'Accountancy, Business Studies, Economics.' },
-  { id: 'class12arts',     title: 'Class 12 (Arts)',     desc: 'History, Political Science, Geography.' },
+  { id: 'class12arts', title: 'Class 12 (Arts)', desc: 'History, Political Science, Geography.' },
 ];
 
-// ── Exported for CoursePreview.jsx (kept for compatibility)
 export const courseCards = Object.values(courseData);
+
 export const CourseCard = ({ course, onArrowClick }) => (
   <div className="course-card" onClick={() => onArrowClick(course)}>
     <div className="course-card-img" />
@@ -31,14 +31,18 @@ export const CourseCard = ({ course, onArrowClick }) => (
         <span className="course-card-price">{course.price}</span>
         <button
           className="course-arrow-btn"
-          onClick={(e) => { e.stopPropagation(); onArrowClick(course); }}
-        >→</button>
+          onClick={(e) => {
+            e.stopPropagation();
+            onArrowClick(course);
+          }}
+        >
+          →
+        </button>
       </div>
     </div>
   </div>
 );
 
-//Reusable Page Card 
 const PageCard = ({ title, desc, price, onClick }) => (
   <div className="course-card" onClick={onClick}>
     <div className="course-card-img" />
@@ -46,45 +50,56 @@ const PageCard = ({ title, desc, price, onClick }) => (
       <h3 className="course-card-title">{title}</h3>
       <p className="course-card-desc">{desc}</p>
       <div className="course-card-footer">
-        {price
-          ? <span className="course-card-price">{price}</span>
-          : <span style={{ flex: 1 }} />
-        }
+        {price ? <span className="course-card-price">{price}</span> : <span style={{ flex: 1 }} />}
         <button
           className="course-arrow-btn"
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-        >→</button>
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+          }}
+        >
+          →
+        </button>
       </div>
     </div>
   </div>
 );
 
-// Page Header
 const PageHeader = ({ title, subtitle, onBack }) => (
   <div className="courses-full-header" style={{ position: 'relative' }}>
     {onBack && (
-      <button className="board-back-btn" onClick={onBack}>← Back</button>
+      <button className="board-back-btn" onClick={onBack}>
+        ← Back
+      </button>
     )}
     <h1 className="courses-full-title">{title}</h1>
     {subtitle && <p className="courses-full-subtitle">{subtitle}</p>}
   </div>
 );
 
-// Main Courses Component
 const Courses = () => {
   const location = useLocation();
 
-  // If navigated from homepage board card, start on class page directly
   const initialBoard = location.state?.selectedBoard || null;
 
-  const [selectedBoard,  setSelectedBoard]  = useState(initialBoard);
-  const [selectedClass,  setSelectedClass]  = useState(null);
-  const [activeCourse,   setActiveCourse]   = useState(null);
-  const [activeTopic,    setActiveTopic]    = useState(null);
+  const [selectedBoard, setSelectedBoard] = useState(initialBoard);
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [activeCourse, setActiveCourse] = useState(null);
+  const [activeTopic, setActiveTopic] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [selectedBoard, selectedClass, activeCourse, activeTopic]);
+
+  useEffect(() => {
+    if (location.state?.resetCourses) {
+      setSelectedBoard(null);
+      setSelectedClass(null);
+      setActiveCourse(null);
+      setActiveTopic(null);
+      window.scrollTo(0, 0);
+    }
+  }, [location.state]);
 
   const resetAll = () => {
     setSelectedBoard(null);
@@ -93,19 +108,16 @@ const Courses = () => {
     setActiveTopic(null);
   };
 
-  // Board selected
   const handleBoardSelect = (board) => {
     setSelectedBoard(board);
   };
 
-  // ── Class selected → subjects directly
   const handleClassSelect = (cls) => {
     setSelectedClass(cls);
-    const course = courseData[cls.id]; // all boards use same data for now
+    const course = courseData[cls.id];
     if (course) setActiveCourse(course);
   };
 
-  // ── Subject selected ─
   const handleSubjectSelect = (topic) => {
     setActiveTopic(topic);
   };
@@ -116,7 +128,6 @@ const Courses = () => {
     setSelectedClass(null);
   };
 
-  // Chapter detail
   if (activeTopic) {
     return (
       <ChapterDetail
@@ -127,7 +138,6 @@ const Courses = () => {
     );
   }
 
-  // Subject list
   if (activeCourse) {
     return (
       <SubjectList
@@ -138,7 +148,6 @@ const Courses = () => {
     );
   }
 
-  // Class selection
   if (selectedBoard) {
     return (
       <div className="courses-page">
@@ -148,7 +157,7 @@ const Courses = () => {
           onBack={resetAll}
         />
         <div className="courses-grid-wrap">
-          <div className="courses-grid">
+          <div className="courses-grid courses-grid--classes">
             {CLASSES.map((cls) => (
               <PageCard
                 key={cls.id}
@@ -164,7 +173,6 @@ const Courses = () => {
     );
   }
 
-  //Board selection
   return (
     <div className="courses-page">
       <PageHeader
@@ -172,16 +180,17 @@ const Courses = () => {
         subtitle="Select your board to explore courses"
       />
       <div className="courses-grid-wrap">
-        <div className="courses-grid">
+        <div className="courses-grid courses-grid--boards">
           {BOARDS.map((board) => (
             <PageCard
               key={board}
               title={board}
               desc={
-                board === 'CBSE'         ? 'Central Board of Secondary Education — National curriculum.' :
-                board === 'MBSC'         ? 'Madhya Pradesh Board of Secondary Education.' :
-                board === 'State Board' ? 'State-specific board of secondary education.' :
-                                          'State-specific curriculum and syllabus.'
+                board === 'CBSE'
+                  ? 'Central Board of Secondary Education — National curriculum.'
+                  : board === 'MBSE'
+                  ? 'Mizoram Board of School Education.'
+                  : ''
               }
               onClick={() => handleBoardSelect(board)}
             />

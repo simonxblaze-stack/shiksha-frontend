@@ -272,3 +272,11 @@ grid-template-columns:1fr;
 }
 
 }
+.pathway-card {
+  border: none;
+  outline: none;
+  width: 100%;
+  text-align: left;
+  background: inherit;
+  cursor: pointer;
+}

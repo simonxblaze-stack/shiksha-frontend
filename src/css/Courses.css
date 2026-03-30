@@ -79,15 +79,25 @@
    CARD GRID
 ═══════════════════════════════════════════ */
 .courses-grid-wrap {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 40px auto 0;
   padding: 0 28px;
 }
 
 .courses-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
+}
+
+/* Board page: 2 cards centered */
+.courses-grid--boards {
+  grid-template-columns: repeat(2, minmax(280px, 360px));
+  justify-content: center;
+}
+
+/* Class page: 4 columns */
+.courses-grid--classes {
+  grid-template-columns: repeat(4, minmax(240px, 1fr));
 }
 
 /* ═══════════════════════════════════════════
@@ -247,7 +257,7 @@
 }
 
 /* ═══════════════════════════════════════════
-   SUBJECT / DETAIL VIEWS (unchanged structure, refreshed colors)
+   SUBJECT / DETAIL VIEWS
 ═══════════════════════════════════════════ */
 .course-detail {
   max-width: 700px;
@@ -367,7 +377,7 @@
 }
 
 /* ═══════════════════════════════════════════
-   COURSE DETAIL PAGE (tables / chapters)
+   COURSE DETAIL PAGE
 ═══════════════════════════════════════════ */
 .course-detail-page {
   max-width: 960px;
@@ -468,6 +478,7 @@ h2.course-detail-title {
 .course-feature-table tr:nth-child(odd) td {
   background: rgba(255, 255, 255, 0.03);
 }
+
 .course-feature-table tr:nth-child(even) td {
   background: transparent;
 }
@@ -566,10 +577,18 @@ h2.course-detail-title {
 /* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
-@media (max-width: 900px) {
-  .courses-grid {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 1100px) {
+  .courses-grid--classes {
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
   }
+}
+
+@media (max-width: 900px) {
+  .courses-grid--boards,
+  .courses-grid--classes {
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+  }
+
   .course-detail-page {
     margin: 24px 16px 0;
     padding: 20px;
@@ -577,24 +596,30 @@ h2.course-detail-title {
 }
 
 @media (max-width: 500px) {
-  .courses-grid {
+  .courses-grid--boards,
+  .courses-grid--classes {
     grid-template-columns: 1fr;
   }
+
   .courses-tab {
     font-size: 12px;
     padding: 10px 10px;
   }
+
   .course-detail-page {
     padding: 16px;
   }
+
   .course-detail-footer {
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
   }
+
   .course-buy-button {
     width: 100%;
   }
+
   .board-back-btn {
     top: 16px;
     left: 16px;

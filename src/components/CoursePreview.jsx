@@ -8,9 +8,7 @@ const TABS = ['Online', 'Classroom Training', 'Software Development'];
 
 const BOARDS = [
   { id: 'CBSE',              title: 'CBSE',              desc: 'Central Board of Secondary Education — National curriculum.' },
-  { id: 'MBSC',              title: 'MBSC',              desc: 'Madhya Pradesh Board of Secondary Education.' },
-  { id: 'State Board',       title: 'State Board',       desc: 'State-specific board of secondary education.' },
-  { id: 'Other State Boards',title: 'Other State Boards',desc: 'State-specific curriculum and syllabus.' },
+  { id: 'MBSC',              title: 'MBSE',              desc: 'Mizoram Board of School Education.' },
 ];
 
 const BoardCard = ({ board, onClick }) => (
@@ -67,12 +65,14 @@ const CoursePreview = () => {
               />
             ))}
           </div>
+          {/*
           <button
             className="preview-show-all-btn"
             onClick={() => { navigate('/courses'); window.scrollTo(0, 0); }}
           >
             Show all
           </button>
+          */}
         </div>
       ) : (
         <ComingSoon />

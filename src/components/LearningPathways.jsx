@@ -14,11 +14,8 @@ const pathways = [
 
 const LearningPathways = () => {
   return (
-
     <div className="pathways-wrapper">
-
       <section className="section">
-
         <p className="section__eyebrow">What We Offer</p>
 
         <h2 className="section__title">
@@ -33,26 +30,23 @@ const LearningPathways = () => {
 
         <div className="pathways-grid">
           {pathways.map((item, i) => (
-            <a key={i} href="#" className={`pathway-card ${item.class}`}>
-
+            <button
+              key={i}
+              type="button"
+              className={`pathway-card ${item.class}`}
+            >
               <span className="card__icon">
                 <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
-                  <circle cx="12" cy="12" r="8"/>
+                  <circle cx="12" cy="12" r="8" />
                 </svg>
               </span>
 
-              <span className="card__label">
-                {item.title}
-              </span>
-
-            </a>
+              <span className="card__label">{item.title}</span>
+            </button>
           ))}
         </div>
-
       </section>
-
     </div>
-
   );
 };
 

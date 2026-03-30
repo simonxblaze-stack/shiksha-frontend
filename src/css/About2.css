@@ -23,6 +23,7 @@
     linear-gradient(rgba(132, 104, 39, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(201, 173, 51, 0.06) 1px, transparent 1px);
   background-size: 60px 60px;
+   scroll-margin-top: 120px;
 }
 
 /* Alternating section background */

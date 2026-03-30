@@ -8,6 +8,7 @@ import {
   FiFileText,
 } from "react-icons/fi";
 import "../css/Navbar.css";
+import { HashLink } from "react-router-hash-link";
 
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -91,238 +92,248 @@ const Navbar = () => {
 
   return (
     <>
-      <div className="top-strip">
-        <marquee width="90%" direction="left" height="30px" scrollAmount="10">
-          <span>Hurry Up!!! Admission is going on.</span>
-          <span> | New session starts from 2026 | </span>
-          <span className="blink">Register Now!</span>
-        </marquee>
-        <div className="strip-controls">
-          <button onClick={decreaseFont} className="accessibility-btn">
-            A-
-          </button>
-          <button onClick={increaseFont} className="accessibility-btn">
-            A+
-          </button>
-          <button onClick={switchLanguage} className="language-btn">
-            {t("language")}
-          </button>
-        </div>
-      </div>
-
-      <header className="main-header">
-        <div className="header-left">
-          <Link to="/" className="brand-link">
-            <img src="/Shiksha.png" alt="Shiksha Logo" className="logo" />
-            <div className="title">
-              <h1>ShikshaCom</h1>
-              <p>Empowerment Through Education</p>
-            </div>
-          </Link>
+      <div className="site-fixed-header">
+        <div className="top-strip">
+          <marquee width="90%" direction="left" height="30px" scrollAmount="10">
+            <span>Hurry Up!!! Admission is going on.</span>
+            <span> | New session starts from 2026 | </span>
+            <span className="blink">Register Now!</span>
+          </marquee>
+          {/*}
+          <div className="strip-controls">
+            <button onClick={decreaseFont} className="accessibility-btn">
+              A-
+            </button>
+            <button onClick={increaseFont} className="accessibility-btn">
+              A+
+            </button>
+            <button onClick={switchLanguage} className="language-btn">
+              {t("language")}
+            </button>
+          </div>
+          */}
         </div>
 
-        <div className="header-right">
-          {isAuthenticated && user ? (
-            <div className="header-profile-wrap" ref={profileMenuRef}>
-              <span className="header-user-name">{displayName}</span>
+        <header className="main-header">
+          <div className="header-left">
+            <Link to="/" className="brand-link">
+              <img src="/Shiksha.png" alt="Shiksha Logo" className="logo" />
+              <div className="title">
+                <h1>ShikshaCom</h1>
+                <p>Empowerment Through Education</p>
+              </div>
+            </Link>
+          </div>
 
+          <div className="header-right">
+            {isAuthenticated && user ? (
+              <div className="header-profile-wrap" ref={profileMenuRef}>
+                <span className="header-user-name">{displayName}</span>
+
+                <button
+                  type="button"
+                  className="profile-btn"
+                  onClick={() => setProfileOpen((prev) => !prev)}
+                >
+                  <FiUser size={18} />
+                </button>
+
+                {profileOpen && (
+                  <div className="profile-dropdown">
+                    <button
+                      className="dropdown-item"
+                      onClick={() => {
+                        navigate("/form-fillup");
+                        setProfileOpen(false);
+                      }}
+                    >
+                      <FiFileText size={16} />
+                      Fill Form
+                    </button>
+
+                    <button
+                      className="dropdown-item logout"
+                      onClick={handleLogout}
+                    >
+                      <FiLogOut size={16} />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="header-auth">
+                <Link to="/login" className="header-login-btn">
+                  Login
+                </Link>
+                <Link to="/signup" className="header-signup-btn">
+                  Signup
+                </Link>
+              </div>
+            )}
+          </div>
+        </header>
+
+        <nav className="navbar navbar-pc">
+          <button
+            className={`hamburger-btn${mobileOpen ? " open" : ""}`}
+            onClick={toggleMobileMenu}
+            aria-label="Toggle menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <ul className={`nav-menu${mobileOpen ? " mobile-open" : ""}`}>
+            <li>
+              <NavLink to="/" end onClick={closeMobileMenu}>
+                {t("home")}
+              </NavLink>
+            </li>
+<li className="nav-item dropdown">
+              <NavLink to="/about" onClick={closeMobileMenu}>
+                {t("about")}
+              </NavLink>
+
+              <ul className="dropdown-menu">
+                <li>
+                  <HashLink smooth to="/about#vision" onClick={closeMobileMenu}>
+                    {t("vision")}
+                  </HashLink>
+                </li>
+                <li>
+                  <HashLink smooth to="/about#mission" onClick={closeMobileMenu}>
+                    {t("mission")}
+                  </HashLink>
+                </li>
+                <li>
+                  <HashLink smooth to="/about#values" onClick={closeMobileMenu}>
+                    {t("values")}
+                  </HashLink>
+                </li>
+                <li>
+                  <HashLink smooth to="/about#why-shiksha" onClick={closeMobileMenu}>
+                    {t("whyShiksha")}
+                  </HashLink>
+                </li>
+              </ul>
+            </li>
+
+            <li className="nav-item dropdown">
               <button
-                type="button"
-                className="profile-btn"
-                onClick={() => setProfileOpen((prev) => !prev)}
-              >
-                <FiUser size={18} />
-              </button>
-
-              {profileOpen && (
-                <div className="profile-dropdown">
-                  <button
-  className="dropdown-item"
+  type="button"
+  className={`nav-link nav-link-btn ${
+    location.pathname === "/courses" ? "active" : ""
+  }`}
   onClick={() => {
-    navigate("/form-fillup");
-    setProfileOpen(false);
+    closeMobileMenu();
+    navigate("/courses", {
+      state: { resetCourses: Date.now() },
+    });
   }}
 >
-  <FiFileText size={16} />
-  Fill Form
+  {t("courses")}
 </button>
-
-                  <button
-                    className="dropdown-item logout"
-                    onClick={handleLogout}
-                  >
-                    <FiLogOut size={16} />
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="header-auth">
-              <Link to="/login" className="header-login-btn">
-                Login
-              </Link>
-              <Link to="/signup" className="header-signup-btn">
-                Signup
-              </Link>
-            </div>
-          )}
-        </div>
-      </header>
-
-      <nav className="navbar navbar-pc">
-        <button
-          className={`hamburger-btn${mobileOpen ? " open" : ""}`}
-          onClick={toggleMobileMenu}
-          aria-label="Toggle menu"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-
-        <ul className={`nav-menu${mobileOpen ? " mobile-open" : ""}`}>
-          <li>
-            <NavLink to="/" end onClick={closeMobileMenu}>
-              {t("home")}
-            </NavLink>
-          </li>
-
-          <li
-            className={`nav-item dropdown${
-              openDropdown === "about" ? " mobile-dropdown-open" : ""
-            }`}
-          >
-            <NavLink to="/about" onClick={closeMobileMenu}>
-              {t("about")}
-            </NavLink>
-            <button
-              className="mobile-dropdown-arrow"
-              onClick={() => handleDropdownToggle("about")}
-              aria-label="Toggle about menu"
-            >
-              ▾
-            </button>
-            <ul className="dropdown-menu">
-              <li>
-                <NavLink to="/vision" onClick={closeMobileMenu}>
-                  {t("vision")}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/mission" onClick={closeMobileMenu}>
-                  {t("mission")}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/values" onClick={closeMobileMenu}>
-                  {t("values")}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/why-shiksha" onClick={closeMobileMenu}>
-                  {t("whyShiksha")}
-                </NavLink>
-              </li>
-            </ul>
-          </li>
-
-          <li className="nav-item dropdown">
-            <NavLink to="/courses" onClick={closeMobileMenu}>
-              {t("courses")}
-            </NavLink>
-          </li>
-
-          <li>
-            <NavLink to="/general-studies" onClick={closeMobileMenu}>
-              {t("generalStudies")}
-            </NavLink>
-          </li>
-
-          <li
-            className={`nav-item dropdown${
-              openDropdown === "others" ? " mobile-dropdown-open" : ""
-            }`}
-          >
-            <span className="nav-label">Others</span>
-            <button
-              className="mobile-dropdown-arrow"
-              onClick={() => handleDropdownToggle("others")}
-            ></button>
-            <ul className="dropdown-menu">
-              <li>
-                <NavLink to="/upcoming" onClick={closeMobileMenu}>
-                  Placements
-                </NavLink>
-              </li>
-              <li className="nav-item dropdown nested-dropdown">
-                <span className="nav-label">Counselling </span>
-                <ul className="dropdown-menu nested-menu">
-                  <li>
-                    <NavLink to="/counselling" onClick={closeMobileMenu}>
-                      Career
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/counselling" onClick={closeMobileMenu}>
-                      Admission in India
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/counselling" onClick={closeMobileMenu}>
-                      Admission in Abroad
-                    </NavLink>
-                  </li>
-                </ul>
-              </li>
-              <li className="nav-item dropdown nested-dropdown">
-                <span className="nav-label">Training </span>
-                <ul className="dropdown-menu nested-menu">
-                  <li>
-                    <NavLink to="/training" onClick={closeMobileMenu}>
-                      Industrial
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/training" onClick={closeMobileMenu}>
-                      Specialized
-                    </NavLink>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <NavLink to="/insight" onClick={closeMobileMenu}>
-                  {t("insight")}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/forum" onClick={closeMobileMenu}>
-                  {t("forum")}
-                </NavLink>
-              </li>
-            </ul>
-          </li>
-
-          <li>
-            <NavLink to="/contact" onClick={closeMobileMenu}>
-              {t("contact")}
-            </NavLink>
-          </li>
-
-          {isAuthenticated && user && (
-            <li className="nav-dashboard-li">
-              <button
-                type="button"
-                className="nav-dashboard-btn"
-                onClick={handleDashboard}
-              >
-                go to dashboard
-                <FiArrowUpRight size={15} />
-              </button>
             </li>
-          )}
-        </ul>
-      </nav>
+
+            <li>
+              <NavLink to="/general-studies" onClick={closeMobileMenu}>
+                {t("generalStudies")}
+              </NavLink>
+            </li>
+
+            <li
+              className={`nav-item dropdown${
+                openDropdown === "others" ? " mobile-dropdown-open" : ""
+              }`}
+            >
+              <span className="nav-label">Others</span>
+              <button
+                className="mobile-dropdown-arrow"
+                onClick={() => handleDropdownToggle("others")}
+              >
+                ▾
+              </button>
+              <ul className="dropdown-menu">
+                <li>
+                  <NavLink to="/forum" onClick={closeMobileMenu}>
+                    {t("forum")}
+                  </NavLink>
+                </li>
+
+                <li>
+                  <NavLink to="/insight" onClick={closeMobileMenu}>
+                    {t("insight")}
+                  </NavLink>
+                </li>
+                 
+                <li className="nav-item dropdown nested-dropdown">
+                  <span className="nav-labels">Training</span>
+                  <ul className="dropdown-menu nested-menu">
+                    <li>
+                      <NavLink to="/training" onClick={closeMobileMenu}>
+                        Industrial
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/training" onClick={closeMobileMenu}>
+                        Specialized
+                      </NavLink>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+
+                  <li className="nav-item dropdown nested-dropdown">
+                  <span className="nav-labels">Counselling</span>
+                  <ul className="dropdown-menu nested-menu">
+                    <li>
+                      <NavLink to="/counselling" onClick={closeMobileMenu}>
+                        Career
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/counselling" onClick={closeMobileMenu}>
+                        Admission in India
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/counselling" onClick={closeMobileMenu}>
+                        Admission in Abroad
+                      </NavLink>
+                    </li>
+                  </ul>
+                </li>
+                  <NavLink to="/upcoming" onClick={closeMobileMenu}>
+                    Placements
+                  </NavLink>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <NavLink to="/contact" onClick={closeMobileMenu}>
+                {t("contact")}
+              </NavLink>
+            </li>
+
+            {isAuthenticated && user && (
+              <li className="nav-dashboard-li">
+                <button
+                  type="button"
+                  className="nav-dashboard-btn"
+                  onClick={handleDashboard}
+                >
+                  go to dashboard
+                  <FiArrowUpRight size={15} />
+                </button>
+              </li>
+            )}
+          </ul>
+        </nav>
+      </div>
+
+      <div className="site-fixed-header-space"></div>
     </>
   );
 };

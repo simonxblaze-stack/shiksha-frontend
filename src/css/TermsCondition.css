@@ -144,9 +144,8 @@
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 24px;
-  align-items: start;
+  align-items: stretch; 
 }
-
 /* ═══════════════════════════════════════════
    LEFT SIDEBAR NAV
 ═══════════════════════════════════════════ */
@@ -277,7 +276,8 @@
    CONTENT PANEL
 ═══════════════════════════════════════════ */
 .tc-content-wrap {
-  min-height: 70vh;
+  display: flex;
+  height: 100%;
 }
 
 .tc-content-panel {
@@ -287,9 +287,12 @@
   backdrop-filter: blur(22px);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
   overflow: hidden;
-  transition:
-    opacity 0.22s ease,
-    transform 0.22s ease;
+
+  display: flex;              
+  flex-direction: column;     
+  height: 100%;               
+
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
 
 .tc-content-panel.animating {
@@ -366,6 +369,7 @@
   padding: 28px 28px 32px;
   max-height: calc(100vh - 280px);
   overflow-y: auto;
+  flex: 1; 
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }

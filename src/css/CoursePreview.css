@@ -91,9 +91,9 @@
 ═══════════════════════════════════════════ */
 .preview-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(260px, 1fr));
-  gap: 22px;
-  width: 100%;
+  grid-template-columns: repeat(2, 420px); /* fixed width cards */
+  gap: 28px;
+  justify-content: center; 
 }
 
 .preview-grid > .course-card {
@@ -171,3 +171,4 @@
     padding: 12px 28px;
   }
 }
+

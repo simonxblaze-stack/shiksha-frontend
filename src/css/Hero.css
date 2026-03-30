@@ -2,12 +2,12 @@
    HERO SECTION
 ═══════════════════════════════════════════ */
 .shiksha-hero {
-  min-height: 100vh;
+  min-height: auto;
   background: #e8e0cc;
   position: relative;
   overflow: hidden;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .hero-bg-grid {
@@ -58,7 +58,7 @@
 .hero-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 100px 48px 80px;
+  padding: 30px 48px 60px;
   display: grid;
   grid-template-columns: 1.75fr 0.8fr;
   gap: 44px;
