@@ -10,12 +10,9 @@ import "../css/teachers-slider.css";
 const TeachersSlider = () => {
   return (
     <section className="teachers-slider-section">
-      {/* ambient glow — mirrors hero-glow-2 */}
       <div className="teachers-slider-glow"></div>
 
       <div className="teachers-slider-container">
-
-        {/* HEADER */}
         <div className="teachers-header">
           <p className="teachers-subtitle">Our Faculty</p>
           <h2 className="teachers-title">Meet Our Expert Teachers</h2>
@@ -25,7 +22,6 @@ const TeachersSlider = () => {
           </p>
         </div>
 
-        {/* SLIDER */}
         <Swiper
           className="teachers-swiper"
           modules={[Navigation, Autoplay]}
@@ -35,10 +31,10 @@ const TeachersSlider = () => {
           spaceBetween={20}
           slidesPerView={4}
           breakpoints={{
-            0:    { slidesPerView: 1 },
-            576:  { slidesPerView: 2 },
-            768:  { slidesPerView: 3 },
-            1024: { slidesPerView: 4 },
+            0: { slidesPerView: 1, spaceBetween: 14 },
+            576: { slidesPerView: 2, spaceBetween: 16 },
+            768: { slidesPerView: 3, spaceBetween: 18 },
+            1024: { slidesPerView: 4, spaceBetween: 20 },
           }}
         >
           {teachersData.map((teacher) => (
@@ -61,7 +57,6 @@ const TeachersSlider = () => {
             </SwiperSlide>
           ))}
         </Swiper>
-
       </div>
     </section>
   );

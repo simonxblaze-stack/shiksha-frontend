@@ -3,7 +3,7 @@
 ═══════════════════════════════════════════ */
 .course-preview {
   background: #e8e0cc;
-  padding-bottom: 72px;
+  padding: 0 0 72px;
   position: relative;
   overflow: hidden;
   background-image:
@@ -46,6 +46,7 @@
 
 .preview-tab {
   flex: 1;
+  min-width: 0;
   padding: 13px 18px;
   background: transparent;
   border: none;
@@ -103,16 +104,18 @@
 ═══════════════════════════════════════════ */
 .preview-grid {
   display: grid;
-  grid-template-columns: repeat(2, 300px);
+  grid-template-columns: repeat(2, minmax(260px, 300px));
   gap: 24px;
   justify-content: center;
+  width: 100%;
 }
 
 /* ═══════════════════════════════════════════
    BOARD CARD
 ═══════════════════════════════════════════ */
 .board-card-preview {
-  width: 300px;
+  width: 100%;
+  max-width: 300px;
   background: #d6c79f;
   border: 1px solid rgba(11, 92, 60, 0.35);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
@@ -141,7 +144,6 @@
   display: block;
 }
 
-/* image na ho to placeholder clean dikhe */
 .board-card-preview-image--placeholder {
   background: linear-gradient(180deg, #d9cb9f 0%, #cfbe8d 100%);
 }
@@ -233,6 +235,20 @@
 /* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .preview-grid-wrap {
+    padding: 0 28px;
+  }
+
+  .preview-section-title {
+    font-size: 44px;
+  }
+
+  .preview-grid {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+  }
+}
+
 @media (max-width: 900px) {
   .preview-section-title {
     font-size: 40px;
@@ -240,23 +256,38 @@
 
   .preview-grid {
     grid-template-columns: 1fr;
+    max-width: 360px;
   }
 
   .board-card-preview {
-    width: 300px;
     max-width: 100%;
   }
 }
 
 @media (max-width: 700px) {
+  .course-preview {
+    padding-bottom: 56px;
+    background-size: 42px 42px;
+  }
+
   .preview-tab-bar {
     width: calc(100% - 32px);
-    margin: 0 auto 42px;
+    margin: 0 auto 36px;
+    padding: 4px;
+    gap: 4px;
+    border-radius: 14px;
   }
 
   .preview-tab {
-    font-size: 12px;
-    padding: 11px 8px;
+    font-size: 11px;
+    padding: 10px 6px;
+    white-space: normal;
+    line-height: 1.2;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 
   .preview-grid-wrap {
@@ -270,10 +301,98 @@
 
   .preview-grid {
     grid-template-columns: 1fr;
+    max-width: 100%;
+    gap: 18px;
+  }
+
+  .board-card-preview-image {
+    height: 200px;
   }
 
   .preview-show-all-btn {
     font-size: 13.5px;
     padding: 12px 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .course-preview {
+    padding-bottom: 48px;
+  }
+
+  .preview-tab-bar {
+    width: calc(100% - 24px);
+    margin: 0 auto 28px;
+    border-radius: 12px;
+  }
+
+  .preview-tab {
+    font-size: 10px;
+    padding: 9px 4px;
+    letter-spacing: 0;
+  }
+
+  .preview-grid-wrap {
+    padding: 0 12px;
+  }
+
+  .preview-section-title {
+    font-size: 28px;
+    margin-bottom: 22px;
+  }
+
+  .preview-grid {
+    gap: 16px;
+  }
+
+  .board-card-preview {
+    border-radius: 0;
+  }
+
+  .board-card-preview-image {
+    height: 180px;
+  }
+
+  .board-card-preview-content {
+    padding: 14px 14px 16px;
+  }
+
+  .board-card-preview-content h3 {
+    font-size: 15px;
+  }
+
+  .board-card-preview-content p {
+    font-size: 10.5px;
+    margin-bottom: 14px;
+  }
+
+  .board-card-preview-btn {
+    min-width: 84px;
+    height: 30px;
+    padding: 0 16px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .preview-tab-bar {
+    width: calc(100% - 20px);
+  }
+
+  .preview-tab {
+    font-size: 9.5px;
+    padding: 8px 3px;
+  }
+
+  .preview-grid-wrap {
+    padding: 0 10px;
+  }
+
+  .preview-section-title {
+    font-size: 25px;
+  }
+
+  .board-card-preview-image {
+    height: 168px;
   }
 }

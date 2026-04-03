@@ -41,6 +41,7 @@ const BoardCard = ({ board, onClick }) => (
       <p>{board.desc}</p>
 
       <button
+        type="button"
         className="board-card-preview-btn"
         onClick={(e) => {
           e.stopPropagation();
@@ -68,6 +69,7 @@ const CoursePreview = () => {
         {TABS.map((tab) => (
           <button
             key={tab}
+            type="button"
             className={`preview-tab ${activeTab === tab ? 'active' : ''}`}
             onClick={() => setActiveTab(tab)}
           >

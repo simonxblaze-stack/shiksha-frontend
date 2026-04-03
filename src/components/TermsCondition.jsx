@@ -292,46 +292,52 @@ const TermsCondition = () => {
   const activeAccent = accentColors[(activeId - 1) % accentColors.length];
 
   const handleSelect = (id) => {
-    if (id === activeId) { setMobileNavOpen(false); return; }
+    if (id === activeId) {
+      setMobileNavOpen(false);
+      return;
+    }
+
     setAnimating(true);
     setTimeout(() => {
       setActiveId(id);
       setAnimating(false);
       if (contentRef.current) contentRef.current.scrollTop = 0;
     }, 220);
+
     setMobileNavOpen(false);
   };
 
   return (
     <div className="tc-root">
-      {/* Background */}
       <div className="tc-bg-grid" />
       <div className="tc-glow-1" />
       <div className="tc-glow-2" />
       <div className="tc-glow-3" />
 
-      {/* Header */}
       <div className="tc-header">
         <div className="tc-header-badge">
           <div className="tc-header-dot" />
           <span className="tc-header-badge-text">Shiksha LMS</span>
         </div>
-        <h1>Terms &amp; Conditions<br />and Privacy Policy</h1>
+        <h1>
+          Terms &amp; Conditions
+          <br />
+          and Privacy Policy
+        </h1>
         <p className="tc-header-sub">CM Engineering Solution · Last reviewed 2024</p>
       </div>
 
-      {/* Layout */}
       <div className="tc-layout">
-
-        {/* Left Nav */}
         <nav className="tc-nav">
           <div className="tc-nav-header">
             <div className="tc-nav-header-label">Table of Contents</div>
           </div>
+
           <div className="tc-nav-scroll">
             {sections.map((s, i) => {
               const acc = accentColors[i % accentColors.length];
               const isActive = s.id === activeId;
+
               return (
                 <button
                   key={s.id}
@@ -352,11 +358,8 @@ const TermsCondition = () => {
           </div>
         </nav>
 
-        {/* Content */}
         <div className="tc-content-wrap">
           <div className={`tc-content-panel${animating ? " animating" : ""}`}>
-
-            {/* Top bar */}
             <div className="tc-content-topbar">
               <span
                 className="tc-section-num-badge"
@@ -367,7 +370,6 @@ const TermsCondition = () => {
               <h2 className="tc-section-title-head">{activeSection?.title}</h2>
             </div>
 
-            {/* Progress bar */}
             <div className="tc-progress-bar-wrap">
               {sections.map((s) => (
                 <div
@@ -378,15 +380,15 @@ const TermsCondition = () => {
                   title={s.title}
                 />
               ))}
-              <span className="tc-progress-label">{activeId}/{sections.length}</span>
+              <span className="tc-progress-label">
+                {activeId}/{sections.length}
+              </span>
             </div>
 
-            {/* Body */}
             <div className="tc-content-body" ref={contentRef}>
               <p className="tc-content-text">{activeSection?.content}</p>
             </div>
 
-            {/* Nav buttons */}
             <div className="tc-nav-btns">
               <button
                 className="tc-btn"
@@ -395,9 +397,11 @@ const TermsCondition = () => {
               >
                 ← Previous
               </button>
+
               <span className="tc-section-counter">
                 Section {activeId} of {sections.length}
               </span>
+
               <button
                 className="tc-btn tc-btn-next"
                 disabled={activeId === sections.length}
@@ -407,28 +411,42 @@ const TermsCondition = () => {
                 Next →
               </button>
             </div>
-
           </div>
         </div>
       </div>
 
-      {/* Mobile drawer toggle */}
       <button
+        type="button"
         className="tc-mobile-toggle"
-        onClick={() => setMobileNavOpen(true)}
-        aria-label="Open table of contents"
+        onClick={() => setMobileNavOpen((prev) => !prev)}
+        aria-label={mobileNavOpen ? "Close table of contents" : "Open table of contents"}
       >
-        ☰
+        {mobileNavOpen ? "✕" : "☰"}
       </button>
 
-      {/* Mobile drawer */}
       <div className={`tc-mobile-drawer${mobileNavOpen ? " open" : ""}`}>
-        <div className="tc-mobile-backdrop" onClick={() => setMobileNavOpen(false)} />
+        <div
+          className="tc-mobile-backdrop"
+          onClick={() => setMobileNavOpen(false)}
+        />
+
         <div className="tc-mobile-panel">
-          <div className="tc-mobile-handle" />
+          <div className="tc-mobile-panel-top">
+            <div className="tc-mobile-handle" />
+            <button
+              type="button"
+              className="tc-mobile-close"
+              onClick={() => setMobileNavOpen(false)}
+              aria-label="Close table of contents"
+            >
+              ✕
+            </button>
+          </div>
+
           {sections.map((s, i) => {
             const acc = accentColors[i % accentColors.length];
             const isActive = s.id === activeId;
+
             return (
               <button
                 key={s.id}
@@ -448,7 +466,6 @@ const TermsCondition = () => {
           })}
         </div>
       </div>
-
     </div>
   );
 };

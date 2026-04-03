@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   FiArrowUpRight,
   FiUser,
-  FiChevronDown,
   FiLogOut,
   FiFileText,
 } from "react-icons/fi";
@@ -14,13 +13,15 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
 
 const Navbar = () => {
-  const { t, switchLanguage } = useLanguage();
+  const { t } = useLanguage();
   const { isAuthenticated, user, loading, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [fontSize, setFontSize] = useState(1);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [openNestedDropdown, setOpenNestedDropdown] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
 
   const profileMenuRef = useRef(null);
@@ -28,15 +29,22 @@ const Navbar = () => {
   const toggleMobileMenu = () => {
     setMobileOpen((prev) => !prev);
     setOpenDropdown(null);
+    setOpenNestedDropdown(null);
   };
 
   const closeMobileMenu = () => {
     setMobileOpen(false);
     setOpenDropdown(null);
+    setOpenNestedDropdown(null);
   };
 
   const handleDropdownToggle = (name) => {
     setOpenDropdown((prev) => (prev === name ? null : name));
+    setOpenNestedDropdown(null);
+  };
+
+  const handleNestedDropdownToggle = (name) => {
+    setOpenNestedDropdown((prev) => (prev === name ? null : name));
   };
 
   useEffect(() => {
@@ -52,6 +60,18 @@ const Navbar = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   if (loading) return null;
 
@@ -74,9 +94,11 @@ const Navbar = () => {
 
   const handleDashboard = () => {
     if (!user) return;
+
     const roles = Array.isArray(user?.roles) ? user.roles : [];
     const normalizedRoles = roles.map((r) => String(r).toLowerCase());
     const singleRole = String(user?.role || "").toLowerCase();
+
     const isTeacher =
       normalizedRoles.includes("teacher") || singleRole === "teacher";
 
@@ -99,7 +121,8 @@ const Navbar = () => {
             <span> | New session starts from 2026 | </span>
             <span className="blink">Register Now!</span>
           </marquee>
-          {/*}
+
+          {/*
           <div className="strip-controls">
             <button onClick={decreaseFont} className="accessibility-btn">
               A-
@@ -140,6 +163,12 @@ const Navbar = () => {
 
                 {profileOpen && (
                   <div className="profile-dropdown">
+                    <div className="profile-dropdown-user">
+                      <span className="profile-dropdown-name">
+                        {displayName}
+                      </span>
+                    </div>
+
                     <button
                       className="dropdown-item"
                       onClick={() => {
@@ -179,6 +208,7 @@ const Navbar = () => {
             className={`hamburger-btn${mobileOpen ? " open" : ""}`}
             onClick={toggleMobileMenu}
             aria-label="Toggle menu"
+            type="button"
           >
             <span></span>
             <span></span>
@@ -191,10 +221,23 @@ const Navbar = () => {
                 {t("home")}
               </NavLink>
             </li>
-<li className="nav-item dropdown">
+
+            <li
+              className={`nav-item dropdown${
+                openDropdown === "about" ? " mobile-dropdown-open" : ""
+              }`}
+            >
               <NavLink to="/about" onClick={closeMobileMenu}>
                 {t("about")}
               </NavLink>
+
+              <button
+                type="button"
+                className="mobile-dropdown-arrow"
+                onClick={() => handleDropdownToggle("about")}
+              >
+                ▾
+              </button>
 
               <ul className="dropdown-menu">
                 <li>
@@ -213,71 +256,79 @@ const Navbar = () => {
                   </HashLink>
                 </li>
                 <li>
-                  <HashLink smooth to="/about#why-shiksha" onClick={closeMobileMenu}>
+                  <HashLink
+                    smooth
+                    to="/about#why-shiksha"
+                    onClick={closeMobileMenu}
+                  >
                     {t("whyShiksha")}
                   </HashLink>
                 </li>
               </ul>
             </li>
 
-            <li className="nav-item dropdown">
+            <li>
               <button
-  type="button"
-  className={`nav-link nav-link-btn ${
-    location.pathname === "/courses" ? "active" : ""
-  }`}
-  onClick={() => {
-    closeMobileMenu();
-    navigate("/courses", {
-      state: { resetCourses: Date.now() },
-    });
-  }}
->
-  {t("courses")}
-</button>
+                type="button"
+                className={`nav-link nav-link-btn ${
+                  location.pathname === "/courses" ? "active" : ""
+                }`}
+                onClick={() => {
+                  closeMobileMenu();
+                  navigate("/courses", {
+                    state: { resetCourses: Date.now() },
+                  });
+                }}
+              >
+                {t("courses")}
+              </button>
             </li>
-<li
-  className={`nav-item dropdown${
-    openDropdown === "general-studies" ? " mobile-dropdown-open" : ""
-  }`}
->
-  <span className="nav-label">General Studies</span>
 
-  <button
-    type="button"
-    className="mobile-dropdown-arrow"
-    onClick={() => handleDropdownToggle("general-studies")}
-  >
-    ▾
-  </button>
+            <li
+              className={`nav-item dropdown${
+                openDropdown === "general-studies" ? " mobile-dropdown-open" : ""
+              }`}
+            >
+              <span className="nav-label">General Studies</span>
 
-  <ul className="dropdown-menu">
-    <li>
-      <NavLink to="/blogs" onClick={closeMobileMenu}>
-        Blogs
-      </NavLink>
-    </li>
+              <button
+                type="button"
+                className="mobile-dropdown-arrow"
+                onClick={() => handleDropdownToggle("general-studies")}
+              >
+                ▾
+              </button>
 
-    <li>
-      <NavLink to="/current-affairs" onClick={closeMobileMenu}>
-        Current Affairs
-      </NavLink>
-    </li>
-  </ul>
-</li>
-            
+              <ul className="dropdown-menu">
+                <li>
+                  <NavLink to="/blogs" onClick={closeMobileMenu}>
+                    Blogs
+                  </NavLink>
+                </li>
+
+                <li>
+                  <NavLink to="/current-affairs" onClick={closeMobileMenu}>
+                    Current Affairs
+                  </NavLink>
+                </li>
+              </ul>
+            </li>
+
             <li
               className={`nav-item dropdown${
                 openDropdown === "others" ? " mobile-dropdown-open" : ""
               }`}
             >
               <span className="nav-label">Resources</span>
+
               <button
+                type="button"
                 className="mobile-dropdown-arrow"
                 onClick={() => handleDropdownToggle("others")}
               >
                 ▾
               </button>
+
               <ul className="dropdown-menu">
                 <li>
                   <NavLink to="/forum" onClick={closeMobileMenu}>
@@ -290,9 +341,26 @@ const Navbar = () => {
                     Explore
                   </NavLink>
                 </li>
-                 
-                <li className="nav-item dropdown nested-dropdown">
+
+                <li
+                  className={`nav-item dropdown nested-dropdown${
+                    openNestedDropdown === "skill-development"
+                      ? " mobile-dropdown-open"
+                      : ""
+                  }`}
+                >
                   <span className="nav-labels">Skill Development</span>
+
+                  <button
+                    type="button"
+                    className="mobile-dropdown-arrow nested-mobile-arrow"
+                    onClick={() =>
+                      handleNestedDropdownToggle("skill-development")
+                    }
+                  >
+                    ▾
+                  </button>
+
                   <ul className="dropdown-menu nested-menu">
                     <li>
                       <NavLink to="/training" onClick={closeMobileMenu}>
@@ -307,34 +375,50 @@ const Navbar = () => {
                   </ul>
                 </li>
 
-                <li className="nav-item dropdown nested-dropdown">
-  <span className="nav-labels">Counselling</span>
-  <ul className="dropdown-menu nested-menu">
-    <li>
-      <NavLink to="/counselling" onClick={closeMobileMenu}>
-        Career
-      </NavLink>
-    </li>
-    <li>
-      <NavLink to="/counselling" onClick={closeMobileMenu}>
-        Admission in India
-      </NavLink>
-    </li>
-    <li>
-      <NavLink to="/counselling" onClick={closeMobileMenu}>
-        Admission in Abroad
-      </NavLink>
-    </li>
-  </ul>
-</li>
+                <li
+                  className={`nav-item dropdown nested-dropdown${
+                    openNestedDropdown === "counselling"
+                      ? " mobile-dropdown-open"
+                      : ""
+                  }`}
+                >
+                  <span className="nav-labels">Counselling</span>
 
-<li>
-  <NavLink to="/upcoming" onClick={closeMobileMenu}>
-    Placements
-  </NavLink>
-</li>
+                  <button
+                    type="button"
+                    className="mobile-dropdown-arrow nested-mobile-arrow"
+                    onClick={() => handleNestedDropdownToggle("counselling")}
+                  >
+                    ▾
+                  </button>
+
+                  <ul className="dropdown-menu nested-menu">
+                    <li>
+                      <NavLink to="/counselling" onClick={closeMobileMenu}>
+                        Career
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/counselling" onClick={closeMobileMenu}>
+                        Admission in India
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/counselling" onClick={closeMobileMenu}>
+                        Admission in Abroad
+                      </NavLink>
+                    </li>
+                  </ul>
+                </li>
+
+                <li>
+                  <NavLink to="/upcoming" onClick={closeMobileMenu}>
+                    Placements
+                  </NavLink>
+                </li>
               </ul>
             </li>
+
             <li>
               <NavLink to="/contact" onClick={closeMobileMenu}>
                 {t("contact")}

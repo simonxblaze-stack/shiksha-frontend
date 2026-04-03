@@ -114,6 +114,7 @@
     transform 0.3s ease,
     box-shadow 0.26s ease,
     border-color 0.26s ease;
+  height: 100%;
 }
 
 .teacher-slider-card:hover {
@@ -224,6 +225,7 @@
 .swiper-button-prev {
   left: 4px;
 }
+
 .swiper-button-next {
   right: 4px;
 }
@@ -237,20 +239,78 @@
    RESPONSIVE
 ═══════════════════════════════════════════ */
 @media (max-width: 991px) {
+  .teachers-slider-section {
+    padding: 84px 18px 78px;
+  }
+
+  .teachers-header {
+    margin-bottom: 42px;
+  }
+
   .teachers-title {
     font-size: 30px;
   }
+
   .teachers-description {
     font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .teachers-swiper {
+    padding: 8px 28px 22px;
   }
 }
 
 @media (max-width: 768px) {
+  .teachers-slider-section {
+    padding: 72px 16px 68px;
+  }
+
+  .teachers-slider-container {
+    max-width: 100%;
+  }
+
+  .teachers-header {
+    margin-bottom: 30px;
+  }
+
+  .teachers-subtitle {
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    margin-bottom: 8px;
+  }
+
   .teachers-title {
     font-size: 26px;
+    line-height: 1.15;
+    margin-bottom: 10px;
   }
+
+  .teachers-description {
+    font-size: 13px;
+    line-height: 1.65;
+    max-width: 100%;
+    padding: 0 4px;
+  }
+
   .teachers-swiper {
-    padding: 10px 4px 20px;
+    padding: 6px 2px 18px;
+  }
+
+  .teacher-slider-card {
+    border-radius: 14px;
+  }
+
+  .teacher-slider-info {
+    padding: 13px 14px 15px;
+  }
+
+  .teacher-slider-info h3 {
+    font-size: 13.5px;
+  }
+
+  .teacher-slider-info p {
+    font-size: 11.5px;
   }
 
   .swiper-button-prev,
@@ -261,9 +321,70 @@
 
 @media (max-width: 480px) {
   .teachers-slider-section {
-    padding: 64px 16px 60px;
+    padding: 64px 12px 58px;
   }
+
+  .teachers-slider-section::before {
+    background-size: 42px 42px;
+  }
+
+  .teachers-header {
+    margin-bottom: 24px;
+  }
+
   .teachers-title {
     font-size: 22px;
+  }
+
+  .teachers-description {
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+
+  .teachers-swiper {
+    padding: 4px 0 14px;
+  }
+
+  .teacher-slider-card {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .teacher-slider-image-wrap {
+    aspect-ratio: 4 / 4.8;
+  }
+
+  .teacher-slider-info {
+    padding: 12px 12px 14px;
+  }
+
+  .teacher-slider-info h3 {
+    font-size: 13px;
+  }
+
+  .teacher-slider-info p {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 360px) {
+  .teachers-slider-section {
+    padding: 58px 10px 52px;
+  }
+
+  .teachers-title {
+    font-size: 20px;
+  }
+
+  .teachers-description {
+    font-size: 12px;
+  }
+
+  .teacher-slider-card {
+    max-width: 100%;
+  }
+
+  .teacher-slider-image-wrap {
+    aspect-ratio: 4 / 4.9;
   }
 }
