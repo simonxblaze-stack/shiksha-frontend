@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import '../css/Courses.css';
 import SubjectList from './SubjectList';
 import { courseData, mbseCourseData } from '../data/courseData';
@@ -54,71 +54,107 @@ const CLASSES = [
   {
     id: 'class8',
     title: 'Class 8',
-    desc: 'Information regarding the course',
+    desc: 'Foundation Course',
     price: '₹1,500',
     image: class8Img,
+    duration: '1 Year',
+    fee: '1500',
+    access: 'Full Course Access',
+    mode: 'Online',
   },
   {
     id: 'class9',
     title: 'Class 9',
-    desc: 'Information regarding the course',
+    desc: 'Foundation Course',
     price: '₹1,500',
     image: class9Img,
+    duration: '1 Year',
+    fee: '1500',
+    access: 'Full Course Access',
+    mode: 'Online',
   },
   {
     id: 'class10',
     title: 'Class 10',
-    desc: 'Information regarding the course',
+    desc: 'Foundation Course',
     price: '₹1,500',
     image: class10Img,
+    duration: '1 Year',
+    fee: '1500',
+    access: 'Full Course Access',
+    mode: 'Online',
   },
   {
     id: 'class11science',
     title: 'Class 11',
     subtitle: 'Science',
-    desc: 'Physics, Chemistry, Biology, Mathematics',
+    desc: 'Foundation Course',
     price: '₹1,500',
     image: class11SciImg,
+    duration: '1 Year',
+    fee: '1500',
+    access: 'Full Course Access',
+    mode: 'Online',
   },
   {
     id: 'class11commerce',
     title: 'Class 11',
     subtitle: 'Commerce',
-    desc: 'Accountancy, Business Studies, Economics',
+    desc: 'Foundation Course',
     price: '₹1,500',
     image: class11ComImg,
+    duration: '1 Year',
+    fee: '1500',
+    access: 'Full Course Access',
+    mode: 'Online',
   },
   {
     id: 'class11arts',
     title: 'Class 11',
     subtitle: 'Arts',
-    desc: 'History, Political Science, Geography',
+    desc: 'Foundation Course',
     price: '₹1,500',
     image: class11ArtsImg,
+    duration: '1 Year',
+    fee: '1500',
+    access: 'Full Course Access',
+    mode: 'Online',
   },
   {
     id: 'class12science',
     title: 'Class 12',
     subtitle: 'Science',
-    desc: 'Physics, Chemistry, Biology, Mathematics',
+    desc: 'Foundation Course',
     price: '₹1,500',
     image: class12SciImg,
+    duration: '1 Year',
+    fee: '1500',
+    access: 'Full Course Access',
+    mode: 'Online',
   },
   {
     id: 'class12commerce',
     title: 'Class 12',
     subtitle: 'Commerce',
-    desc: 'Accountancy, Business Studies, Economics',
+    desc: 'Foundation Course',
     price: '₹1,500',
     image: class12ComImg,
+    duration: '1 Year',
+    fee: '1500',
+    access: 'Full Course Access',
+    mode: 'Online',
   },
   {
     id: 'class12arts',
     title: 'Class 12',
     subtitle: 'Arts',
-    desc: 'History, Political Science, Geography',
+    desc: 'Foundation Course',
     price: '₹1,500',
     image: class12ArtsImg,
+    duration: '1 Year',
+    fee: '1500',
+    access: 'Full Course Access',
+    mode: 'Online',
   },
 ];
 
@@ -201,8 +237,103 @@ const CourseTile = ({
   );
 };
 
+const ClassCourseTile = ({
+  image,
+  title,
+  subtitle,
+  desc,
+  duration,
+  fee,
+  access,
+  mode,
+  onViewDetails,
+  onEnroll,
+}) => {
+  return (
+    <article
+      className="courses-tile courses-tile--detailed"
+      role="button"
+      tabIndex={0}
+      onClick={onViewDetails}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') onViewDetails();
+      }}
+    >
+      <div className="courses-tile__imageWrap">
+        {image ? (
+          <img
+            src={image}
+            alt={`${title}${subtitle ? ` ${subtitle}` : ''}`}
+            className="courses-tile__image"
+          />
+        ) : (
+          <div className="courses-tile__imagePlaceholder">Course Image</div>
+        )}
+      </div>
+
+      <div className="courses-tile__content courses-tile__content--detailed">
+        <div className="courses-tile__heading">
+          <h3 className="courses-tile__title">{title}</h3>
+          {subtitle && <span className="courses-tile__stream">{subtitle}</span>}
+        </div>
+
+        {desc && <p className="courses-tile__desc">{desc}</p>}
+
+        <div className="courses-details-box">
+          <h4 className="courses-details-box__title">Course Details</h4>
+
+          <div className="courses-details-box__item">
+            <span>Duration:</span>
+            <strong>{duration}</strong>
+          </div>
+
+          <div className="courses-details-box__item">
+            <span>Fee:</span>
+            <strong>₹{fee}/month</strong>
+          </div>
+
+          <div className="courses-details-box__item">
+            <span>Access:</span>
+            <strong>{access}</strong>
+          </div>
+
+          <div className="courses-details-box__item">
+            <span>Mode:</span>
+            <strong>{mode}</strong>
+          </div>
+        </div>
+
+        <div className="courses-tile__actions">
+          <button
+            type="button"
+            className="courses-tile__btn courses-tile__btn--primary"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEnroll();
+            }}
+          >
+            ENROLL NOW
+          </button>
+
+          <button
+            type="button"
+            className="courses-tile__btn courses-tile__btn--secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewDetails();
+            }}
+          >
+            View Details
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+};
+
 const Courses = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [selectedBoardGroup, setSelectedBoardGroup] = useState(
     location.state?.selectedBoardGroup || null
@@ -282,6 +413,17 @@ const Courses = () => {
     }
   };
 
+  const handleEnrollNow = (cls) => {
+    navigate('/payment', {
+      state: {
+        className: cls.title,
+        stream: cls.subtitle || '',
+        subject: cls.desc || 'Full Course',
+        price: cls.fee || cls.price || '1500',
+      },
+    });
+  };
+
   if (activeCourse) {
     return (
       <SubjectList
@@ -340,15 +482,18 @@ const Courses = () => {
 
           <div className="courses-grid courses-grid--classes">
             {CLASSES.map((cls) => (
-              <CourseTile
+              <ClassCourseTile
                 key={cls.id}
                 image={cls.image}
                 title={cls.title}
                 subtitle={cls.subtitle}
                 desc={cls.desc}
-                price={cls.price}
-                buttonText="Browse"
-                onClick={() => handleClassSelect(cls)}
+                duration={cls.duration}
+                fee={cls.fee}
+                access={cls.access}
+                mode={cls.mode}
+                onViewDetails={() => handleClassSelect(cls)}
+                onEnroll={() => handleEnrollNow(cls)}
               />
             ))}
           </div>

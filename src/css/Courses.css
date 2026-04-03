@@ -192,7 +192,7 @@
 .courses-tile__footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 10px;
   margin-top: 12px;
 }
@@ -265,5 +265,129 @@
 
   .courses-tile__content {
     min-height: auto;
+  }
+}
+
+.courses-tile--detailed {
+  overflow: hidden;
+}
+
+.courses-tile__content--detailed {
+  padding: 18px 18px 20px;
+}
+
+.courses-tile__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.courses-tile__stream {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.courses-details-box {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.courses-details-box__title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.courses-details-box__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.courses-details-box__item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.courses-details-box__item span {
+  font-weight: 500;
+}
+
+.courses-details-box__item strong {
+  color: #ffffff;
+  font-weight: 700;
+  text-align: right;
+}
+
+.courses-tile__actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.courses-tile__btn--primary,
+.courses-tile__btn--secondary {
+  flex: 1;
+}
+
+.courses-tile__btn--primary {
+  background: #003223;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.courses-tile__btn--primary:hover {
+  background: #004a33;
+  border-color: 1px solid rgba(255, 255, 255, 0.28);
+  color: black;
+}
+
+.courses-tile__btn--secondary {
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.courses-tile__btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: black;
+}
+
+@media (max-width: 640px) {
+  .courses-tile__heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .courses-details-box__item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .courses-details-box__item strong {
+    text-align: left;
+  }
+
+  .courses-tile__actions {
+    flex-direction: column;
   }
 }
