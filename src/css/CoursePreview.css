@@ -349,7 +349,7 @@
   }
 
   .board-card-preview {
-    border-radius: 0;
+    border-radius: 15px;
   }
 
   .board-card-preview-image {
