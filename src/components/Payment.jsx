@@ -33,9 +33,9 @@ const Payment = () => {
         <p><strong>Subject:</strong> {subject}</p>
         <p><strong>Fee:</strong> ₹{price}</p>
 
-        <button className="pay-btn">
-          Pay & Enroll
-        </button>
+        <button className="pay-btn" onClick={() => window.open("https://docs.google.com/forms/d/e/1FAIpQLScYOfEKfvAqgSpfeZp-wAvwnB9dXi0UXCn5GoZHe8TVRJZT1A/viewform", "_blank")}>
+  Pay & Enroll
+</button>
       </div>
     </div>
   );
