@@ -271,7 +271,7 @@
 
 .nav-menu > li > a {
   display: block;
-  padding: 13px 14px;
+  padding: 5px 10px;
   text-decoration: none;
   color: #ffffff;
   font-weight: 600;
@@ -370,7 +370,7 @@
 
 .nav-menu > li > .nav-link-btn {
   display: block;
-  padding: 13px 14px;
+  padding: 5px 10px;
   text-decoration: none;
   color: #ffffff;
   font-weight: 600;

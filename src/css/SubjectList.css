@@ -484,6 +484,7 @@
   .course-detail-panel {
     padding: 20px 16px;
     border-radius: 14px;
+    margin-top: 25px;
   }
 
   .course-learn-grid,
