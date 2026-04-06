@@ -110,7 +110,13 @@ const Navbar = () => {
     }
   };
 
-  const displayName = user?.email || "My Account";
+  const firstName =
+    user?.first_name ||
+    user?.firstName ||
+    user?.name?.split(" ")?.[0] ||
+    user?.full_name?.split(" ")?.[0] ||
+    user?.email?.split("@")?.[0] ||
+    "User";
 
   return (
     <>
@@ -151,7 +157,7 @@ const Navbar = () => {
           <div className="header-right">
             {isAuthenticated && user ? (
               <div className="header-profile-wrap" ref={profileMenuRef}>
-                <span className="header-user-name">{displayName}</span>
+                <span className="header-user-name">Hi, {firstName}</span>
 
                 <button
                   type="button"
@@ -165,7 +171,7 @@ const Navbar = () => {
                   <div className="profile-dropdown">
                     <div className="profile-dropdown-user">
                       <span className="profile-dropdown-name">
-                        {displayName}
+                        Hi, {firstName}
                       </span>
                     </div>
 

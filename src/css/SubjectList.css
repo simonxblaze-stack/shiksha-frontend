@@ -7,12 +7,26 @@
 .course-detail-container {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 20px;
+}
+.course-detail-hero .course-detail-container {
+  max-width: 90%;
+  margin: 0;
+  padding: 0 68px;
+}
+
+.course-detail-hero__content {
+  max-width: 760px;
+  margin-left: 150px;
 }
 
 .course-detail-hero {
-  background: #004b33;
-  padding: 18px 0 140px;
+  background: #041f09;
+   background-image:
+    linear-gradient(rgba(132, 104, 39, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 173, 51, 0.07) 1px, transparent 1px);
+  background-size: 60px 60px;
+  padding: 18px 0 75px;
   color: #ffffff;
 }
 
@@ -33,8 +47,8 @@
 .course-breadcrumb__item {
   border: none;
   background: transparent;
-  padding: 0;
-  font-size: 11px;
+  padding: 10px;
+  font-size: 12px;
   font-weight: 500;
   color: #d79a68;
   font-family: "Poppins", sans-serif;
@@ -48,60 +62,56 @@
 }
 
 .course-breadcrumb__sep {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 12px;
 }
 
 .course-detail-hero__content {
-  max-width: 640px;
+  max-width: 700px;
 }
 
 .course-detail-hero__title {
-  margin: 0 0 10px;
-  font-size: 30px;
-  line-height: 1.08;
-  font-weight: 800;
-  color: #ff6f57;
-  font-family: "Montserrat", sans-serif;
+  margin: 0 0 14px;
+  font-size: 25px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #ffc85c;
+  font-family: "Poppins", sans-serif;
 }
 
 .course-detail-hero__summary {
-  margin: 0 0 12px;
-  font-size: 12px;
-  line-height: 1.35;
+  margin: 0 0 14px;
+  font-size: 17px;
+  line-height: 1.6;
   color: #ffffff;
-  font-family: "Poppins", sans-serif;
-  max-width: 560px;
+  font-family: "Montserrat", sans-serif;
+  max-width: 620px;
 }
 
 .course-detail-hero__meta {
-  margin: 0 0 5px;
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.8);
-  font-family: "Poppins", sans-serif;
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.84);
+  font-family: "Montserrat", sans-serif;
 }
 
-/* ── MAIN PAGE LAYOUT ──
-   One grid that spans ALL content so the sticky card
-   follows the full height of the left column.
-*/
+/* ── MAIN PAGE LAYOUT ── */
 .course-page-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 20px;
-  align-items: start;      
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: start;
   position: relative;
   z-index: 2;
-  
 }
 
-/* Left column: stacks the two panels vertically */
 .course-page-left {
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 24px;
-  margin: 10px;
+  margin: 14px 0 0;
   min-height: 100vh;
 }
 
@@ -109,7 +119,8 @@
 .course-detail-panel {
   background: #f8f8f8;
   border: 1px solid #dcdcdc;
-  padding: 28px 30px 22px;
+  border-radius: 18px;
+  padding: 30px 32px 24px;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
 }
 
@@ -117,34 +128,34 @@
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
 }
 
-/* ── PURCHASE CARD (sticky) ── */
+/* ── PURCHASE CARD ── */
 .purchase-card {
   position: sticky;
   margin-top: -90px;
   top: 240px;
-  align-self: start;       /* critical — keeps card from stretching */
+  align-self: start;
   background: #f8f5f1;
   border: 1px solid #d8d0c7;
-  border-radius: 12px;
-  padding: 18px 16px;
+  border-radius: 14px;
+  padding: 20px 18px;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
   z-index: 10;
 }
 
 .purchase-card__title {
-  margin: 0 0 16px;
+  margin: 0 0 18px;
   font-size: 16px;
   font-weight: 700;
   text-align: center;
   color: #d97839;
-  font-family: "Montserrat", sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .purchase-card__plan {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .purchase-card__radio {
@@ -159,10 +170,10 @@
 
 .purchase-card__label {
   margin: 0 0 2px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #1f1f1f;
-  font-family: "Poppins", sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 .purchase-card__price {
@@ -170,33 +181,33 @@
   font-size: 16px;
   font-weight: 800;
   color: #1f1f1f;
-  font-family: "Montserrat", sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .purchase-card__features {
-  margin: 0 0 16px;
-  padding-left: 16px;
+  margin: 0 0 18px;
+  padding-left: 18px;
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .purchase-card__features li {
-  font-size: 10px;
-  line-height: 1.4;
+  font-size: 11px;
+  line-height: 1.5;
   color: #666666;
-  font-family: "Poppins", sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 .purchase-card__btn {
   width: 100%;
-  height: 32px;
-  border-radius: 8px;
+  height: 40px;
+  border-radius: 10px;
   border: 1px solid #0d7078;
   background: #ffffff;
   color: #0d7078;
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
-  font-family: "Poppins", sans-serif;
+  font-family: "Montserrat", sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -208,31 +219,31 @@
 
 /* ── WHAT YOU'LL LEARN ── */
 .course-learn-box {
-  padding-bottom: 16px;
+  padding-bottom: 20px;
   border-bottom: 1px solid #d7d7d7;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .course-section-heading {
-  margin: 0 0 14px;
-  font-size: 16px;
+  margin: 0 0 16px;
+  font-size: 24px;
   font-weight: 700;
   color: #181818;
-  font-family: "Montserrat", sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .course-learn-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 18px;
+  gap: 14px 22px;
 }
 
 .course-learn-item,
 .course-includes-item {
-  font-size: 11px;
-  line-height: 1.4;
+  font-size: 15px;
+  line-height: 1.6;
   color: #222222;
-  font-family: "Poppins", sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 /* ── THIS COURSE INCLUDES ── */
@@ -241,17 +252,17 @@
 }
 
 .course-sub-heading {
-  margin: 0 0 12px;
-  font-size: 15px;
-  font-weight: 700;
+  margin: 0 0 14px;
+  font-size: 20px;
+  font-weight: 600;
   color: #191919;
-  font-family: "Montserrat", sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .course-includes-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 20px;
+  gap: 14px 22px;
 }
 
 /* ── COURSE CONTENTS ── */
@@ -260,14 +271,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
 }
 
 .course-expand-btn {
   border: none;
   background: transparent;
   color: #d97839;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   font-family: "Poppins", sans-serif;
   cursor: pointer;
@@ -277,11 +288,13 @@
 .course-accordion {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
 }
 
 .course-accordion__item {
   border: 1px solid #2b6955;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 .course-accordion__header {
@@ -289,12 +302,13 @@
   border: none;
   background: #2f735c;
   color: #ffffff;
-  padding: 9px 12px;
+  padding: 18px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  font-size: 11px;
+  font-size: 19px;
+  line-height: 1.3;
   font-weight: 600;
   font-family: "Poppins", sans-serif;
   cursor: pointer;
@@ -303,19 +317,20 @@
 
 .course-accordion__left {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .course-accordion__arrow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  font-size: 12px;
+  width: 16px;
+  font-size: 14px;
   line-height: 1;
   transform: rotate(-90deg);
   transition: transform 0.2s ease;
+  margin-top: 3px;
 }
 
 .course-accordion__arrow.is-open {
@@ -324,20 +339,23 @@
 
 .course-accordion__count {
   white-space: nowrap;
-  font-size: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: "Montserrat", sans-serif;
 }
 
 .course-accordion__body {
   background: #ffffff;
-  padding: 12px;
+  padding: 18px 20px;
   border-top: 1px solid #d7d7d7;
 }
 
 .course-accordion__textbook {
-  margin: 0 0 10px;
-  font-size: 11px;
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.5;
   color: #666666;
-  font-family: "Poppins", sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 .course-accordion__chapters {
@@ -347,20 +365,33 @@
 }
 
 .course-accordion__chapters li {
-  font-size: 11px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.6;
+  font-weight: 400;
   color: #222222;
-  font-family: "Poppins", sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 .course-accordion__chapters li + li {
-  margin-top: 6px;
+  margin-top: 9px;
 }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 980px) {
   .course-detail-hero {
-    padding-bottom: 36px;
+    padding: 28px 0 44px;
+  }
+
+  .course-detail-hero__title {
+    font-size: 23px;
+  }
+
+  .course-detail-hero__summary {
+    font-size: 15px;
+  }
+
+  .course-detail-hero__meta {
+    font-size: 13px;
   }
 
   .course-page-layout {
@@ -369,14 +400,37 @@
     padding-bottom: 50px;
   }
 
+  .course-page-left {
+    min-height: auto;
+    margin-top: 0;
+  }
+
   .purchase-card {
     position: relative;
-    top: 70px;
-    max-width: 340px;
+    top: 0;
+    margin-top: 0;
+    max-width: 360px;
   }
 
   .course-detail-panel {
-    padding: 24px 20px;
+    padding: 24px 22px;
+  }
+
+  .course-section-heading {
+    font-size: 22px;
+  }
+
+  .course-sub-heading {
+    font-size: 18px;
+  }
+
+  .course-accordion__header {
+    font-size: 18px;
+    padding: 16px 18px;
+  }
+
+  .course-accordion__body {
+    padding: 16px 18px;
   }
 }
 
@@ -385,17 +439,93 @@
     padding: 0 14px;
   }
 
+  .course-detail-hero {
+    padding: 24px 0 34px;
+  }
+
+  .course-breadcrumb {
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .course-breadcrumb__item,
+  .course-breadcrumb__sep {
+    font-size: 11px;
+  }
+
   .course-detail-hero__title {
-    font-size: 28px;
+    font-size: 22px;
+    line-height: 1.3;
+  }
+
+  .course-detail-hero__summary {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .course-detail-hero__meta {
+    font-size: 12px;
+  }
+
+  .course-detail-panel {
+    padding: 20px 16px;
+    border-radius: 14px;
   }
 
   .course-learn-grid,
   .course-includes-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .course-section-heading {
+    font-size: 20px;
+  }
+
+  .course-sub-heading {
+    font-size: 17px;
   }
 
   .course-content-head {
     flex-direction: column;
     align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .course-accordion {
+    gap: 10px;
+  }
+
+  .course-accordion__header {
+    padding: 15px 16px;
+    font-size: 18px;
+    line-height: 1.3;
+    align-items: flex-start;
+  }
+
+  .course-accordion__left {
+    gap: 8px;
+  }
+
+  .course-accordion__count {
+    font-size: 12px;
+  }
+
+  .course-accordion__body {
+    padding: 16px;
+  }
+
+  .course-accordion__textbook {
+    font-size: 13px;
+  }
+
+  .course-accordion__chapters li {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .purchase-card {
+    max-width: 100%;
+    padding: 18px 16px;
   }
 }
