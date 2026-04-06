@@ -96,7 +96,7 @@
   will-change: transform;
   transition:
     opacity 0.32s ease var(--delay, 0ms),
-    transform 0.28s ease var(--delay, 0ms),
+    transform 0.5s ease var(--delay, 0ms),
     border-color 0.2s ease;
 }
 
@@ -118,7 +118,7 @@
   display: block;
   transform: translateZ(0);
   will-change: transform;
-  transition: transform 0.28s ease;
+  transition: transform 0.5s ease;
 }
 
 .scard:hover .scard-img {
@@ -214,9 +214,9 @@
   align-items: center;
   gap: 14px;
   transition:
-    background 0.22s,
-    border-color 0.22s,
-    transform 0.22s;
+    background 0.5s,
+    border-color 0.5s,
+    transform 0.5s;
 }
 .up-card:hover {
   background: rgba(105, 189, 126, 0.05);

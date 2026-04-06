@@ -54,7 +54,6 @@ const CLASSES = [
   {
     id: 'class8',
     title: 'Class 8',
-    desc: 'Foundation Course',
     price: '₹1,500',
     image: class8Img,
     duration: '1 Year',
@@ -65,7 +64,6 @@ const CLASSES = [
   {
     id: 'class9',
     title: 'Class 9',
-    desc: 'Foundation Course',
     price: '₹1,500',
     image: class9Img,
     duration: '1 Year',
@@ -76,7 +74,6 @@ const CLASSES = [
   {
     id: 'class10',
     title: 'Class 10',
-    desc: 'Foundation Course',
     price: '₹1,500',
     image: class10Img,
     duration: '1 Year',
@@ -88,7 +85,6 @@ const CLASSES = [
     id: 'class11science',
     title: 'Class 11',
     subtitle: 'Science',
-    desc: 'Foundation Course',
     price: '₹1,500',
     image: class11SciImg,
     duration: '1 Year',
@@ -100,7 +96,6 @@ const CLASSES = [
     id: 'class11commerce',
     title: 'Class 11',
     subtitle: 'Commerce',
-    desc: 'Foundation Course',
     price: '₹1,500',
     image: class11ComImg,
     duration: '1 Year',
@@ -112,7 +107,6 @@ const CLASSES = [
     id: 'class11arts',
     title: 'Class 11',
     subtitle: 'Arts',
-    desc: 'Foundation Course',
     price: '₹1,500',
     image: class11ArtsImg,
     duration: '1 Year',
@@ -124,7 +118,6 @@ const CLASSES = [
     id: 'class12science',
     title: 'Class 12',
     subtitle: 'Science',
-    desc: 'Foundation Course',
     price: '₹1,500',
     image: class12SciImg,
     duration: '1 Year',
@@ -136,7 +129,6 @@ const CLASSES = [
     id: 'class12commerce',
     title: 'Class 12',
     subtitle: 'Commerce',
-    desc: 'Foundation Course',
     price: '₹1,500',
     image: class12ComImg,
     duration: '1 Year',
@@ -148,7 +140,6 @@ const CLASSES = [
     id: 'class12arts',
     title: 'Class 12',
     subtitle: 'Arts',
-    desc: 'Foundation Course',
     price: '₹1,500',
     image: class12ArtsImg,
     duration: '1 Year',
@@ -280,8 +271,6 @@ const ClassCourseTile = ({
         {desc && <p className="courses-tile__desc">{desc}</p>}
 
         <div className="courses-details-box">
-          <h4 className="courses-details-box__title">Course Details</h4>
-
           <div className="courses-details-box__item">
             <span>Duration:</span>
             <strong>{duration}</strong>
@@ -414,14 +403,10 @@ const Courses = () => {
   };
 
   const handleEnrollNow = (cls) => {
-    navigate('/payment', {
-      state: {
-        className: cls.title,
-        stream: cls.subtitle || '',
-        subject: cls.desc || 'Full Course',
-        price: cls.fee || cls.price || '1500',
-      },
-    });
+    window.open(
+      'https://docs.google.com/forms/d/e/1FAIpQLScYOfEKfvAqgSpfeZp-wAvwnB9dXi0UXCn5GoZHe8TVRJZT1A/viewform?usp=header',
+      '_blank'
+    );
   };
 
   if (activeCourse) {
