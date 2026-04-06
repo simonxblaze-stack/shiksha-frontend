@@ -192,7 +192,7 @@
 }
 
 .purchase-card__features li {
-  font-size: 11px;
+  font-size: 14px;
   line-height: 1.5;
   color: #666666;
   font-family: "Montserrat", sans-serif;
@@ -205,7 +205,7 @@
   border: 1px solid #0d7078;
   background: #ffffff;
   color: #0d7078;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   font-family: "Montserrat", sans-serif;
   cursor: pointer;
@@ -436,7 +436,19 @@
 
 @media (max-width: 700px) {
   .course-detail-container {
+    max-width: 100%;
     padding: 0 14px;
+  }
+
+  .course-detail-hero .course-detail-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 14px;
+  }
+
+  .course-detail-hero__content {
+    max-width: 100%;
+    margin-left: 0;
   }
 
   .course-detail-hero {
@@ -456,11 +468,13 @@
   .course-detail-hero__title {
     font-size: 22px;
     line-height: 1.3;
+    max-width: 100%;
   }
 
   .course-detail-hero__summary {
     font-size: 14px;
     line-height: 1.6;
+    max-width: 100%;
   }
 
   .course-detail-hero__meta {
