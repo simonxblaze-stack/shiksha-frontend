@@ -3,7 +3,7 @@
 ═══════════════════════════════════════════ */
 .teachers-slider-section {
   padding: 100px 20px 90px;
-  background: #e8e0cc;
+  background: #ffffff;
   position: relative;
   overflow: hidden;
 }
@@ -80,7 +80,7 @@
   margin: 0 0 14px;
   font-size: 38px;
   font-weight: 800;
-  color: rgba(7, 78, 24, 0.9);
+  color: rgba(11, 58, 22, 0.9);
   font-family: "Montserrat", sans-serif;
 }
 

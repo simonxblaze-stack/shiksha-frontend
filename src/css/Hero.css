@@ -3,7 +3,7 @@
 ═══════════════════════════════════════════ */
 .shiksha-hero {
   min-height: auto;
-  background: #041f09;
+  background: #003223;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -136,10 +136,10 @@
 .updates-panel {
   width: 100%;
   max-width: 430px;
-  background: rgba(17, 55, 29, 0.65);
+  background: rgba(255, 255, 255, 0.53);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
-  border: 1.5px solid rgba(10, 30, 15, 0.62);
+  border: 1.5px solid rgba(10, 30, 15, 0.75);
   border-radius: 22px;
   padding: 22px 22px 18px;
 }
@@ -159,7 +159,7 @@
 .up-title {
   font-size: 13px;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(3, 28, 2, 0.85);
   font-family: "Montserrat", sans-serif;
   letter-spacing: 0.3px;
 }
@@ -184,13 +184,17 @@
   top: 0;
   background: linear-gradient(
     to bottom,
-    rgba(9, 40, 4, 0.9) 0%,
+    rgba(9, 40, 4, 0.54) 0%,
     transparent 100%
   );
 }
 .up-fade-bottom {
   bottom: 0;
-  background: linear-gradient(to top, rgba(9, 40, 4, 0.9) 0%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(9, 40, 4, 0.69) 0%,
+    transparent 100%
+  );
 }
 
 /* Scrolling track */
@@ -206,7 +210,7 @@
   height: 72px;
   flex-shrink: 0;
   background: transparent;
-  border: 1px solid rgba(10, 30, 15, 0.15);
+  border: 1px solid rgba(5, 47, 10, 0.26);
   border-radius: 12px;
   padding: 0 18px;
   cursor: default;
@@ -236,7 +240,7 @@
 .up-card-title {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(0, 0, 0, 0.78);
   font-family: "Poppins", sans-serif;
   line-height: 1.4;
   display: -webkit-box;

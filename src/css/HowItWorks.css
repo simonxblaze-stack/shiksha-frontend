@@ -3,7 +3,7 @@
 ═══════════════════════════════════════════ */
 .hw-section {
   padding: 100px 24px 110px;
-  background: #041f09;
+  background: #003223;
   background-image:
     linear-gradient(rgba(132, 104, 39, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(201, 173, 51, 0.06) 1px, transparent 1px);
@@ -227,7 +227,7 @@
 
 /* Card content box */
 .hw-card-content {
-  background: #041f09;
+  background: #ffffff;
   border: 1px solid rgba(132, 104, 39, 0.16);
   border-radius: 18px;
   padding: 26px 20px 22px;
@@ -280,7 +280,7 @@
 
 .hw-card-desc {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.52);
+  color: #001a0f;
   line-height: 1.72;
   margin-bottom: 16px;
 }

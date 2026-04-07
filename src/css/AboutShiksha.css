@@ -274,7 +274,7 @@
 }
 
 .sa-card {
-  background: rgb(4, 51, 16);
+  background: #003223;
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
   border: 1.5px solid rgba(255, 255, 255, 0.1);
