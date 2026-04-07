@@ -136,7 +136,7 @@
 .updates-panel {
   width: 100%;
   max-width: 430px;
-  background: rgba(255, 255, 255, 0.53);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
   border: 1.5px solid rgba(10, 30, 15, 0.75);
@@ -159,7 +159,7 @@
 .up-title {
   font-size: 13px;
   font-weight: 800;
-  color: rgba(3, 28, 2, 0.85);
+  color: rgba(5, 43, 4, 0.85);
   font-family: "Montserrat", sans-serif;
   letter-spacing: 0.3px;
 }
@@ -210,7 +210,7 @@
   height: 72px;
   flex-shrink: 0;
   background: transparent;
-  border: 1px solid rgba(5, 47, 10, 0.26);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   padding: 0 18px;
   cursor: default;
