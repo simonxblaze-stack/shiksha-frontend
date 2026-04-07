@@ -2,7 +2,7 @@
    FAQ SECTION
 ═══════════════════════════════════════════ */
 .faq-section {
-  background: #e8e0cc;
+  background: #ffffff;
   min-height: 100vh;
   padding: 80px 24px;
   position: relative;
@@ -144,7 +144,7 @@
 }
 
 .faq-card {
-  background: rgba(10, 30, 15, 0.52);
+  background: #003223;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 18px;
   backdrop-filter: blur(22px);

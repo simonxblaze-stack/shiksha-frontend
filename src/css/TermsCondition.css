@@ -5,7 +5,7 @@
 ═══════════════════════════════════════════ */
 .tc-root {
   min-height: 100vh;
-  background: #e8e0cc;
+  background: #ffffff;
   position: relative;
   overflow: hidden;
   font-family: "Poppins", sans-serif;
@@ -120,7 +120,7 @@
   font-family: "Montserrat", sans-serif;
   font-size: clamp(1.8rem, 4vw, 3rem);
   font-weight: 900;
-  color: rgba(10, 25, 14, 0.92);
+  color: #003223;
   margin: 0 0 10px;
   letter-spacing: -0.5px;
   line-height: 1.15;
@@ -152,7 +152,7 @@
 .tc-nav {
   position: sticky;
   top: 24px;
-  background: rgba(10, 30, 15, 0.55);
+  background: #003223;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 20px;
   backdrop-filter: blur(22px);
@@ -281,7 +281,7 @@
 }
 
 .tc-content-panel {
-  background: rgba(10, 30, 15, 0.5);
+  background: #003223;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 22px;
   backdrop-filter: blur(22px);

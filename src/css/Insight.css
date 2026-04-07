@@ -71,13 +71,13 @@
   outline: none;
   font-size: 13.5px;
   font-family: "Poppins", sans-serif;
-  color: #0e1c0f;
+  color: #ffffff;
   background: transparent;
   padding: 7px 0;
 }
 
 .insight-search-bar input::placeholder {
-  color: rgba(14, 28, 15, 0.38);
+  color: rgba(255, 255, 255, 0.77);
 }
 
 .insight-search-bar input:disabled {

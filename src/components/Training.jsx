@@ -41,7 +41,7 @@ const Training = () => {
       <div className="upcoming-page-content">
         <Navbar />
         <div className="upcoming-container">
-          <h1>Training Programs - Coming Soon</h1>
+          <h1>Skill Developemnt Programs - Coming Soon </h1>
           <p className="upcoming-page-description">
             We're developing comprehensive training programs to empower learners and professionals. Here's what's in our pipeline:
           </p>

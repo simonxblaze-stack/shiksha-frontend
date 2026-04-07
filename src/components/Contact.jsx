@@ -25,9 +25,7 @@ const Contact = () => {
           <img src={location_icon} alt="" />
           <h2>Head Office</h2>
           <p>
-            CM Engineering And Solution<br />
-            Engineering, Planning And Project Management<br/>
-            House No. - 73A<br />
+            House No. - 14731A<br/>
             Maruti Vihar<br />
             Gurgaon, Haryana - 122002<br />
           </p>
@@ -37,8 +35,7 @@ const Contact = () => {
           <img src={location_icon} alt="" />
           <h2>Regional Office Address</h2>
           <p>
-            Hualngohmun<br />
-            Vengchhak<br />
+            Hualngohmun Vengchhak<br />
             Near World Bank Road<br />
             Aizawl , Mizoram - 796005<br />
           </p>

@@ -3,7 +3,7 @@
 ═══════════════════════════════════════════ */
 .fb-section {
   min-height: 100vh;
-  background: #e8e0cc;
+  background: #ffffff;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -108,7 +108,7 @@
 .fb-title {
   font-size: 32px;
   font-weight: 800;
-  color: rgba(12, 28, 15, 0.88);
+  color: #003223;
   font-family: "Montserrat", sans-serif;
   line-height: 1.2;
   margin: 0 0 14px;
@@ -133,8 +133,8 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  background: rgba(10, 30, 15, 0.06);
-  border: 1px solid rgba(10, 30, 15, 0.09);
+  background: rgba(0, 50, 35, 0.12);
+  border: 1px solid rgba(0, 50, 35, 0.22);
   border-radius: 14px;
   padding: 14px 16px;
   transition:
@@ -179,9 +179,9 @@
    RIGHT — FORM CARD
 ═══════════════════════════════════════════ */
 .fb-form-wrap {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(0, 50, 35, 0.12);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 50, 35, 0.22);
   border-radius: 24px;
   padding: 36px 36px 32px;
   box-shadow:
