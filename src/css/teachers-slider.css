@@ -97,7 +97,8 @@
    SWIPER
 ═══════════════════════════════════════════ */
 .teachers-swiper {
-  padding: 10px 52px 24px;
+  padding: 10px 0 24px;
+  overflow: hidden;
 }
 
 /* ═══════════════════════════════════════════
@@ -173,7 +174,7 @@
   margin: 0;
   font-size: 12px;
   font-weight: 600;
-  color: #041f09;
+  color: #ff8f01;
   font-family: "Poppins", sans-serif;
   letter-spacing: 0.3px;
   white-space: nowrap;
@@ -187,51 +188,51 @@
 ═══════════════════════════════════════════ */
 .swiper-button-prev,
 .swiper-button-next {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(10, 30, 15, 0.55);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  color: rgba(255, 255, 255, 0.85);
+  width: 44px;
+  height: 44px;
+  border-radius: 50px;
+  background: #003223c3;
+  border: none;
+  box-shadow: 0 4px 14px rgba(0, 50, 35, 0.39);
+  color: #ffffff;
   top: 50%;
   transform: translateY(-50%);
-  transition: all 0.25s ease;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .swiper-button-prev::after,
 .swiper-button-next::after {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 6px;
+  font-weight: 800;
 }
 
 .swiper-button-prev:hover,
 .swiper-button-next:hover {
-  background: rgba(10, 30, 15, 0.8);
-  border-color: #041f09;
-  color: #041f09;
-  box-shadow:
-    0 0 0 1.5px #041f09,
-    0 12px 30px rgba(0, 0, 0, 0.3);
-  transform: translateY(-50%) scale(1.1);
+  background: #004d36;
+  box-shadow: 0 6px 20px rgba(0, 50, 35, 0.55);
+  transform: translateY(-50%) scale(1.07);
 }
 
 .swiper-button-prev:active,
 .swiper-button-next:active {
+  background: #002519;
   transform: translateY(-50%) scale(0.95);
+  box-shadow: 0 2px 8px rgba(0, 50, 35, 0.4);
 }
 
 .swiper-button-prev {
-  left: 4px;
+  left: 8px;
 }
 
 .swiper-button-next {
-  right: 4px;
+  right: 8px;
 }
 
 .swiper-button-disabled {
-  opacity: 0.3;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
@@ -257,7 +258,7 @@
   }
 
   .teachers-swiper {
-    padding: 8px 28px 22px;
+    padding: 8px 0 22px;
   }
 }
 
@@ -294,7 +295,7 @@
   }
 
   .teachers-swiper {
-    padding: 6px 2px 18px;
+    padding: 6px 0 18px;
   }
 
   .teacher-slider-card {

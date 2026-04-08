@@ -70,6 +70,8 @@ const Login = () => {
 
   return (
     <div className={`login-container ${isRedirecting ? "is-redirecting" : ""}`}>
+      <div className="login-glow-center"></div>
+      <div className="login-glow-top-right"></div>
       {isRedirecting && (
         <div className="login-overlay">
           <div className="login-overlay-card">

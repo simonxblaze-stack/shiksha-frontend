@@ -7,7 +7,7 @@
   justify-content: center;
   align-items: flex-start;
   padding: 80px 24px 80px;
-  background: #e8e0cc;
+  background: #ffffff;
   position: relative;
   overflow: hidden;
 }
@@ -21,9 +21,11 @@
     linear-gradient(rgba(132, 104, 39, 0.15) 1px, transparent 1px),
     linear-gradient(90deg, rgba(201, 173, 51, 0.08) 1px, transparent 1px);
   background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%,
-      black 30%,
-      transparent 100%);
+  mask-image: radial-gradient(
+    ellipse 80% 80% at 50% 50%,
+    black 30%,
+    transparent 100%
+  );
   pointer-events: none;
 }
 
@@ -56,10 +58,10 @@
 .ff-card {
   width: 100%;
   max-width: 700px;
-  background: rgba(10, 30, 15, 0.52);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f2f3f4;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #dcdcdc;
   border-radius: 22px;
   padding: 40px 36px;
   position: relative;
@@ -83,7 +85,7 @@
   text-align: center;
   font-size: 22px;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.92);
+  color: #111111;
   font-family: "Montserrat", sans-serif;
   margin-bottom: 6px;
 }
@@ -91,14 +93,14 @@
 .ff-subtitle {
   text-align: center;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.45);
+  color: #555555;
   font-family: "Poppins", sans-serif;
   margin-bottom: 28px;
 }
 
 .ff-loading {
   text-align: center;
-  color: rgba(255, 255, 255, 0.5);
+  color: #555555;
   font-family: "Poppins", sans-serif;
   padding: 3rem 0;
 }
@@ -107,13 +109,13 @@
 .ff-section-title {
   font-size: 12px;
   font-weight: 700;
-  color: #1dcaab;
+  color: #ff8f01;
   font-family: "Montserrat", sans-serif;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   margin: 28px 0 14px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid #e0e0e0;
 }
 
 /* ── fields ── */
@@ -125,7 +127,7 @@
   display: block;
   margin-bottom: 6px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.65);
+  color: #333333;
   font-size: 12px;
   font-family: "Poppins", sans-serif;
   letter-spacing: 0.02em;
@@ -136,12 +138,12 @@
 .ff-field textarea {
   width: 100%;
   padding: 10px 13px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid #d0d0d0;
   border-radius: 10px;
   font-size: 13px;
   font-family: "Poppins", sans-serif;
-  color: rgba(255, 255, 255, 0.88);
+  color: #111111;
   transition:
     border-color 0.22s,
     box-shadow 0.22s;
@@ -150,7 +152,7 @@
 
 .ff-field input::placeholder,
 .ff-field textarea::placeholder {
-  color: rgba(255, 255, 255, 0.25);
+  color: #aaaaaa;
 }
 
 /* date & select option text fix */
@@ -160,8 +162,8 @@
 }
 
 .ff-field select option {
-  background: #0a1f1c;
-  color: rgba(255, 255, 255, 0.88);
+  background: #ffffff;
+  color: #111111;
 }
 
 .ff-field input:focus,
@@ -172,10 +174,10 @@
 }
 
 .ff-field input:disabled {
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.3);
+  background: #f0f0f0;
+  color: #aaaaaa;
   cursor: not-allowed;
-  border-color: rgba(255, 255, 255, 0.06);
+  border-color: #e0e0e0;
 }
 
 .ff-field textarea {
@@ -222,7 +224,7 @@
 
 .ff-checkbox-row label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: #333333;
   font-family: "Poppins", sans-serif;
   cursor: pointer;
 }
@@ -263,15 +265,15 @@
 .ff-btn-primary {
   flex: 1;
   padding: 12px;
-  background: rgba(10, 30, 15, 0.6);
-  color: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #041f09;
+  color: #ffffff;
+  border: 1px solid #041f09;
   border-radius: 11px;
   font-size: 13px;
   font-weight: 700;
   font-family: "Montserrat", sans-serif;
   cursor: pointer;
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
   transition:
     border-color 0.22s,
     box-shadow 0.22s,
@@ -293,9 +295,9 @@
 /* secondary */
 .ff-btn-secondary {
   padding: 12px 22px;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f0f0f0;
+  color: #333333;
+  border: 1px solid #d0d0d0;
   border-radius: 11px;
   font-size: 13px;
   font-weight: 600;
@@ -308,9 +310,9 @@
 }
 
 .ff-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.85);
+  background: #e4e4e4;
+  border-color: #bbbbbb;
+  color: #111111;
 }
 
 /* ── radio group ── */
@@ -325,7 +327,7 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.75);
+  color: #333333;
   font-family: "Poppins", sans-serif;
   cursor: pointer;
 }
@@ -353,20 +355,20 @@
 .ff-file-input {
   width: 100%;
   padding: 10px 13px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid #d0d0d0;
   border-radius: 10px;
   font-size: 13px;
   font-family: "Poppins", sans-serif;
-  color: rgba(255, 255, 255, 0.88);
+  color: #111111;
   cursor: pointer;
 }
 
 .ff-file-input::file-selector-button {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #f0f0f0;
+  border: 1px solid #d0d0d0;
   border-radius: 6px;
-  color: rgba(255, 255, 255, 0.7);
+  color: #333333;
   padding: 4px 12px;
   margin-right: 10px;
   font-size: 12px;
@@ -376,7 +378,7 @@
 }
 
 .ff-file-input::file-selector-button:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: #e4e4e4;
 }
 
 /* file name / existing file indicators */
@@ -391,7 +393,7 @@
 .ff-file-existing {
   display: block;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
+  color: #888888;
   font-family: "Poppins", sans-serif;
   margin-top: 4px;
   font-style: italic;
@@ -402,17 +404,17 @@
   display: block;
   text-align: right;
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.3);
+  color: #aaaaaa;
   font-family: "Poppins", sans-serif;
   margin-top: 2px;
 }
 
 /* ── disabled select fix ── */
 .ff-field select:disabled {
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.3);
+  background: #f0f0f0;
+  color: #aaaaaa;
   cursor: not-allowed;
-  border-color: rgba(255, 255, 255, 0.06);
+  border-color: #e0e0e0;
 }
 
 /* ═══════════════════════════════════════════
@@ -465,30 +467,30 @@
   font-size: 14px;
   font-weight: 700;
   font-family: "Montserrat", sans-serif;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.3);
+  border: 2px solid #cccccc;
+  color: #aaaaaa;
   background: transparent;
   transition: all 0.3s;
 }
 
 .ff-step-circle.active,
 .ff-step-circle.done {
-  background: #1dcaab;
-  border-color: #1dcaab;
+  background: #ff8f01;
+  border-color: #ff8f01;
   color: #fff;
 }
 
 .ff-step-label {
   font-size: 11px;
   font-family: "Poppins", sans-serif;
-  color: rgba(255, 255, 255, 0.35);
+  color: #aaaaaa;
   text-align: center;
   max-width: 100px;
 }
 
 .ff-step-label.active,
 .ff-step-label.done {
-  color: #1dcaab;
+  color: #ff8f01;
 }
 
 .ff-step-connector {
@@ -502,12 +504,12 @@
 .ff-step-line {
   width: 100%;
   height: 2px;
-  background: rgba(255, 255, 255, 0.12);
+  background: #dddddd;
   transition: background 0.3s;
 }
 
 .ff-step-line.done {
-  background: #1dcaab;
+  background: #ff8f01;
 }
 
 /* ═══════════════════════════════════════════
@@ -522,9 +524,9 @@
 .ff-yesno-btn {
   padding: 10px 32px;
   border-radius: 10px;
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border: 1.5px solid #d0d0d0;
   background: transparent;
-  color: rgba(255, 255, 255, 0.6);
+  color: #333333;
   font-size: 14px;
   font-weight: 600;
   font-family: "Poppins", sans-serif;
@@ -533,15 +535,15 @@
 }
 
 .ff-yesno-btn:hover {
-  border-color: #1dcaab;
-  color: #1dcaab;
+  border-color: #5e3908;
+  color: #ff8f01;
 }
 
 .ff-yesno-btn.active {
-  border-color: #1dcaab;
-  color: #1dcaab;
+  border-color: #75460a;
+  color: #ff8f01;
   background: rgba(29, 202, 171, 0.08);
-  box-shadow: 0 0 0 1.5px #1dcaab;
+  box-shadow: 0 0 0 1.5px #ff8f01;
 }
 
 /* ═══════════════════════════════════════════
@@ -563,8 +565,8 @@
   width: 90px;
   height: 90px;
   border-radius: 12px;
-  border: 1.5px dashed rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px dashed #cccccc;
+  background: #f7f7f7;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -572,10 +574,12 @@
   gap: 6px;
   cursor: pointer;
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.4);
+  color: #888888;
   font-size: 11px;
   font-family: "Poppins", sans-serif;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
   overflow: hidden;
 }
 

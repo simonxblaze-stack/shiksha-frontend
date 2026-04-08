@@ -62,6 +62,8 @@ const Signup = () => {
 
   return (
     <div className="signup-container">
+      <div className="signup-glow-center"></div>
+      <div className="signup-glow-top-right"></div>
       <div className="signup-form">
         <h2>Sign Up</h2>
 

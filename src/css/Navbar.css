@@ -11,7 +11,7 @@
   --nb-orange: #ff8f01;
   --nb-ink: #0e1c0f;
   --nb-ink-soft: rgba(14, 28, 15, 0.65);
-  --nb-border: rgba(132, 104, 39, 0.18);
+  --nb-border: rgba(9, 62, 5, 0.18);
 }
 
 /* ═══════════════════════════════════════════
@@ -196,10 +196,10 @@
 
 .header-login-btn {
   background: transparent;
-  border: 1.5px solid var(--nb-border);
+  border: 2px solid var(--nb-border);
   padding: 8px 22px;
   border-radius: 8px;
-  color: #003223;
+  color: #033325;
   font-size: 13.5px;
   font-weight: 600;
   text-decoration: none;
@@ -209,13 +209,13 @@
 }
 
 .header-login-btn:hover {
-  background: rgba(18, 80, 39, 0.07);
+  background: rgba(18, 80, 39, 0.22);
   border-color: var(--nb-forest-mid);
   color: var(--nb-forest);
 }
 
 .header-signup-btn {
-  background: var(--nb-forest);
+  background: #003223;
   border: 1.5px solid var(--nb-forest);
   padding: 8px 22px;
   border-radius: 8px;
@@ -230,9 +230,9 @@
 }
 
 .header-signup-btn:hover {
-  background: var(--nb-forest-mid);
+  background: #106950;
   border-color: var(--nb-forest-mid);
-  box-shadow: 0 6px 20px rgba(27, 156, 133, 0.4);
+  box-shadow: 0 6px 20px #033325;
   transform: translateY(-1px);
 }
 
