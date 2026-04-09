@@ -3,7 +3,7 @@
 ═══════════════════════════════════════════ */
 .shiksha-hero {
   min-height: auto;
-  background: #003223;
+  background: #fff;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -136,7 +136,7 @@
 .updates-panel {
   width: 100%;
   max-width: 430px;
-  background: rgba(255, 255, 255, 0.85);
+  background: #003223;
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
   border: 1.5px solid rgba(10, 30, 15, 0.75);
@@ -159,7 +159,7 @@
 .up-title {
   font-size: 13px;
   font-weight: 800;
-  color: rgba(5, 43, 4, 0.85);
+  color: #fff;
   font-family: "Montserrat", sans-serif;
   letter-spacing: 0.3px;
 }
@@ -240,7 +240,7 @@
 .up-card-title {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.78);
+  color: #fff;
   font-family: "Poppins", sans-serif;
   line-height: 1.4;
   display: -webkit-box;

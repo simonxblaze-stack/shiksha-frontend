@@ -1,5 +1,5 @@
 .ss-strip {
-  background: #fff;
+  background: #003223;
   border-top: 1px solid #e8f5f0;
   border-bottom: 1px solid #e8f5f0;
   padding: 48px 24px;
@@ -25,7 +25,7 @@
   font-family: "Montserrat", sans-serif;
   font-size: 42px;
   font-weight: 900;
-  color: #0d1f1c;
+  color: #fff;
   letter-spacing: -2px;
   line-height: 1;
   margin-bottom: 8px;
@@ -37,7 +37,7 @@
 .ss-label {
   font-size: 13px;
   font-weight: 500;
-  color: #8aada8;
+  color: #e8f5f0;
   font-family: "Poppins", sans-serif;
 }
 
