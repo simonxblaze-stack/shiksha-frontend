@@ -33,6 +33,13 @@ const articleMap = {
   "class-9/science/chapter-5": Chapter5Class9Science,
   "class-9/science/chapter-6": Chapter6Class9Science,
   "class-9/science/chapter-7": Chapter7Class9Science,
+  "class-9/science/chapter-8": Chapter8Class9Science,
+  "class-9/science/chapter-9": Chapter9Class9Science,
+  "class-9/science/chapter-10": Chapter10Class9Science,
+  "class-9/science/chapter-11": Chapter11Class9Science,
+  "class-9/science/chapter-12": Chapter12Class9Science,
+  "class-9/science/chapter-13": Chapter13Class9Science,
+  "class-9/science/chapter-14": Chapter14Class9Science,
 };
 
 export default articleMap;

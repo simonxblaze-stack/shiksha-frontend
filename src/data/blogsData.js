@@ -60,6 +60,13 @@ import c9s4 from "../assets/blog/blog-class9/science/4.png";
 import c9s5 from "../assets/blog/blog-class9/science/5.png";
 import c9s6 from "../assets/blog/blog-class9/science/6.png";
 import c9s7 from "../assets/blog/blog-class9/science/7.png";
+import c9s8 from "../assets/blog/blog-class9/science/8.png";
+import c9s9 from "../assets/blog/blog-class9/science/9.png";
+import c9s10 from "../assets/blog/blog-class9/science/10.png";
+import c9s11 from "../assets/blog/blog-class9/science/11.png";
+import c9s12 from "../assets/blog/blog-class9/science/12.png";
+import c9s13 from "../assets/blog/blog-class9/science/13.png";
+import c9s14 from "../assets/blog/blog-class9/science/14.png";
 
 // ================= DATA =================
 
@@ -452,6 +459,63 @@ const blogsData = [
     title: "Chapter 7: Diversity in Living Organisms",
     thumbnail: c9s7,
   },
+  {
+    id: "c9s8",
+    slug: "class-9/science/chapter-8",
+    category: "Science",
+    classLevel: "9",
+    title: "Chapter 8: Motion",
+    thumbnail: c9s8,
+  },
+  {
+    id: "c9s9",
+    slug: "class-9/science/chapter-9",
+    category: "Science",
+    classLevel: "9",
+    title: "Chapter 9: Force and Laws of Motion",
+    thumbnail: c9s9,
+  },
+  {
+    id: "c9s10",
+    slug: "class-9/science/chapter-10",
+    category: "Science",
+    classLevel: "9",
+    title: "Chapter 10: Gravitation",
+    thumbnail: c9s10,
+  },
+  {
+    id: "c9s11",
+    slug: "class-9/science/chapter-11",
+    category: "Science",
+    classLevel: "9",
+    title: "Chapter 11: Work and Energy",
+    thumbnail: c9s11,
+  },
+  {
+    id: "c9s12",
+    slug: "class-9/science/chapter-12",
+    category: "Science",
+    classLevel: "9",
+    title: "Chapter 12: Sound",
+    thumbnail: c9s12,
+  },
+  {
+    id: "c9s13",
+    slug: "class-9/science/chapter-13",
+    category: "Science",
+    classLevel: "9",
+    title: "Chapter 13: Why Do We Fall Ill",
+    thumbnail: c9s13,
+  },
+  {
+    id: "c9s14",
+    slug: "class-9/science/chapter-14",
+    category: "Science",
+    classLevel: "9",
+    title: "Chapter 14: Natural Resources",
+    thumbnail: c9s14,
+  },
+
 ];
 
 export default blogsData;

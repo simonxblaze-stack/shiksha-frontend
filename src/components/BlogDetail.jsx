@@ -61,6 +61,13 @@ import C9Chapter4 from "./blogs/class-9/science/Chapter4.jsx";
 import C9Chapter5 from "./blogs/class-9/science/Chapter5.jsx";
 import C9Chapter6 from "./blogs/class-9/science/Chapter6.jsx";
 import C9Chapter7 from "./blogs/class-9/science/Chapter7.jsx";
+import C9Chapter8 from "./blogs/class-9/science/Chapter8.jsx";
+import C9Chapter9 from "./blogs/class-9/science/Chapter9.jsx";
+import C9Chapter10 from "./blogs/class-9/science/Chapter10.jsx";
+import C9Chapter11 from "./blogs/class-9/science/Chapter11.jsx";
+import C9Chapter12 from "./blogs/class-9/science/Chapter12.jsx";
+import C9Chapter13 from "./blogs/class-9/science/Chapter13.jsx";
+import C9Chapter14 from "./blogs/class-9/science/Chapter14.jsx";
 
 /* ================= MAP ================= */
 
@@ -123,6 +130,13 @@ const articleMap = {
   "class-9/science/chapter-5": C9Chapter5,
   "class-9/science/chapter-6": C9Chapter6,
   "class-9/science/chapter-7": C9Chapter7,
+  "class-9/science/chapter-8": C9Chapter8,
+  "class-9/science/chapter-9": C9Chapter9,
+  "class-9/science/chapter-10": C9Chapter10,
+  "class-9/science/chapter-11": C9Chapter11,
+  "class-9/science/chapter-12": C9Chapter12,
+  "class-9/science/chapter-13": C9Chapter13,
+  "class-9/science/chapter-14": C9Chapter14,
 };
 
 /* ================= COMPONENT ================= */
