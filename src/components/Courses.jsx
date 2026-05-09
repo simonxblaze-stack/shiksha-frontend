@@ -676,6 +676,13 @@ navigate(`/enroll/${courseId}`);
 
           if (level === 'class') {
             setActiveCourse(null);
+             // scroll back to previous classes section
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    }, 50);
           }
         }}
       />
