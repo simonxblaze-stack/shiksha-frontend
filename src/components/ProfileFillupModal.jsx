@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useProfileModal } from "../contexts/ProfileModalContext";
 import FormFillup from "./FormFillup";
+import ProfileSuccessModal from "./ProfileSuccessModal";
 import "../css/ProfileFillupModal.css";
 
 const ProfileFillupModal = () => {
@@ -11,6 +12,7 @@ const ProfileFillupModal = () => {
   const { notification, clearNotification } = useProfileModal();
   const location = useLocation();
   const [dismissed, setDismissed] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const isIncomplete = isAuthenticated && user?.profile_complete === false;
   const isOnFormPage = location.pathname === "/form-fillup";
@@ -42,7 +44,12 @@ const ProfileFillupModal = () => {
   const handleSuccess = () => {
     clearNotification();
     setDismissed(true);
+    setShowSuccess(true);
   };
+
+  if (showSuccess) {
+    return <ProfileSuccessModal onClose={() => setShowSuccess(false)} />;
+  }
 
   if (!show) return null;
 
