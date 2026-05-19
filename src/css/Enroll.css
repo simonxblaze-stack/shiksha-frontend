@@ -211,3 +211,63 @@
   padding: 60px 20px;
   color: #666;
 }
+
+.enroll-modal-status {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+/* ── Modal overlay ── */
+.enroll-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px 16px;
+  overflow-y: auto;
+}
+
+.enroll-modal {
+  background: #f9fafb;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 980px;
+  position: relative;
+  padding: 36px 28px 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: enroll-modal-in 0.2s ease;
+}
+
+@keyframes enroll-modal-in {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.enroll-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 4px 10px;
+  cursor: pointer;
+  color: #555;
+}
+
+.enroll-modal__close:hover {
+  background: #f3f4f6;
+  color: #111;
+}
+
+@media (max-width: 720px) {
+  .enroll-modal {
+    padding: 24px 16px 32px;
+  }
+}

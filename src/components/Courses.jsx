@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../css/Courses.css';
 import SubjectList from './SubjectList';
+import EnrollModal from './EnrollModal';
 import { courseData, mbseCourseData } from '../data/courseData';
 import BoardSvg from './BoardSvg';
 import { useAuth } from '../contexts/AuthContext';
@@ -473,6 +474,7 @@ const Courses = () => {
   const [activeCourse, setActiveCourse] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [enrollmentStatusByCourseId, setEnrollmentStatusByCourseId] = useState({});
+  const [enrollModalCourseId, setEnrollModalCourseId] = useState(null);
 
 const goToState = (url, nextState = {}) => {
   navigate(url, {
@@ -775,6 +777,11 @@ const handleClassSelect = (cls) => {
   };
 
   const handleEnrollNow = (cls) => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
     const courseId = cls.courseIds?.[selectedBoard];
 
     if (!courseId) {
@@ -791,7 +798,7 @@ const handleClassSelect = (cls) => {
       return;
     }
 
-    navigate(`/enroll/${courseId}`);
+    setEnrollModalCourseId(courseId);
   };
 
   const searchBar = (placeholder = 'Search boards…') => (
@@ -843,24 +850,33 @@ const handleClassSelect = (cls) => {
   );
 
   if (activeCourse) {
+    const activeCourseId = selectedClass?.courseIds?.[selectedBoard];
     return (
-      <SubjectList
-        course={activeCourse}
-        courseId={selectedClass?.courseIds?.[selectedBoard]}
-        enrollmentStatus={
-          enrollmentStatusByCourseId[selectedClass?.courseIds?.[selectedBoard]]
-        }
-        boardGroup={currentBoardGroup?.title}
-        board={currentBoard?.title}
-        selectedClass={
-          selectedClass?.subtitle
-            ? `${selectedClass.title} (${selectedClass.subtitle})`
-            : selectedClass?.title
-        }
-        onBack={(level) => {
-  handleTrailClick(level);
-}}
-      />
+      <>
+        <SubjectList
+          course={activeCourse}
+          courseId={activeCourseId}
+          enrollmentStatus={enrollmentStatusByCourseId[activeCourseId]}
+          boardGroup={currentBoardGroup?.title}
+          board={currentBoard?.title}
+          selectedClass={
+            selectedClass?.subtitle
+              ? `${selectedClass.title} (${selectedClass.subtitle})`
+              : selectedClass?.title
+          }
+          onBack={(level) => { handleTrailClick(level); }}
+          onEnroll={() => {
+            if (!isAuthenticated) { navigate('/login'); return; }
+            setEnrollModalCourseId(activeCourseId);
+          }}
+        />
+        {enrollModalCourseId && (
+          <EnrollModal
+            courseId={enrollModalCourseId}
+            onClose={() => setEnrollModalCourseId(null)}
+          />
+        )}
+      </>
     );
   }
 
@@ -874,58 +890,66 @@ const handleClassSelect = (cls) => {
       : CLASSES;
 
     return (
-      <section className="courses-page">
-        <div className="courses-container">
-          <SectionHeader
-            title="Courses"
-            subtitle=""
-            trail={[
-              { key: 'boards', label: 'Boards' },
-              { key: 'boardGroup', label: currentBoardGroup?.title || 'Board Type' },
-              { key: 'board', label: currentBoard?.title || 'Board' },
-            ]}
-            onTrailClick={handleTrailClick}
-            rightSlot={searchBar('Search course…')}
+      <>
+        <section className="courses-page">
+          <div className="courses-container">
+            <SectionHeader
+              title="Courses"
+              subtitle=""
+              trail={[
+                { key: 'boards', label: 'Boards' },
+                { key: 'boardGroup', label: currentBoardGroup?.title || 'Board Type' },
+                { key: 'board', label: currentBoard?.title || 'Board' },
+              ]}
+              onTrailClick={handleTrailClick}
+              rightSlot={searchBar('Search course…')}
+            />
+
+            {searchQuery.trim() && (
+              <p className="courses-search-count">
+                {classesToShow.length} result{classesToShow.length !== 1 ? 's' : ''} for &ldquo;
+                {searchQuery.trim()}&rdquo;
+              </p>
+            )}
+
+            {classesToShow.length > 0 ? (
+              <div className="courses-grid courses-grid--classes">
+                {classesToShow.map((cls) => {
+                  const cid = cls.courseIds?.[selectedBoard];
+                  const status = cid ? enrollmentStatusByCourseId[cid] : undefined;
+
+                  return (
+                    <ClassCourseTile
+                      key={cls.id}
+                      image={cls.image}
+                      title={cls.title}
+                      subtitle={cls.subtitle}
+                      desc={cls.desc}
+                      duration={cls.duration}
+                      fee={cls.fee}
+                      access={cls.access}
+                      mode={cls.mode}
+                      onViewDetails={() => handleClassSelect(cls)}
+                      onEnroll={() => handleEnrollNow(cls)}
+                      enrollmentStatus={status}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="courses-search-empty">
+                No classes found for &ldquo;{searchQuery.trim()}&rdquo;
+              </p>
+            )}
+          </div>
+        </section>
+        {enrollModalCourseId && (
+          <EnrollModal
+            courseId={enrollModalCourseId}
+            onClose={() => setEnrollModalCourseId(null)}
           />
-
-          {searchQuery.trim() && (
-            <p className="courses-search-count">
-              {classesToShow.length} result{classesToShow.length !== 1 ? 's' : ''} for &ldquo;
-              {searchQuery.trim()}&rdquo;
-            </p>
-          )}
-
-          {classesToShow.length > 0 ? (
-            <div className="courses-grid courses-grid--classes">
-              {classesToShow.map((cls) => {
-                const cid = cls.courseIds?.[selectedBoard];
-                const status = cid ? enrollmentStatusByCourseId[cid] : undefined;
-
-                return (
-                  <ClassCourseTile
-                    key={cls.id}
-                    image={cls.image}
-                    title={cls.title}
-                    subtitle={cls.subtitle}
-                    desc={cls.desc}
-                    duration={cls.duration}
-                    fee={cls.fee}
-                    access={cls.access}
-                    mode={cls.mode}
-                    onViewDetails={() => handleClassSelect(cls)}
-                    onEnroll={() => handleEnrollNow(cls)}
-                    enrollmentStatus={status}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <p className="courses-search-empty">
-              No classes found for &ldquo;{searchQuery.trim()}&rdquo;
-            </p>
-          )}
-        </div>
-      </section>
+        )}
+      </>
     );
   }
 
