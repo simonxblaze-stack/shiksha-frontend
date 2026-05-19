@@ -372,9 +372,13 @@ const ClassCourseTile = ({
     enrollBtnClass += ' courses-tile__btn--pending';
   }
 
+  let tileClass = 'courses-tile courses-tile--detailed';
+  if (isEnrolled) tileClass += ' courses-tile--enrolled';
+  else if (isPending) tileClass += ' courses-tile--pending';
+
   return (
     <article
-      className="courses-tile courses-tile--detailed"
+      className={tileClass}
       role="button"
       tabIndex={0}
       onClick={onViewDetails}
@@ -391,6 +395,16 @@ const ClassCourseTile = ({
           />
         ) : (
           <div className="courses-tile__imagePlaceholder">Course Image</div>
+        )}
+        {isEnrolled && (
+          <span className="courses-tile__status-badge courses-tile__status-badge--enrolled">
+            ✓ Enrolled
+          </span>
+        )}
+        {isPending && (
+          <span className="courses-tile__status-badge courses-tile__status-badge--pending">
+            ⏳ Pending
+          </span>
         )}
       </div>
 
