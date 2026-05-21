@@ -150,17 +150,21 @@ function App() {
         <Route
           path="/login"
           element={
-            <Page>
-              <Login />
-            </Page>
+            isAuthenticated ? <Navigate to="/" replace /> : (
+              <Page>
+                <Login />
+              </Page>
+            )
           }
         />
         <Route
           path="/signup"
           element={
-            <Page>
-              <Signup />
-            </Page>
+            isAuthenticated ? <Navigate to="/" replace /> : (
+              <Page>
+                <Signup />
+              </Page>
+            )
           }
         />
         <Route path="/verify-email" element={<VerifyEmail />} />
