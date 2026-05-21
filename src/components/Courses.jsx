@@ -579,6 +579,10 @@ const Courses = () => {
     }
   }, [location.state]);
 
+  useEffect(() => {
+    setEnrollModalCourseId(null);
+  }, [location.pathname]);
+
   const currentBoardGroup = useMemo(
     () => BOARD_GROUPS.find((item) => item.id === selectedBoardGroup),
     [selectedBoardGroup]
@@ -871,6 +875,12 @@ const Courses = () => {
             </p>
           )}
         </div>
+        {enrollModalCourseId && (
+          <EnrollModal
+            courseId={enrollModalCourseId}
+            onClose={() => setEnrollModalCourseId(null)}
+          />
+        )}
       </section>
     );
   }

@@ -1,5 +1,4 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 
 import '../css/SubjectList.css';
@@ -28,8 +27,7 @@ const Breadcrumb = ({ items, onNavigate }) => {
   );
 };
 
-const SubjectList = ({ course, courseId, enrollmentStatus, boardGroup, board, selectedClass, onBack }) => {
-  const navigate = useNavigate();
+const SubjectList = ({ course, courseId, enrollmentStatus, boardGroup, board, selectedClass, onBack, onEnroll }) => {
   const [expandedIndex, setExpandedIndex] = useState(0);
   const purchaseCardRef = useRef(null);
   const [purchaseCardVisible, setPurchaseCardVisible] = useState(false);
@@ -276,7 +274,7 @@ const SubjectList = ({ course, courseId, enrollmentStatus, boardGroup, board, se
             </ul>
 <button
   className="purchase-card__btn"
-    onClick={() => navigate(`/enroll/${courseId}`)}
+  onClick={onEnroll}
 >
   Start Subscription
 </button>
