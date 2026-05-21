@@ -11,15 +11,20 @@ const ProfileFillupModal = () => {
   const { user, isAuthenticated } = useAuth();
   const { notification, clearNotification } = useProfileModal();
   const location = useLocation();
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(
+    () => sessionStorage.getItem("profileModalDismissed") === "true"
+  );
   const [showSuccess, setShowSuccess] = useState(false);
 
   const isIncomplete = isAuthenticated && user?.profile_complete === false;
   const isOnFormPage = location.pathname === "/form-fillup";
 
-  // Force-reopen whenever a notification message is pushed (e.g. from enroll attempt)
+  // Force-reopen when triggered from enroll/subscribe — clears the "Fill up later" flag
   useEffect(() => {
-    if (notification) setDismissed(false);
+    if (notification) {
+      sessionStorage.removeItem("profileModalDismissed");
+      setDismissed(false);
+    }
   }, [notification]);
 
   // Auto-close when profile becomes complete after submission
@@ -38,6 +43,7 @@ const ProfileFillupModal = () => {
 
   const handleSkip = () => {
     clearNotification();
+    sessionStorage.setItem("profileModalDismissed", "true");
     setDismissed(true);
   };
 

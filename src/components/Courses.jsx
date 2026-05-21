@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../css/Courses.css';
 import SubjectList from './SubjectList';
+import EnrollModal from './EnrollModal';
 import { courseData, mbseCourseData } from '../data/courseData';
 import BoardSvg from './BoardSvg';
 import { useAuth } from '../contexts/AuthContext';
@@ -475,6 +476,7 @@ const Courses = () => {
   const [activeCourse, setActiveCourse] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [enrollmentStatusByCourseId, setEnrollmentStatusByCourseId] = useState({});
+  const [enrollModalCourseId, setEnrollModalCourseId] = useState(null);
 
   const goToState = (nextState) => {
     const state = {
@@ -576,6 +578,10 @@ const Courses = () => {
       setActiveCourse(null);
     }
   }, [location.state]);
+
+  useEffect(() => {
+    setEnrollModalCourseId(null);
+  }, [location.pathname]);
 
   const currentBoardGroup = useMemo(
     () => BOARD_GROUPS.find((item) => item.id === selectedBoardGroup),
@@ -869,6 +875,12 @@ const Courses = () => {
             </p>
           )}
         </div>
+        {enrollModalCourseId && (
+          <EnrollModal
+            courseId={enrollModalCourseId}
+            onClose={() => setEnrollModalCourseId(null)}
+          />
+        )}
       </section>
     );
   }

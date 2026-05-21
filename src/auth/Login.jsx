@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
-import { HOME_URL } from "../config/urls";
 import "./Login.css";
 
 const EyeIcon = () => (
@@ -33,7 +32,6 @@ const Login = () => {
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
-  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // ✅ SHOW MESSAGE FROM SIGNUP
   useEffect(() => {
@@ -57,10 +55,7 @@ const Login = () => {
 
       showToast({ message: "You are logged in! Welcome back.", duration: 2500 });
 
-      setIsRedirecting(true);
-      setStatusMessage("Login successful! Redirecting...");
-
-      let redirectTo = HOME_URL;
+      let redirectTo = "/";
       try {
         const stashed = sessionStorage.getItem("post_auth_redirect");
         if (stashed && stashed.startsWith("/") && !stashed.startsWith("//")) {
@@ -69,9 +64,7 @@ const Login = () => {
         sessionStorage.removeItem("post_auth_redirect");
       } catch (_) { /* sessionStorage unavailable */ }
 
-      setTimeout(() => {
-        window.location.href = redirectTo;
-      }, 2500);
+      navigate(redirectTo, { replace: true });
 
     } catch (err) {
       const raw = err?.message ?? err;
@@ -86,18 +79,9 @@ const Login = () => {
   };
 
   return (
-    <div className={`login-container ${isRedirecting ? "is-redirecting" : ""}`}>
+    <div className="login-container">
       <div className="login-glow-center"></div>
       <div className="login-glow-top-right"></div>
-      {isRedirecting && (
-        <div className="login-overlay">
-          <div className="login-overlay-card">
-            <div className="login-spinner"></div>
-            <h3>Please wait</h3>
-            <p>{statusMessage}</p>
-          </div>
-        </div>
-      )}
 
       <div className="login-form">
         <h2>Login</h2>
