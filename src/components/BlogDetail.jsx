@@ -75,7 +75,6 @@ import C9Chapter2History from "./blogs/class-9/history/Chapter2.jsx";
 import C9Chapter3History from "./blogs/class-9/history/Chapter3.jsx";
 import C9Chapter4History from "./blogs/class-9/history/Chapter4.jsx";
 import C9Chapter5History from "./blogs/class-9/history/Chapter5.jsx";
-import C9Chapter6History from "./blogs/class-9/history/Chapter6.jsx";
 import C9Chapter7History from "./blogs/class-9/history/Chapter7.jsx";
 
 //class9 geography
@@ -168,7 +167,6 @@ const articleMap = {
 "class-9/history/chapter-3": C9Chapter3History,
 "class-9/history/chapter-4": C9Chapter4History,
 "class-9/history/chapter-5": C9Chapter5History,
-"class-9/history/chapter-6": C9Chapter6History,
 "class-9/history/chapter-7": C9Chapter7History,
  
 // Class 9 Geography
