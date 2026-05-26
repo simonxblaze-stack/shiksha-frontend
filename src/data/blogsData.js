@@ -582,14 +582,7 @@ const blogsData = [
     title: "Chapter 5: Pastoralists in the Modern World",
     thumbnail: c9h5,
   },
- {
-    id: "c9h6",
-    slug: "class-9/history/chapter-6",
-    category: "History",
-    classLevel: "9",
-    title: "Chapter 6: Peasants and Farmers",
-    thumbnail: c9h6,
- },
+ 
  {
     id: "c9h7",
     slug: "class-9/history/chapter-7",

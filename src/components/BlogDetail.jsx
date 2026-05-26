@@ -168,7 +168,6 @@ const articleMap = {
 "class-9/history/chapter-3": C9Chapter3History,
 "class-9/history/chapter-4": C9Chapter4History,
 "class-9/history/chapter-5": C9Chapter5History,
-"class-9/history/chapter-6": C9Chapter6History,
 "class-9/history/chapter-7": C9Chapter7History,
  
 // Class 9 Geography
