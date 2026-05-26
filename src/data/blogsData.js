@@ -428,7 +428,6 @@ const blogsData = [
   thumbnail: sci16,
 },
 
-  // ================= CLASS 9 SCIENCE =================
   {
     id: "c9s1",
     slug: "class-9/science/chapter-1",
