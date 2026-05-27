@@ -93,6 +93,32 @@ import c9g3 from "../assets/blog/blog-class9/geography/3.png";
 import c9g4 from "../assets/blog/blog-class9/geography/4.png";
 import c9g5 from "../assets/blog/blog-class9/geography/5.png";
 
+// ================= CLASS 8 Civics IMAGES =================
+import c8c1 from "../assets/blog/blog-class8/civics/1.png";
+import c8c2 from "../assets/blog/blog-class8/civics/2.png";
+import c8c3 from "../assets/blog/blog-class8/civics/3.png";
+
+// ================= CLASS 8 History IMAGES =================
+import c8h1 from "../assets/blog/blog-class8/history/1.png";
+import c8h2 from "../assets/blog/blog-class8/history/2.png";
+import c8h3 from "../assets/blog/blog-class8/history/3.png";
+import c8h4 from "../assets/blog/blog-class8/history/4.png";
+import c8h5 from "../assets/blog/blog-class8/history/5.png";
+import c8h6 from "../assets/blog/blog-class8/history/6.png";
+import c8h7 from "../assets/blog/blog-class8/history/7.png";
+import c8h8 from "../assets/blog/blog-class8/history/8.png";
+import c8h9 from "../assets/blog/blog-class8/history/9.png";
+import c8h10 from "../assets/blog/blog-class8/history/10.png";
+import c8h11 from "../assets/blog/blog-class8/history/11.png";
+
+// ================= CLASS 8 Geography IMAGES =================
+import c8g1 from "../assets/blog/blog-class8/geography/1.png";
+import c8g2 from "../assets/blog/blog-class8/geography/2.png";
+import c8g3 from "../assets/blog/blog-class8/geography/3.png";
+import c8g4 from "../assets/blog/blog-class8/geography/4.png";
+import c8g5 from "../assets/blog/blog-class8/geography/5.png";
+import c8g6 from "../assets/blog/blog-class8/geography/6.png";
+
 
 // ================= DATA =================
 
@@ -663,8 +689,172 @@ thumbnail: c9e4
   classLevel: "9",
   title: "Chapter 5: Natural Vegetation and Wildlife",
   thumbnail: c9g5
-}
+},
 
+{
+  id: "c8c1",
+  slug: "class-8/civics/chapter-1",
+  category: "Civics",
+  classLevel: "8",
+  title: "Chapter 1: The Indian Constitution",
+  thumbnail: c8c1,
+},
+{
+  id: "c8c2",
+  slug: "class-8/civics/chapter-2",
+  category: "Civics",
+  classLevel: "8",
+  title: "Chapter 2: Understanding Secularism",
+  thumbnail: c8c2,
+},
+{
+  id: "c8c3",
+  slug: "class-8/civics/chapter-3",
+  category: "Civics",
+  classLevel: "8",
+  title: "Chapter 3: Why Do We Need a Parliament",
+  thumbnail: c8c3,
+},
+
+// ================= CLASS 8 HISTORY =================
+{
+  id: "c8h1",
+  slug: "class-8/history/chapter-1",
+  category: "History",
+  classLevel: "8",
+  title: "Chapter 1: How, When and Where",
+  thumbnail: c8h1,
+},
+{
+  id: "c8h2",
+  slug: "class-8/history/chapter-2",
+  category: "History",
+  classLevel: "8",
+  title: "Chapter 2: From Trade to Territory",
+  thumbnail: c8h2,
+},
+{
+  id: "c8h3",
+  slug: "class-8/history/chapter-3",
+  category: "History",
+  classLevel: "8",
+  title: "Chapter 3: Ruling the Countryside",
+  thumbnail: c8h3,
+},
+{
+  id: "c8h4",
+  slug: "class-8/history/chapter-4",
+  category: "History",
+  classLevel: "8",
+  title: "Chapter 4: Tribals, Dikus and the Vision of a Golden Age",
+  thumbnail: c8h4,
+},
+{
+  id: "c8h5",
+  slug: "class-8/history/chapter-5",
+  category: "History",
+  classLevel: "8",
+  title: "Chapter 5: When People Rebel",
+  thumbnail: c8h5,
+},
+{
+  id: "c8h6",
+  slug: "class-8/history/chapter-6",
+  category: "History",
+  classLevel: "8",
+  title: "Chapter 6: Colonialism and the City",
+  thumbnail: c8h6,
+},
+{
+  id: "c8h7",
+  slug: "class-8/history/chapter-7",
+  category: "History",
+  classLevel: "8",
+  title: "Chapter 7: Weavers, Iron Smelters and Factory Owners",
+  thumbnail: c8h7,
+},
+{
+  id: "c8h8",
+  slug: "class-8/history/chapter-8",
+  category: "History",
+  classLevel: "8",
+  title: "Chapter 8: Civilising the Native, Educating the Nation",
+  thumbnail: c8h8,
+},
+{
+  id: "c8h9",
+  slug: "class-8/history/chapter-9",
+  category: "History",
+  classLevel: "8",
+  title: "Chapter 9: Women, Caste and Reform",
+  thumbnail: c8h9,
+},
+{
+  id: "c8h10",
+  slug: "class-8/history/chapter-10",
+  category: "History",
+  classLevel: "8",
+  title: "Chapter 10: The Changing World of Visual Arts",
+  thumbnail: c8h10,
+},
+{
+  id: "c8h11",
+  slug: "class-8/history/chapter-11",
+  category: "History",
+  classLevel: "8",
+  title: "Chapter 11: The Making of the National Movement",
+  thumbnail: c8h11,
+},
+
+// ================= CLASS 8 GEOGRAPHY =================
+{
+  id: "c8g1",
+  slug: "class-8/geography/chapter-1",
+  category: "Geography",
+  classLevel: "8",
+  title: "Chapter 1: Resources",
+  thumbnail: c8g1,
+},
+{
+  id: "c8g2",
+  slug: "class-8/geography/chapter-2",
+  category: "Geography",
+  classLevel: "8",
+  title: "Chapter 2: Land, Soil, Water, Natural Vegetation and Wildlife Resources",
+  thumbnail: c8g2,
+},
+{
+  id: "c8g3",
+  slug: "class-8/geography/chapter-3",
+  category: "Geography",
+  classLevel: "8",
+  title: "Chapter 3: Mineral and Power Resources",
+  thumbnail: c8g3,
+},
+{
+  id: "c8g4",
+  slug: "class-8/geography/chapter-4",
+  category: "Geography",
+  classLevel: "8",
+  title: "Chapter 4: Agriculture",
+  thumbnail: c8g4,
+},
+{
+  id: "c8g5",
+  slug: "class-8/geography/chapter-5",
+  category: "Geography",
+  classLevel: "8",
+  title: "Chapter 5: Industries",
+  thumbnail: c8g5,
+},
+{
+  id: "c8g6",
+  slug: "class-8/geography/chapter-6",
+  category: "Geography",
+  classLevel: "8",
+  title: "Chapter 6: Human Resources",
+  thumbnail: c8g6,
+},
 
 ];
 export default blogsData;

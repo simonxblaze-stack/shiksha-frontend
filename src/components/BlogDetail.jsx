@@ -90,6 +90,31 @@ import c9Chapter2Economics from "./blogs/class-9/economics/Chapter2.jsx";
 import c9Chapter3Economics from "./blogs/class-9/economics/Chapter3.jsx";
 import c9Chapter4Economics from "./blogs/class-9/economics/Chapter4.jsx";
 
+//class 8 civics
+import c8Chapter1Civics from "./blogs/class-8/civics/Chapter1.jsx";
+import c8Chapter2Civics from "./blogs/class-8/civics/Chapter2.jsx";
+import c8Chapter3Civics from "./blogs/class-8/civics/Chapter3.jsx";
+
+//class8 geography
+import c8Chapter1Geography from "./blogs/class-8/geography/Chapter1.jsx";
+import c8Chapter2Geography from "./blogs/class-8/geography/Chapter2.jsx";
+import c8Chapter3Geography from "./blogs/class-8/geography/Chapter3.jsx";
+import c8Chapter4Geography from "./blogs/class-8/geography/Chapter4.jsx";
+import c8Chapter5Geography from "./blogs/class-8/geography/Chapter5.jsx";
+import c8Chapter6Geography from "./blogs/class-8/geography/Chapter6.jsx";
+
+// class 8 history
+import c8Chapter1History from "./blogs/class-8/history/Chapter1.jsx";
+import c8Chapter2History from "./blogs/class-8/history/Chapter2.jsx";
+import c8Chapter3History from "./blogs/class-8/history/Chapter3.jsx";
+import c8Chapter4History from "./blogs/class-8/history/Chapter4.jsx";
+import c8Chapter5History from "./blogs/class-8/history/Chapter5.jsx";
+import c8Chapter6History from "./blogs/class-8/history/Chapter6.jsx";
+import c8Chapter7History from "./blogs/class-8/history/Chapter7.jsx";
+import c8Chapter8History from "./blogs/class-8/history/Chapter8.jsx";
+import c8Chapter9History from "./blogs/class-8/history/Chapter9.jsx";
+import c8Chapter10History from "./blogs/class-8/history/Chapter10.jsx";
+import c8Chapter11History from "./blogs/class-8/history/Chapter11.jsx";
 
 
 /* ================= MAP ================= */
@@ -181,6 +206,32 @@ const articleMap = {
 "class-9/economics/chapter-2": c9Chapter2Economics,
 "class-9/economics/chapter-3": c9Chapter3Economics,
 "class-9/economics/chapter-4": c9Chapter4Economics,
+
+// Class 8 Geography
+"class-8/geography/chapter-1": c8Chapter1Geography,
+"class-8/geography/chapter-2": c8Chapter2Geography,
+"class-8/geography/chapter-3": c8Chapter3Geography,
+"class-8/geography/chapter-4": c8Chapter4Geography,
+"class-8/geography/chapter-5": c8Chapter5Geography,
+"class-8/geography/chapter-6": c8Chapter6Geography,
+
+// Class 8 History
+"class-8/history/chapter-1": c8Chapter1History,
+"class-8/history/chapter-2": c8Chapter2History,
+"class-8/history/chapter-3": c8Chapter3History,
+"class-8/history/chapter-4": c8Chapter4History,
+"class-8/history/chapter-5": c8Chapter5History,
+"class-8/history/chapter-6": c8Chapter6History,
+"class-8/history/chapter-7": c8Chapter7History,
+"class-8/history/chapter-8": c8Chapter8History,
+"class-8/history/chapter-9": c8Chapter9History,
+"class-8/history/chapter-10": c8Chapter10History,
+"class-8/history/chapter-11": c8Chapter11History,
+
+// Class 8 Civics
+"class-8/civics/chapter-1": c8Chapter1Civics,
+"class-8/civics/chapter-2": c8Chapter2Civics,
+"class-8/civics/chapter-3": c8Chapter3Civics,
 
 };
 
