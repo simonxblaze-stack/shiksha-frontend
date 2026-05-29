@@ -375,7 +375,9 @@ const ClassCourseTile = ({
 
   return (
     <article
-      className="courses-tile courses-tile--detailed"
+      className={`courses-tile courses-tile--detailed${
+        isEnrolled ? ' courses-tile--enrolled' : ''
+      }`}
       role="button"
       tabIndex={0}
       onClick={onViewDetails}
