@@ -1,123 +1,123 @@
 // ================= CLASS 10 GEOGRAPHY IMAGES =================
-import blog1Img from "../assets/blog-class10/1.png";
-import blog2Img from "../assets/blog-class10/2.png";
-import blog3Img from "../assets/blog-class10/3.png";
-import blog4Img from "../assets/blog-class10/4.png";
-import blog5Img from "../assets/blog-class10/5.png";
-import blog6Img from "../assets/blog-class10/6.png";
-import blog7Img from "../assets/blog-class10/7.png";
+import blog1Img from "../assets/blog-class10/1.jpg";
+import blog2Img from "../assets/blog-class10/2.jpg";
+import blog3Img from "../assets/blog-class10/3.jpg";
+import blog4Img from "../assets/blog-class10/4.jpg";
+import blog5Img from "../assets/blog-class10/5.jpg";
+import blog6Img from "../assets/blog-class10/6.jpg";
+import blog7Img from "../assets/blog-class10/7.jpg";
 
 // ================= CLASS 10 History IMAGES =================
 
-import his1 from "../assets/blog/History/1.png";
-import his2 from "../assets/blog/History/2.png";
-import his3 from "../assets/blog/History/3.png";
-import his4 from "../assets/blog/History/4.png";
-import his5 from "../assets/blog/History/5.png";
+import his1 from "../assets/blog/History/1.jpg";
+import his2 from "../assets/blog/History/2.jpg";
+import his3 from "../assets/blog/History/3.jpg";
+import his4 from "../assets/blog/History/4.jpg";
+import his5 from "../assets/blog/History/5.jpg";
 
 // ================= CLASS 10 Economics IMAGES =================
-import eco1 from "../assets/blog/Economics/1.png";
-import eco2 from "../assets/blog/Economics/2.png";
-import eco3 from "../assets/blog/Economics/3.png";
-import eco4 from "../assets/blog/Economics/4.png";
-import eco5 from "../assets/blog/Economics/5.png";
+import eco1 from "../assets/blog/Economics/1.jpg";
+import eco2 from "../assets/blog/Economics/2.jpg";
+import eco3 from "../assets/blog/Economics/3.jpg";
+import eco4 from "../assets/blog/Economics/4.jpg";
+import eco5 from "../assets/blog/Economics/5.jpg";
 
 
 // ================= CLASS 10 Social-Science IMAGES =================
 
-import poli1 from "../assets/blog/Political Science/1.png";
-import poli2 from "../assets/blog/Political Science/2.png";
-import poli3 from "../assets/blog/Political Science/3.png";
-import poli4 from "../assets/blog/Political Science/4.png";
-import poli5 from "../assets/blog/Political Science/5.png";
-import poli6 from "../assets/blog/Political Science/6.png";
-import poli7 from "../assets/blog/Political Science/7.png";
+import poli1 from "../assets/blog/Political Science/1.jpg";
+import poli2 from "../assets/blog/Political Science/2.jpg";
+import poli3 from "../assets/blog/Political Science/3.jpg";
+import poli4 from "../assets/blog/Political Science/4.jpg";
+import poli5 from "../assets/blog/Political Science/5.jpg";
+import poli6 from "../assets/blog/Political Science/6.jpg";
+import poli7 from "../assets/blog/Political Science/7.jpg";
 
 // ================= CLASS 10 Science IMAGES =================
 
-import sci1 from "../assets/blog/Science/1.png";
-import sci2 from "../assets/blog/Science/2.png";
-import sci3 from "../assets/blog/Science/3.png";
-import sci4 from "../assets/blog/Science/4.png";
-import sci5 from "../assets/blog/Science/5.png";
-import sci6 from "../assets/blog/Science/6.png";
-import sci7 from "../assets/blog/Science/7.png";
-import sci8 from "../assets/blog/Science/8.png";
-import sci9 from "../assets/blog/Science/9.png";
-import sci10 from "../assets/blog/Science/10.png";
-import sci11 from "../assets/blog/Science/11.png";
-import sci12 from "../assets/blog/Science/12.png";
-import sci13 from "../assets/blog/Science/13.png";
-import sci14 from "../assets/blog/Science/14.png";
-import sci15 from "../assets/blog/Science/15.png";
-import sci16 from "../assets/blog/Science/16.png";
+import sci1 from "../assets/blog/Science/1.jpg";
+import sci2 from "../assets/blog/Science/2.jpg";
+import sci3 from "../assets/blog/Science/3.jpg";
+import sci4 from "../assets/blog/Science/4.jpg";
+import sci5 from "../assets/blog/Science/5.jpg";
+import sci6 from "../assets/blog/Science/6.jpg";
+import sci7 from "../assets/blog/Science/7.jpg";
+import sci8 from "../assets/blog/Science/8.jpg";
+import sci9 from "../assets/blog/Science/9.jpg";
+import sci10 from "../assets/blog/Science/10.jpg";
+import sci11 from "../assets/blog/Science/11.jpg";
+import sci12 from "../assets/blog/Science/12.jpg";
+import sci13 from "../assets/blog/Science/13.jpg";
+import sci14 from "../assets/blog/Science/14.jpg";
+import sci15 from "../assets/blog/Science/15.jpg";
+import sci16 from "../assets/blog/Science/16.jpg";
 
 // ================= CLASS 9 SCIENCE IMAGES =================
-import c9s1 from "../assets/blog/blog-class9/science/1.png";
-import c9s2 from "../assets/blog/blog-class9/science/2.png";
-import c9s3 from "../assets/blog/blog-class9/science/3.png";
-import c9s4 from "../assets/blog/blog-class9/science/4.png";
-import c9s5 from "../assets/blog/blog-class9/science/5.png";
-import c9s6 from "../assets/blog/blog-class9/science/6.png";
-import c9s7 from "../assets/blog/blog-class9/science/7.png";
-import c9s8 from "../assets/blog/blog-class9/science/8.png";
-import c9s9 from "../assets/blog/blog-class9/science/9.png";
-import c9s10 from "../assets/blog/blog-class9/science/10.png";
-import c9s11 from "../assets/blog/blog-class9/science/11.png";
-import c9s12 from "../assets/blog/blog-class9/science/12.png";
-import c9s13 from "../assets/blog/blog-class9/science/13.png";
-import c9s14 from "../assets/blog/blog-class9/science/14.png";
+import c9s1 from "../assets/blog/blog-class9/science/1.jpg";
+import c9s2 from "../assets/blog/blog-class9/science/2.jpg";
+import c9s3 from "../assets/blog/blog-class9/science/3.jpg";
+import c9s4 from "../assets/blog/blog-class9/science/4.jpg";
+import c9s5 from "../assets/blog/blog-class9/science/5.jpg";
+import c9s6 from "../assets/blog/blog-class9/science/6.jpg";
+import c9s7 from "../assets/blog/blog-class9/science/7.jpg";
+import c9s8 from "../assets/blog/blog-class9/science/8.jpg";
+import c9s9 from "../assets/blog/blog-class9/science/9.jpg";
+import c9s10 from "../assets/blog/blog-class9/science/10.jpg";
+import c9s11 from "../assets/blog/blog-class9/science/11.jpg";
+import c9s12 from "../assets/blog/blog-class9/science/12.jpg";
+import c9s13 from "../assets/blog/blog-class9/science/13.jpg";
+import c9s14 from "../assets/blog/blog-class9/science/14.jpg";
 
 // ================= CLASS 9 History IMAGES =================
 
-import c9h1 from "../assets/blog/blog-class9/history/1.png";
-import c9h2 from "../assets/blog/blog-class9/history/2.png";
-import c9h3 from "../assets/blog/blog-class9/history/3.png";
-import c9h4 from "../assets/blog/blog-class9/history/4.png";
-import c9h5 from "../assets/blog/blog-class9/history/5.png";
-import c9h6 from "../assets/blog/blog-class9/history/6.png";
-import c9h7 from "../assets/blog/blog-class9/history/7.png";
+import c9h1 from "../assets/blog/blog-class9/history/1.jpg";
+import c9h2 from "../assets/blog/blog-class9/history/2.jpg";
+import c9h3 from "../assets/blog/blog-class9/history/3.jpg";
+import c9h4 from "../assets/blog/blog-class9/history/4.jpg";
+import c9h5 from "../assets/blog/blog-class9/history/5.jpg";
+import c9h6 from "../assets/blog/blog-class9/history/6.jpg";
+import c9h7 from "../assets/blog/blog-class9/history/7.jpg";
 
 
 // ================= CLASS 9 Economics IMAGES =================
-import c9e1 from "../assets/blog/blog-class9/economics/1.png";
-import c9e2 from "../assets/blog/blog-class9/economics/2.png";
-import c9e3 from "../assets/blog/blog-class9/economics/3.png";
-import c9e4 from "../assets/blog/blog-class9/economics/4.png";
+import c9e1 from "../assets/blog/blog-class9/economics/1.jpg";
+import c9e2 from "../assets/blog/blog-class9/economics/2.jpg";
+import c9e3 from "../assets/blog/blog-class9/economics/3.jpg";
+import c9e4 from "../assets/blog/blog-class9/economics/4.jpg";
 
 
 // ================= CLASS 9 Geography IMAGES =================
-import c9g1 from "../assets/blog/blog-class9/geography/1.png";
-import c9g2 from "../assets/blog/blog-class9/geography/2.png";
-import c9g3 from "../assets/blog/blog-class9/geography/3.png";
-import c9g4 from "../assets/blog/blog-class9/geography/4.png";
-import c9g5 from "../assets/blog/blog-class9/geography/5.png";
+import c9g1 from "../assets/blog/blog-class9/geography/1.jpg";
+import c9g2 from "../assets/blog/blog-class9/geography/2.jpg";
+import c9g3 from "../assets/blog/blog-class9/geography/3.jpg";
+import c9g4 from "../assets/blog/blog-class9/geography/4.jpg";
+import c9g5 from "../assets/blog/blog-class9/geography/5.jpg";
 
 // ================= CLASS 8 Civics IMAGES =================
-import c8c1 from "../assets/blog/blog-class8/civics/1.png";
-import c8c2 from "../assets/blog/blog-class8/civics/2.png";
-import c8c3 from "../assets/blog/blog-class8/civics/3.png";
+import c8c1 from "../assets/blog/blog-class8/civics/1.jpg";
+import c8c2 from "../assets/blog/blog-class8/civics/2.jpg";
+import c8c3 from "../assets/blog/blog-class8/civics/3.jpg";
 
 // ================= CLASS 8 History IMAGES =================
-import c8h1 from "../assets/blog/blog-class8/history/1.png";
-import c8h2 from "../assets/blog/blog-class8/history/2.png";
-import c8h3 from "../assets/blog/blog-class8/history/3.png";
-import c8h4 from "../assets/blog/blog-class8/history/4.png";
-import c8h5 from "../assets/blog/blog-class8/history/5.png";
-import c8h6 from "../assets/blog/blog-class8/history/6.png";
-import c8h7 from "../assets/blog/blog-class8/history/7.png";
-import c8h8 from "../assets/blog/blog-class8/history/8.png";
-import c8h9 from "../assets/blog/blog-class8/history/9.png";
-import c8h10 from "../assets/blog/blog-class8/history/10.png";
-import c8h11 from "../assets/blog/blog-class8/history/11.png";
+import c8h1 from "../assets/blog/blog-class8/history/1.jpg";
+import c8h2 from "../assets/blog/blog-class8/history/2.jpg";
+import c8h3 from "../assets/blog/blog-class8/history/3.jpg";
+import c8h4 from "../assets/blog/blog-class8/history/4.jpg";
+import c8h5 from "../assets/blog/blog-class8/history/5.jpg";
+import c8h6 from "../assets/blog/blog-class8/history/6.jpg";
+import c8h7 from "../assets/blog/blog-class8/history/7.jpg";
+import c8h8 from "../assets/blog/blog-class8/history/8.jpg";
+import c8h9 from "../assets/blog/blog-class8/history/9.jpg";
+import c8h10 from "../assets/blog/blog-class8/history/10.jpg";
+import c8h11 from "../assets/blog/blog-class8/history/11.jpg";
 
 // ================= CLASS 8 Geography IMAGES =================
-import c8g1 from "../assets/blog/blog-class8/geography/1.png";
-import c8g2 from "../assets/blog/blog-class8/geography/2.png";
-import c8g3 from "../assets/blog/blog-class8/geography/3.png";
-import c8g4 from "../assets/blog/blog-class8/geography/4.png";
-import c8g5 from "../assets/blog/blog-class8/geography/5.png";
-import c8g6 from "../assets/blog/blog-class8/geography/6.png";
+import c8g1 from "../assets/blog/blog-class8/geography/1.jpg";
+import c8g2 from "../assets/blog/blog-class8/geography/2.jpg";
+import c8g3 from "../assets/blog/blog-class8/geography/3.jpg";
+import c8g4 from "../assets/blog/blog-class8/geography/4.jpg";
+import c8g5 from "../assets/blog/blog-class8/geography/5.jpg";
+import c8g6 from "../assets/blog/blog-class8/geography/6.jpg";
 
 
 // ================= DATA =================
