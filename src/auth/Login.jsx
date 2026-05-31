@@ -129,6 +129,10 @@ const Login = () => {
           </button>
         </form>
 
+        <p style={{ marginTop: 12 }}>
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
+
         <p>
           Don't have an account? <Link to="/signup">Sign up</Link>
         </p>

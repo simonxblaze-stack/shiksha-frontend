@@ -388,6 +388,23 @@
   overflow: hidden;
 }
 
+.courses-tile--enrolled {
+  border-color: #f97316;
+  border-width: 3px;
+  box-shadow:
+    0 0 0 3px rgba(249, 115, 22, 0.85),
+    0 0 24px 4px rgba(249, 115, 22, 0.45),
+    0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+.courses-tile--enrolled:hover {
+  border-color: #fb923c;
+  box-shadow:
+    0 0 0 3px rgba(251, 146, 60, 1),
+    0 0 32px 6px rgba(253, 186, 116, 0.65),
+    0 22px 44px rgba(0, 0, 0, 0.22);
+}
+
 .courses-tile__content--detailed {
   padding: 12px 18px 20px;
 }
