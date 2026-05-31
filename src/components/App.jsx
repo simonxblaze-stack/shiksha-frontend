@@ -32,6 +32,7 @@ import Login from "../auth/Login";
 import Signup from "../auth/Signup";
 import VerifyEmail from "../auth/VerifyEmail";
 import EmailVerified from "../auth/EmailVerified";
+import ForgotPassword from "../auth/ForgotPassword";
 
 import Explore from "./Explore";
 import SkillDevelopment from "./SkillDevelopment";
@@ -169,6 +170,16 @@ function App() {
         />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/email-verified" element={<EmailVerified />} />
+        <Route
+          path="/forgot-password"
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : (
+              <Page>
+                <ForgotPassword />
+              </Page>
+            )
+          }
+        />
 
         <Route
           path="/about"
