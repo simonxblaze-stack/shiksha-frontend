@@ -10,3 +10,11 @@ export const submitEnrollmentRequest = (formData) =>
 
 export const getMyEnrollmentRequests = () =>
   api.get("/enrollments/requests/mine/").then((r) => r.data);
+
+// --- Free trial ---
+
+export const getTrialStatus = (courseId) =>
+  api.get(`/enrollments/courses/${courseId}/trial-status/`).then((r) => r.data);
+
+export const startTrial = (courseId) =>
+  api.post(`/enrollments/courses/${courseId}/start-trial/`).then((r) => r.data);
