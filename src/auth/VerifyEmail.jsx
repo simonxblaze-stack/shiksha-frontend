@@ -23,7 +23,12 @@ const VerifyEmail = () => {
 
     try {
       await api.post("/accounts/resend-verification/", { email });
-      setMessage("Verification email sent! Check your inbox.");
+      // The backend sends a separate, labelled link to every unverified
+      // account on this email, so acknowledge that more than one is possible.
+      setMessage(
+        "Verification sent. If this email has more than one account, " +
+        "we've sent a separate link for each — check your inbox."
+      );
     } catch (err) {
       setError(
         err?.response?.data?.detail || "Failed to resend. Please try again."
@@ -73,6 +78,8 @@ const VerifyEmail = () => {
 
         <p className="ve-note">
           Didn&apos;t receive it? Check your spam folder or resend below.
+          If you&apos;ve registered more than one account with this email,
+          each one gets its own link.
         </p>
 
         <button
