@@ -267,41 +267,47 @@ const Enroll = () => {
   const onActiveTrial = activeSub?.is_trial && activeSub?.status === "ACTIVE";
   const canStartTrial = trialStatus?.can_start === true && !existingStatus;
 
+  // First-time users must take the trial — hide the payment form entirely
+  // until they've used (or are currently using) it.
+  if (canStartTrial) {
+    return (
+      <div className="enroll-page">
+        <div className="enroll-success">
+          <h2>Try {course.title} free for {trialStatus?.trial_duration_days || 30} days 🎁</h2>
+          <p>
+            Start with full access — no payment needed. After your trial ends,
+            you can enroll to keep learning.
+          </p>
+          <button
+            type="button"
+            className="enroll-submit"
+            onClick={handleStartTrial}
+            disabled={trialStarting || !profileComplete}
+            title={!profileComplete ? "Complete your profile to start your trial" : ""}
+          >
+            {trialStarting
+              ? "Starting..."
+              : `Start ${trialStatus?.trial_duration_days || 30}-day free trial`}
+          </button>
+          {trialError && (
+            <p className="enroll-error" style={{ marginTop: 12 }}>{trialError}</p>
+          )}
+          {!profileComplete && (
+            <p style={{ marginTop: 12 }}>
+              Complete your <Link to="/form-fillup">profile</Link> first.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="enroll-page">
       <h1 className="enroll-title">Enroll in {course.title}</h1>
       <p className="enroll-subtitle">
         Pay via QR, upload receipt, and we'll approve your enrollment shortly.
       </p>
-
-      {canStartTrial && (
-        <div className="enroll-trial-cta">
-          <div className="enroll-trial-cta__text">
-            <h3>Try free for {trialStatus?.trial_duration_days || 30} days</h3>
-            <p>
-              Get full access to <strong>{course.title}</strong> at no cost.
-              No payment required. Cancel anytime.
-            </p>
-          </div>
-          <div className="enroll-trial-cta__action">
-            <button
-              type="button"
-              className="enroll-trial-btn"
-              onClick={handleStartTrial}
-              disabled={trialStarting || !profileComplete}
-              title={!profileComplete ? "Complete your profile to start your trial" : ""}
-            >
-              {trialStarting ? "Starting..." : "Start free trial"}
-            </button>
-            {trialError && <div className="enroll-error" style={{ marginTop: 8 }}>{trialError}</div>}
-            {!profileComplete && (
-              <div className="enroll-trial-hint">
-                Complete your <Link to="/form-fillup">profile</Link> first.
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {onActiveTrial && (
         <div className="enroll-trial-banner">

@@ -283,37 +283,48 @@ const EnrollModal = ({ courseId, onClose }) => {
     const onActiveTrial = activeSub?.is_trial && activeSub?.status === "ACTIVE";
     const canStartTrial = trialStatus?.can_start === true && !existingStatus;
 
+    // First-time users must take the trial — hide the payment form entirely
+    // until they've used (or are currently using) it.
+    if (canStartTrial) {
+      return (
+        <div className="em-status">
+          <div className="em-status__icon em-status__icon--success">🎁</div>
+          <h3 className="em-status__heading">
+            Try {course.title} free for {trialStatus?.trial_duration_days || 30} days
+          </h3>
+          <p className="em-status__msg">
+            Start with full access — no payment needed. After your trial ends,
+            you can enroll to keep learning.
+          </p>
+          <button
+            type="button"
+            className="em-btn em-btn--primary em-btn--submit"
+            onClick={handleStartTrial}
+            disabled={trialStarting || !profileComplete}
+            title={!profileComplete ? "Complete your profile to start your trial" : ""}
+          >
+            {trialStarting ? (
+              <><span className="em-btn-spinner" /> Starting…</>
+            ) : (
+              `Start ${trialStatus?.trial_duration_days || 30}-day free trial`
+            )}
+          </button>
+          {trialError && (
+            <div className="em-alert em-alert--error" style={{ marginTop: 12 }}>
+              {trialError}
+            </div>
+          )}
+          {!profileComplete && (
+            <p className="em-status__msg" style={{ marginTop: 12, fontSize: "0.9em" }}>
+              Complete your <Link to="/form-fillup" onClick={onClose}>profile</Link> first.
+            </p>
+          )}
+        </div>
+      );
+    }
+
     return (
       <>
-        {canStartTrial && (
-          <div className="enroll-trial-cta" style={{ margin: "0 0 16px 0" }}>
-            <div className="enroll-trial-cta__text">
-              <h3>Try free for {trialStatus?.trial_duration_days || 30} days</h3>
-              <p>
-                Get full access to <strong>{course.title}</strong> at no cost.
-                No payment required.
-              </p>
-            </div>
-            <div className="enroll-trial-cta__action">
-              <button
-                type="button"
-                className="enroll-trial-btn"
-                onClick={handleStartTrial}
-                disabled={trialStarting || !profileComplete}
-                title={!profileComplete ? "Complete your profile to start your trial" : ""}
-              >
-                {trialStarting ? "Starting..." : "Start free trial"}
-              </button>
-              {trialError && <div className="em-alert em-alert--error" style={{ marginTop: 8 }}>{trialError}</div>}
-              {!profileComplete && (
-                <div className="enroll-trial-hint">
-                  Complete your <Link to="/form-fillup" onClick={onClose}>profile</Link> first.
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {onActiveTrial && (
           <div className="enroll-trial-banner" style={{ margin: "0 0 16px 0" }}>
             <strong>Free trial active</strong> · {activeSub.days_remaining} day{activeSub.days_remaining === 1 ? "" : "s"} remaining.
