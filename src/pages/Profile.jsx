@@ -483,7 +483,7 @@ export default function Profile() {
 
         <hr className="profileDivider" />
       </div>
-
+    {/* Courses Enrolled 
       <div className="coursesSection">
         <div className="coursesSection__table">
           <div className="coursesSection__header">
@@ -495,11 +495,17 @@ export default function Profile() {
               <div key={item.id} className="coursesSection__row">
                 <span className="coursesSection__course">{item.course_title}</span>
                 <span className="coursesSection__batch">{item.batch_code}</span>
-              </div>
+              </div>   
+
             ))}
+
           </div>
+
         </div>
       </div>
+    
+    </div>
+*/}
     </div>
   );
 }
