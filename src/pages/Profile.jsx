@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/apiClient";
-import { getPublicProfile, savePublicProfile } from "../utils/profileStorage";
 import "../css/Profile.css";
 
 export default function Profile() {
