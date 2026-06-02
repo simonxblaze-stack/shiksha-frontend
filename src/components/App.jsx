@@ -12,6 +12,7 @@ import ProfileFillupModal from "./ProfileFillupModal";
 import { ProfileModalProvider } from "../contexts/ProfileModalContext";
 import { useAuth } from "../contexts/AuthContext";
 import { APP_URL, LOGIN_URL } from "../config/urls";
+import Profile from "../pages/Profile";
 
 import "../css/App.css";
 
@@ -150,6 +151,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+  path="/profile"
+  element={
+    <ProtectedRoute>
+      <Page>
+        <Profile />
+      </Page>
+    </ProtectedRoute>
+  }
+  />
 
         <Route
           path="/form-fillup"

@@ -205,13 +205,15 @@ const Navbar = () => {
                     </div>
 
                     <button
-                      className="dropdown-item"
-                      onClick={() => { window.location.href = `${APP_URL}/profile`; setProfileOpen(false); }}
-                    >
-                      <FiUser size={16} />
-                      Profile
-                    </button>
-
+  className="dropdown-item"
+  onClick={() => {
+    navigate("/profile");
+    setProfileOpen(false);
+  }}
+>
+  <FiUser size={16} />
+  Profile
+</button>
                     
 
                     {!user.profile_complete && (
