@@ -41,14 +41,9 @@ export default function Profile() {
     "⭐", "🌟", "✨", "💫", "🔥", "💎", "🎯", "🎨",
   ];
 
-  useEffect(() => {
-    const stored = getPublicProfile();
-    setAbout(stored.about || "");
-    setSubjects(stored.subjects || []);
-    setHobbies(stored.hobbies || []);
-    setLanguages(stored.languages || []);
-    fetchProfile();
-  }, []);
+ useEffect(() => {
+  fetchProfile();
+}, []);
 
   const fetchProfile = async () => {
     try {
@@ -104,13 +99,7 @@ export default function Profile() {
 
   const handleEditSave = async () => {
     setSaving(true);
-    savePublicProfile({
-      name: editName,
-      about: editAbout,
-      subjects: editSubjects,
-      hobbies: editHobbies,
-      languages: editLanguages,
-    });
+
     setAbout(editAbout);
     setSubjects(editSubjects);
     setHobbies(editHobbies);
