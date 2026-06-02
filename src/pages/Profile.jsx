@@ -309,21 +309,7 @@ export default function Profile() {
                   <span>• {studentInfo.studentId}</span>
                 </div>
               )}
-              {!isEditing && studentInfo?.email && (
-                <div className="profileHeader__metaRow">
-                  <span>• {studentInfo.email}</span>
-                </div>
-              )}
-              {!isEditing && studentInfo?.phone && (
-                <div className="profileHeader__metaRow">
-                  <span>• {studentInfo.phone}</span>
-                </div>
-              )}
-              {!isEditing && locationBits && (
-                <div className="profileHeader__metaRow">
-                  <span>• {locationBits}{studentInfo?.pinCode ? ` - ${studentInfo.pinCode}` : ""}</span>
-                </div>
-              )}
+              
 
               {!isEditing && (
                 <div className="profileHeader__badges">

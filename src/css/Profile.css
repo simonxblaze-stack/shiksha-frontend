@@ -19,7 +19,6 @@
 
 /* ─── Header ────────────────────────────────────── */
 .profileHeader {
-  background: linear-gradient(135deg, #b8dde6 0%, #d8eef3 45%, #eef7f9 100%);
   padding: 24px 28px;
   display: flex;
   align-items: flex-start;
@@ -262,7 +261,7 @@
 /* ─── Divider ────────────────────────────────────── */
 .profileDivider {
   border: none;
-  border-top: 1px solid #e8e8e8;
+  border-bottom: 1px solid var(--ShikshaCom-App-BLACK, #000);
   margin: 0;
 }
 
@@ -272,9 +271,8 @@
 }
 
 .profileSection__title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-size: 24px;
+  font-weight: 600;
   margin: 0 0 12px 0;
 }
 
@@ -286,7 +284,8 @@
 }
 
 .profileSection__placeholder {
-  font-size: 13px;
+  font-size: 18px;
+  font-weight: 500;
   color: #aaa;
   margin: 0;
 }
@@ -318,8 +317,8 @@
 }
 
 .interests__colTitle {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight:500;
   color: #1a1a1a;
   margin: 0 0 8px 0;
 }
@@ -408,7 +407,8 @@
 }
 
 .activity__list li {
-  font-size: 13px;
+  font-size: 18px;
+  font-weight: 500;
   color: #444;
 }
 
