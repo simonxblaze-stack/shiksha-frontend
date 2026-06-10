@@ -106,7 +106,26 @@ const articleMap = {
   "class-8/civics/chapter-9": lazy(() => import("./blogs/class-8/civics/Chapter9.jsx")),
   "class-8/civics/chapter-10": lazy(() => import("./blogs/class-8/civics/Chapter10.jsx")),
 
-
+  // ---- Class 8 — Science ----
+  "class-8/science/chapter-1": lazy(() => import("./blogs/class-8/science/Chapter1.jsx")),
+  "class-8/science/chapter-2": lazy(() => import("./blogs/class-8/science/Chapter2.jsx")),
+  "class-8/science/chapter-3": lazy(() => import("./blogs/class-8/science/Chapter3.jsx")),
+  "class-8/science/chapter-4": lazy(() => import("./blogs/class-8/science/Chapter4.jsx")),
+  "class-8/science/chapter-5": lazy(() => import("./blogs/class-8/science/Chapter5.jsx")),
+  "class-8/science/chapter-6": lazy(() => import("./blogs/class-8/science/Chapter6.jsx")),
+  "class-8/science/chapter-7": lazy(() => import("./blogs/class-8/science/Chapter7.jsx")),
+  "class-8/science/chapter-8": lazy(() => import("./blogs/class-8/science/Chapter8.jsx")),
+  "class-8/science/chapter-9": lazy(() => import("./blogs/class-8/science/Chapter9.jsx")),
+  "class-8/science/chapter-10": lazy(() => import("./blogs/class-8/science/Chapter10.jsx")),
+  "class-8/science/chapter-11": lazy(() => import("./blogs/class-8/science/Chapter11.jsx")),
+  "class-8/science/chapter-12": lazy(() => import("./blogs/class-8/science/Chapter12.jsx")),
+  "class-8/science/chapter-13": lazy(() => import("./blogs/class-8/science/Chapter13.jsx")),
+  "class-8/science/chapter-14": lazy(() => import("./blogs/class-8/science/Chapter14.jsx")),
+  "class-8/science/chapter-15": lazy(() => import("./blogs/class-8/science/Chapter15.jsx")),
+  "class-8/science/chapter-16": lazy(() => import("./blogs/class-8/science/Chapter16.jsx")),
+  "class-8/science/chapter-17": lazy(() => import("./blogs/class-8/science/Chapter17.jsx")),
+  "class-8/science/chapter-18": lazy(() => import("./blogs/class-8/science/Chapter18.jsx")),
+ 
 
   // ---- Class 8 — Geography ----
   "class-8/geography/chapter-1": lazy(() => import("./blogs/class-8/geography/Chapter1.jsx")),

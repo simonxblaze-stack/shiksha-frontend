@@ -127,6 +127,27 @@ import c8g4 from "../assets/blog/blog-class8/geography/4.jpg";
 import c8g5 from "../assets/blog/blog-class8/geography/5.jpg";
 import c8g6 from "../assets/blog/blog-class8/geography/6.jpg";
 
+// ================= CLASS 8 Science IMAGES =================
+import c8s1 from "../assets/blog/blog-class8/science/1.png";
+import c8s2 from "../assets/blog/blog-class8/science/2.png";
+import c8s3 from "../assets/blog/blog-class8/science/3.png";
+import c8s4 from "../assets/blog/blog-class8/science/4.png";
+import c8s5 from "../assets/blog/blog-class8/science/5.png";
+import c8s6 from "../assets/blog/blog-class8/science/6.png";
+import c8s7 from "../assets/blog/blog-class8/science/7.png";
+import c8s8 from "../assets/blog/blog-class8/science/8.png";
+import c8s9 from "../assets/blog/blog-class8/science/9.png";
+import c8s10 from "../assets/blog/blog-class8/science/10.png";
+import c8s11 from "../assets/blog/blog-class8/science/11.png";
+import c8s12 from "../assets/blog/blog-class8/science/12.png";
+import c8s13 from "../assets/blog/blog-class8/science/13.png";
+import c8s14 from "../assets/blog/blog-class8/science/14.png";
+import c8s15 from "../assets/blog/blog-class8/science/15.png";
+import c8s16 from "../assets/blog/blog-class8/science/16.png";
+import c8s17 from "../assets/blog/blog-class8/science/17.png";
+import c8s18 from "../assets/blog/blog-class8/science/18.png";
+
+
 
 // ================= DATA =================
 
@@ -757,7 +778,14 @@ thumbnail: c9e4
   title: "Chapter 7: Understanding Marginalisation",
   thumbnail: c8c7
 },
-
+ {
+  id: "c8c8",
+  slug: "class-8/civics/chapter-8",
+  category: "Civics",
+  classLevel: "8",
+  title: "Chapter 8: Confronting Marginalisation",
+  thumbnail: c8c8
+},
 {
   id: "c8c9",
   slug: "class-8/civics/chapter-9",
@@ -915,5 +943,151 @@ thumbnail: c9e4
   thumbnail: c8g6,
 },
 
+// ================= CLASS 8 SCIENCE =================
+{
+  id: "c8s1",
+  slug: "class-8/science/chapter-1",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 1: Crop Production and Management",
+  thumbnail: c8s1,
+},
+{
+  id: "c8s2",
+  slug: "class-8/science/chapter-2",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 2: Microorganisms: Friend and Foe",
+  thumbnail: c8s2,
+},
+{
+  id: "c8s3",
+  slug: "class-8/science/chapter-3",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 3: Synthetic Fibres and Plastics",
+  thumbnail: c8s3,
+},
+{
+  id: "c8s4",
+  slug: "class-8/science/chapter-4",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 4: Materials: Metals and Non-Metals",
+  thumbnail: c8s4,
+},
+{
+  id: "c8s5",
+  slug: "class-8/science/chapter-5",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 5: Coal and Petroleum",
+  thumbnail: c8s5,
+},
+{
+  id: "c8s6",
+  slug: "class-8/science/chapter-6",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 6: Combustion and Flame",
+  thumbnail: c8s6,
+},
+{
+  id: "c8s7",
+  slug: "class-8/science/chapter-7",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 7: Conservation of Plants and Animals",
+  thumbnail: c8s7,
+},
+{
+  id: "c8s8",
+  slug: "class-8/science/chapter-8",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 8: Cell - Structure and Functions",
+  thumbnail: c8s8,
+},
+{
+  id: "c8s9",
+  slug: "class-8/science/chapter-9",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 9: Reproduction in Animals",
+  thumbnail: c8s9,
+},
+{
+  id: "c8s10",
+  slug: "class-8/science/chapter-10",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 10: Reaching the Age of Adolescence",
+  thumbnail: c8s10,
+},
+{
+  id: "c8s11",
+  slug: "class-8/science/chapter-11",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 11: Force and Pressure",
+  thumbnail: c8s11,
+},
+{
+  id: "c8s12",
+  slug: "class-8/science/chapter-12",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 12: Friction",
+  thumbnail: c8s12,
+},
+{
+  id: "c8s13",
+  slug: "class-8/science/chapter-13",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 13: Sound",
+  thumbnail: c8s13,
+},
+{
+  id: "c8s14",
+  slug: "class-8/science/chapter-14",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 14: Chemical Effects of Electric Current",
+  thumbnail: c8s14,
+},
+{
+  id: "c8s15",
+  slug: "class-8/science/chapter-15",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 15: Some Natural Phenomena",
+  thumbnail: c8s15,
+},
+{
+  id: "c8s16",
+  slug: "class-8/science/chapter-16",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 16: Light",
+  thumbnail: c8s16,
+},
+{
+  id: "c8s17",
+  slug: "class-8/science/chapter-17",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 17: Stars and the Solar System",
+  thumbnail: c8s17,
+
+},
+{
+  id: "c8s18",
+  slug: "class-8/science/chapter-18",
+  category: "Science",
+  classLevel: "8",
+  title: "Chapter 18: Pollution of Air and Water",
+  thumbnail: c8s18,
+}
+
 ];
-export default blogsData;
