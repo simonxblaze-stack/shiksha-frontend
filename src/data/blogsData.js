@@ -97,6 +97,14 @@ import c9g5 from "../assets/blog/blog-class9/geography/5.jpg";
 import c8c1 from "../assets/blog/blog-class8/civics/1.jpg";
 import c8c2 from "../assets/blog/blog-class8/civics/2.jpg";
 import c8c3 from "../assets/blog/blog-class8/civics/3.jpg";
+import c8c4 from "../assets/blog/blog-class8/civics/4.png";
+import c8c5 from "../assets/blog/blog-class8/civics/5.png";
+import c8c6 from "../assets/blog/blog-class8/civics/6.png";
+import c8c7 from "../assets/blog/blog-class8/civics/7.png";
+import c8c8 from "../assets/blog/blog-class8/civics/8.png";
+import c8c9 from "../assets/blog/blog-class8/civics/9.png";
+import c8c10 from "../assets/blog/blog-class8/civics/10.png";
+
 
 // ================= CLASS 8 History IMAGES =================
 import c8h1 from "../assets/blog/blog-class8/history/1.jpg";
@@ -714,6 +722,57 @@ thumbnail: c9e4
   classLevel: "8",
   title: "Chapter 3: Why Do We Need a Parliament",
   thumbnail: c8c3,
+},
+
+{
+  id: "c8c4",
+  slug: "class-8/civics/chapter-4",
+  category: "Civics",
+  classLevel: "8",
+  title: "Chapter 4: Understanding Laws",
+  thumbnail: c8c4
+},
+
+{
+  id: "c8c5",
+  slug: "class-8/civics/chapter-5",
+  category: "Civics",
+  classLevel: "8",
+  title: "Chapter 5: Judiciary",
+  thumbnail: c8c5
+},
+{
+  id: "c8c6",
+  slug: "class-8/civics/chapter-6",
+  category: "Civics",
+  classLevel: "8",
+  title: "Chapter 6: Understanding Our Criminal Justice System",
+  thumbnail: c8c6
+},
+{
+  id: "c8c7",
+  slug: "class-8/civics/chapter-7",
+  category: "Civics",
+  classLevel: "8",
+  title: "Chapter 7: Understanding Marginalisation",
+  thumbnail: c8c7
+},
+
+{
+  id: "c8c9",
+  slug: "class-8/civics/chapter-9",
+  category: "Civics",
+  classLevel: "8",
+  title: "Chapter 9: Public Facilities",
+  thumbnail: c8c9
+},
+{
+  id: "c8c10",
+  slug: "class-8/civics/chapter-10",
+  category: "Civics",
+  classLevel: "8",
+  title: "Chapter 10: Law and Social Justice",
+  thumbnail: c8c10
 },
 
 // ================= CLASS 8 HISTORY =================

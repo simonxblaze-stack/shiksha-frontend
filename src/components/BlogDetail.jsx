@@ -99,6 +99,14 @@ const articleMap = {
   "class-8/civics/chapter-1": lazy(() => import("./blogs/class-8/civics/Chapter1.jsx")),
   "class-8/civics/chapter-2": lazy(() => import("./blogs/class-8/civics/Chapter2.jsx")),
   "class-8/civics/chapter-3": lazy(() => import("./blogs/class-8/civics/Chapter3.jsx")),
+  "class-8/civics/chapter-4": lazy(() => import("./blogs/class-8/civics/Chapter4.jsx")),
+  "class-8/civics/chapter-5": lazy(() => import("./blogs/class-8/civics/Chapter5.jsx")),
+  "class-8/civics/chapter-6": lazy(() => import("./blogs/class-8/civics/Chapter6.jsx")),
+  "class-8/civics/chapter-7": lazy(() => import("./blogs/class-8/civics/Chapter7.jsx")),
+  "class-8/civics/chapter-9": lazy(() => import("./blogs/class-8/civics/Chapter9.jsx")),
+  "class-8/civics/chapter-10": lazy(() => import("./blogs/class-8/civics/Chapter10.jsx")),
+
+
 
   // ---- Class 8 — Geography ----
   "class-8/geography/chapter-1": lazy(() => import("./blogs/class-8/geography/Chapter1.jsx")),
