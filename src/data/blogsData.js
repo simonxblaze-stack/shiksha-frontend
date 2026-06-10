@@ -1091,3 +1091,4 @@ thumbnail: c9e4
 }
 
 ];
+export default blogsData;
