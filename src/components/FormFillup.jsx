@@ -185,7 +185,14 @@ const FormFillup = ({ onSuccess } = {}) => {
       return;
     }
 
-    const val = type === "checkbox" ? checked : value;
+   let val = type === "checkbox" ? checked : value;
+
+if (
+  ["phone", "father_phone", "mother_phone", "guardian_phone"].includes(name)
+) {
+  // Remove +91 if user types it
+  val = value.replace(/^\+91/, "").replace(/\D/g, "").slice(0, 10);
+}
 
     setForm((prev) => {
       const updated = { ...prev, [name]: val };
@@ -329,7 +336,11 @@ const FormFillup = ({ onSuccess } = {}) => {
     if (step === 1) {
       if (!form.first_name?.trim()) errs.first_name = "First name is required";
       if (!form.last_name?.trim()) errs.last_name = "Last name is required";
-      if (!form.phone?.trim()) errs.phone = "Phone number is required";
+if (!form.phone?.trim()) {
+  errs.phone = "Phone number is required";
+} else if (!/^\d{10}$/.test(form.phone)) {
+  errs.phone = "Phone number must be exactly 10 digits";
+}
       if (!form.date_of_birth) errs.date_of_birth = "Date of birth is required";
       if (!form.state) errs.state = "State is required";
       if (!form.district) errs.district = "District is required";
@@ -363,7 +374,11 @@ const FormFillup = ({ onSuccess } = {}) => {
     if (step === 1) {
       if (!form.first_name?.trim()) errs.first_name = "First name is required";
       if (!form.last_name?.trim()) errs.last_name = "Last name is required";
-      if (!form.phone?.trim()) errs.phone = "Phone number is required";
+if (!form.phone?.trim()) {
+  errs.phone = "Phone number is required";
+} else if (!/^\d{10}$/.test(form.phone)) {
+  errs.phone = "Phone number must be exactly 10 digits";
+}
       if (!form.date_of_birth) errs.date_of_birth = "Date of birth is required";
       if (!form.state) errs.state = "State is required";
       if (!form.district) errs.district = "District is required";
@@ -440,8 +455,14 @@ const FormFillup = ({ onSuccess } = {}) => {
         if (value instanceof File || value === null) continue;
         if (Array.isArray(value)) { value.forEach((v) => fd.append(key, v)); continue; }
         if (typeof value === "boolean") { fd.append(key, value ? "true" : "false"); continue; }
-        fd.append(key, value);
-      }
+if (
+  ["phone", "father_phone", "mother_phone", "guardian_phone"].includes(key)
+  && value
+) {
+  fd.append(key, `+91${value}`);
+} else {
+  fd.append(key, value);
+}      }
       const fileFields = ["profile_photo", "qualification_certificate", "id_proof_front", "id_proof_back"];
       for (const field of fileFields) {
         if (form[field] instanceof File) fd.append(field, form[field]);
@@ -592,7 +613,17 @@ const FormFillup = ({ onSuccess } = {}) => {
                     </div>
                     <div className="ff-field">
                       <label>Phone Number *</label>
-                      <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="+91 XXXXX XXXXX" />
+<div className="ff-phone-wrapper">
+  <span className="ff-country-code">+91</span>
+  <input
+    type="tel"
+    name="phone"
+    value={form.phone}
+    onChange={handleChange}
+    maxLength={10}
+    placeholder="XXXXXXXXXX"
+  />
+</div>
                       {errors.phone && <span className="ff-field-error">{errors.phone}</span>}
                     </div>
                   </div>
@@ -667,7 +698,17 @@ const FormFillup = ({ onSuccess } = {}) => {
                     </div>
                     <div className="ff-field">
                       <label>Father&apos;s Phone</label>
-                      <input type="tel" name="father_phone" value={form.father_phone} onChange={handleChange} placeholder="Father's phone" />
+                      <div className="ff-phone-wrapper">
+                        <span className="ff-country-code">+91</span>
+                        <input
+                          type="tel"
+                          name="father_phone"
+                          value={form.father_phone}
+                          onChange={handleChange}
+                          maxLength={10}
+                          placeholder="XXXXXXXXXX"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -678,7 +719,17 @@ const FormFillup = ({ onSuccess } = {}) => {
                     </div>
                     <div className="ff-field">
                       <label>Mother&apos;s Phone</label>
-                      <input type="tel" name="mother_phone" value={form.mother_phone} onChange={handleChange} placeholder="Mother's phone" />
+<div className="ff-phone-wrapper">
+  <span className="ff-country-code">+91</span>
+  <input
+    type="tel"
+    name="mother_phone"
+    value={form.mother_phone}
+    onChange={handleChange}
+    maxLength={10}
+    placeholder="XXXXXXXXXX"
+  />
+</div>
                     </div>
                   </div>
 
@@ -689,7 +740,17 @@ const FormFillup = ({ onSuccess } = {}) => {
                     </div>
                     <div className="ff-field">
                       <label>Guardian&apos;s Phone</label>
-                      <input type="tel" name="guardian_phone" value={form.guardian_phone} onChange={handleChange} placeholder="Guardian's phone" />
+                      <div className="ff-phone-wrapper">
+                        <span className="ff-country-code">+91</span>
+                        <input
+                          type="tel"
+                          name="guardian_phone"
+                          value={form.guardian_phone}
+                          onChange={handleChange}
+                          maxLength={10}
+                          placeholder="XXXXXXXXXX"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -892,7 +953,17 @@ const FormFillup = ({ onSuccess } = {}) => {
                     </div>
                     <div className="ff-field">
                       <label>Phone Number *</label>
-                      <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="+91 XXXXX XXXXX" />
+<div className="ff-phone-wrapper">
+  <span className="ff-country-code">+91</span>
+  <input
+    type="tel"
+    name="phone"
+    value={form.phone}
+    onChange={handleChange}
+    maxLength={10}
+    placeholder="XXXXXXXXXX"
+  />
+</div>
                       {errors.phone && <span className="ff-field-error">{errors.phone}</span>}
                     </div>
                   </div>

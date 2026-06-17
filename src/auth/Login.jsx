@@ -26,14 +26,16 @@ const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
+  const [username, setUsername] = useState("");      // only used after a 409
+  const [needUsername, setNeedUsername] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
-  // ✅ SHOW MESSAGE FROM SIGNUP
+  // Show message passed from signup / password-reset redirects.
   useEffect(() => {
     if (location.state?.message) {
       setStatusMessage(location.state.message);
@@ -46,12 +48,12 @@ const Login = () => {
     setStatusMessage("");
     setSubmitting(true);
 
+    // After a 409, the user types their username; that becomes the identifier.
+    const idToSend = needUsername ? username.trim() : identifier.trim();
+
     try {
       setStatusMessage("Checking your account...");
-      const loggedInUser = await login(email, password);
-
-      const roles = Array.isArray(loggedInUser?.roles) ? loggedInUser.roles : [];
-      const isTeacher = roles.some((r) => String(r).toLowerCase() === "teacher");
+      const { redirect } = await login(idToSend, password);
 
       showToast({ message: "You are logged in! Welcome back.", duration: 2500 });
 
@@ -64,16 +66,32 @@ const Login = () => {
         sessionStorage.removeItem("post_auth_redirect");
       } catch (_) { /* sessionStorage unavailable */ }
 
+      // If the backend points us at a dashboard on a different host, go there.
+      // Same-host (or malformed) → fall through to in-app navigation.
+      if (redirect?.dashboard_url) {
+        try {
+          const target = new URL(redirect.dashboard_url);
+          if (target.hostname !== window.location.hostname) {
+            window.location.href = redirect.dashboard_url;
+            return;
+          }
+        } catch (_) { /* malformed url — fall through */ }
+      }
+
       navigate(redirectTo, { replace: true });
-
     } catch (err) {
-      const raw = err?.message ?? err;
-      const message =
-        raw instanceof Error ? raw.message :
-        typeof raw === "string" ? raw :
-        err?.response?.data?.detail || "Login failed";
-
-      setError(message);
+      setStatusMessage("");
+      if (err?.code === "ambiguous_email") {
+        // Shared email → reveal the username field and ask them to retry.
+        setNeedUsername(true);
+        setPassword("");
+        setError(
+          "This email is linked to more than one account. " +
+          "Please enter your username to sign in."
+        );
+      } else {
+        setError(err?.message || "Login failed");
+      }
       setSubmitting(false);
     }
   };
@@ -87,16 +105,32 @@ const Login = () => {
         <h2>Login</h2>
 
         <form onSubmit={handleSubmit}>
-          <div className="login-form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={submitting}
-            />
-          </div>
+          {!needUsername ? (
+            <div className="login-form-group">
+              <label>Username or email</label>
+              <input
+                type="text"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                required
+                disabled={submitting}
+                autoComplete="username"
+              />
+            </div>
+          ) : (
+            <div className="login-form-group">
+              <label>Username</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                disabled={submitting}
+                autoFocus
+                autoComplete="username"
+              />
+            </div>
+          )}
 
           <div className="login-form-group">
             <label>Password</label>
@@ -107,6 +141,7 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={submitting}
+                autoComplete="current-password"
               />
               <button
                 type="button"

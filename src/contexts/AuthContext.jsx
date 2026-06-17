@@ -60,22 +60,32 @@ export const AuthProvider = ({ children }) => {
   }, [bootstrap]);
 
   /**
-   * Login
+   * Login. `identifier` is a username OR an email.
+   *
+   * Returns { me, redirect } on success, where:
+   *   - me        = the /me/ payload (also stored as `user`)
+   *   - redirect  = { role, dashboard_url } from the backend, or null
+   *
+   * On the shared-email case the backend returns HTTP 409 with
+   * { code: "ambiguous_email" }. We reject with that `code` so the login
+   * form can reveal a username field and ask the user to retry by username.
    */
-  const login = async (email, password) => {
+  const login = async (identifier, password) => {
     try {
-      await api.post("/accounts/login/", { email, password });
+      const res = await api.post("/accounts/login/", { identifier, password });
 
       setLoading(true);
       const me = await bootstrap();
-      return me;
+      return { me, redirect: res.data?.redirect ?? null };
     } catch (err) {
       setLoading(false);
 
+      const code = err?.response?.data?.code ?? null;
       const cleanError = extractError(err);
 
       return Promise.reject({
         message: cleanError,
+        code,
         raw: err,
       });
     }
@@ -109,26 +119,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
-   * Role checker
+   * Role checker. Accounts are single-role; `user.roles` is an array of
+   * role-name strings (e.g. ["STUDENT"]). Comparison is case-insensitive.
    */
   const hasRole = (role) => {
-    if (!user) return false;
-
+    if (!user || !Array.isArray(user.roles)) return false;
     const target = String(role).toLowerCase();
-
-    // single role
-    if (String(user.role || "").toLowerCase() === target) {
-      return true;
-    }
-
-    // multiple roles
-    if (Array.isArray(user.roles)) {
-      return user.roles.some(
-        (r) => String(r).toLowerCase() === target
-      );
-    }
-
-    return false;
+    return user.roles.some((r) => String(r).toLowerCase() === target);
   };
 
   return (

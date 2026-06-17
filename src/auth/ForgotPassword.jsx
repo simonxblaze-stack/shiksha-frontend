@@ -56,7 +56,13 @@ const ForgotPassword = () => {
     setSubmitting(true);
     try {
       await api.post("/accounts/password-reset/request/", { email: email.trim().toLowerCase() });
-      setInfo("If an account exists for that email, we've sent a 6-digit verification code. Check your inbox.");
+      // A shared email gets one code PER account, each labelled with its
+      // username — the user picks the code for the account they're resetting.
+      setInfo(
+        "If an account exists for that email, we've sent a 6-digit code. " +
+        "If you have more than one account on this email, each gets its own " +
+        "code labelled with its username — enter the one you want to reset."
+      );
       setStep(STEP_CODE);
     } catch (err) {
       setError(errMsg(err, "Could not send verification code. Please try again."));
@@ -167,7 +173,9 @@ const ForgotPassword = () => {
         {step === STEP_CODE && (
           <form onSubmit={handleVerify}>
             <p className="login-status" style={{ marginBottom: 16 }}>
-              We sent a 6-digit code to <strong>{email}</strong>. Enter it below.
+              We sent a 6-digit code to <strong>{email}</strong>. If this email
+              has more than one account, use the code labelled with the username
+              you want to reset.
             </p>
 
             <div className="login-form-group">

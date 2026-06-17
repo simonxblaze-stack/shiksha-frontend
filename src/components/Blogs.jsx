@@ -67,6 +67,8 @@ const Blogs = () => {
                   src={blog.thumbnail}
                   alt={blog.title}
                   className="blog-list-image"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <span className="blog-list-category">{blog.category}</span>
               </div>

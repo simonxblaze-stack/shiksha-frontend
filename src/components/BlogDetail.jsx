@@ -1,244 +1,185 @@
-import React, { useEffect, useState } from "react";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-/* ================= IMPORT BLOG FILES ================= */
-
-// Geography
-import Chapter1Geography from "./blogs/class-10/geography/Chapter1.jsx";
-import Chapter2Geography from "./blogs/class-10/geography/Chapter2.jsx";
-import Chapter3Geography from "./blogs/class-10/geography/Chapter3.jsx";
-import Chapter4Geography from "./blogs/class-10/geography/Chapter4.jsx";
-import Chapter5Geography from "./blogs/class-10/geography/Chapter5.jsx";
-import Chapter6Geography from "./blogs/class-10/geography/Chapter6.jsx";
-import Chapter7Geography from "./blogs/class-10/geography/Chapter7.jsx";
-
-// History
-import Chapter1History from "./blogs/class-10/history/Chapter1.jsx";
-import Chapter2History from "./blogs/class-10/history/Chapter2.jsx";
-import Chapter3History from "./blogs/class-10/history/Chapter3.jsx";
-import Chapter4History from "./blogs/class-10/history/Chapter4.jsx";
-import Chapter5History from "./blogs/class-10/history/Chapter5.jsx";
-
-// Economics
-import Chapter1Economics from "./blogs/class-10/economics/Chapter1.jsx";
-import Chapter2Economics from "./blogs/class-10/economics/Chapter2.jsx";
-import Chapter3Economics from "./blogs/class-10/economics/Chapter3.jsx";
-import Chapter4Economics from "./blogs/class-10/economics/Chapter4.jsx";
-import Chapter5Economics from "./blogs/class-10/economics/Chapter5.jsx";
-
-// Political Science
-import Chapter1Political from "./blogs/class-10/political-science/Chapter1.jsx";
-import Chapter2Political from "./blogs/class-10/political-science/Chapter2.jsx";
-import Chapter3Political from "./blogs/class-10/political-science/Chapter3.jsx";
-import Chapter4Political from "./blogs/class-10/political-science/Chapter4.jsx";
-import Chapter5Political from "./blogs/class-10/political-science/Chapter5.jsx";
-import Chapter6Political from "./blogs/class-10/political-science/Chapter6.jsx";
-import Chapter7Political from "./blogs/class-10/political-science/Chapter7.jsx";
-
-// Science (class 10)
-import Chapter1Science from "./blogs/class-10/science/Chapter1.jsx";
-import Chapter2Science from "./blogs/class-10/science/Chapter2.jsx";
-import Chapter3Science from "./blogs/class-10/science/Chapter3.jsx";
-import Chapter4Science from "./blogs/class-10/science/Chapter4.jsx";
-import Chapter5Science from "./blogs/class-10/science/Chapter5.jsx";
-import Chapter6Science from "./blogs/class-10/science/Chapter6.jsx";
-import Chapter7Science from "./blogs/class-10/science/Chapter7.jsx";
-import Chapter8Science from "./blogs/class-10/science/Chapter8.jsx";
-import Chapter9Science from "./blogs/class-10/science/Chapter9.jsx";
-import Chapter10Science from "./blogs/class-10/science/Chapter10.jsx";
-import Chapter11Science from "./blogs/class-10/science/Chapter11.jsx";
-import Chapter12Science from "./blogs/class-10/science/Chapter12.jsx";
-import Chapter13Science from "./blogs/class-10/science/Chapter13.jsx";
-import Chapter14Science from "./blogs/class-10/science/Chapter14.jsx";
-import Chapter15Science from "./blogs/class-10/science/Chapter15.jsx";
-import Chapter16Science from "./blogs/class-10/science/Chapter16.jsx";
-
-// Class 9 Science
-import C9Chapter1 from "./blogs/class-9/science/Chapter1.jsx";
-import C9Chapter2 from "./blogs/class-9/science/Chapter2.jsx";
-import C9Chapter3 from "./blogs/class-9/science/Chapter3.jsx";
-import C9Chapter4 from "./blogs/class-9/science/Chapter4.jsx";
-import C9Chapter5 from "./blogs/class-9/science/Chapter5.jsx";
-import C9Chapter6 from "./blogs/class-9/science/Chapter6.jsx";
-import C9Chapter7 from "./blogs/class-9/science/Chapter7.jsx";
-import C9Chapter8 from "./blogs/class-9/science/Chapter8.jsx";
-import C9Chapter9 from "./blogs/class-9/science/Chapter9.jsx";
-import C9Chapter10 from "./blogs/class-9/science/Chapter10.jsx";
-import C9Chapter11 from "./blogs/class-9/science/Chapter11.jsx";
-import C9Chapter12 from "./blogs/class-9/science/Chapter12.jsx";
-import C9Chapter13 from "./blogs/class-9/science/Chapter13.jsx";
-import C9Chapter14 from "./blogs/class-9/science/Chapter14.jsx";
-
-//class 9 history
-import C9Chapter1History from "./blogs/class-9/history/Chapter1.jsx";
-import C9Chapter2History from "./blogs/class-9/history/Chapter2.jsx";
-import C9Chapter3History from "./blogs/class-9/history/Chapter3.jsx";
-import C9Chapter4History from "./blogs/class-9/history/Chapter4.jsx";
-import C9Chapter5History from "./blogs/class-9/history/Chapter5.jsx";
-import C9Chapter7History from "./blogs/class-9/history/Chapter7.jsx";
-
-//class9 geography
-import c9Chapter1Geography from "./blogs/class-9/geography/Chapter1.jsx";
-import c9Chapter2Geography from "./blogs/class-9/geography/Chapter2.jsx";
-import c9Chapter3Geography from "./blogs/class-9/geography/Chapter3.jsx";
-import c9Chapter4Geography from "./blogs/class-9/geography/Chapter4.jsx";
-import c9Chapter5Geography from "./blogs/class-9/geography/Chapter5.jsx";
-
-//class 9 economics
-import c9Chapter1Economics from "./blogs/class-9/economics/Chapter1.jsx";
-import c9Chapter2Economics from "./blogs/class-9/economics/Chapter2.jsx";
-import c9Chapter3Economics from "./blogs/class-9/economics/Chapter3.jsx";
-import c9Chapter4Economics from "./blogs/class-9/economics/Chapter4.jsx";
-
-//class 8 civics
-import c8Chapter1Civics from "./blogs/class-8/civics/Chapter1.jsx";
-import c8Chapter2Civics from "./blogs/class-8/civics/Chapter2.jsx";
-import c8Chapter3Civics from "./blogs/class-8/civics/Chapter3.jsx";
-
-//class8 geography
-import c8Chapter1Geography from "./blogs/class-8/geography/Chapter1.jsx";
-import c8Chapter2Geography from "./blogs/class-8/geography/Chapter2.jsx";
-import c8Chapter3Geography from "./blogs/class-8/geography/Chapter3.jsx";
-import c8Chapter4Geography from "./blogs/class-8/geography/Chapter4.jsx";
-import c8Chapter5Geography from "./blogs/class-8/geography/Chapter5.jsx";
-import c8Chapter6Geography from "./blogs/class-8/geography/Chapter6.jsx";
-
-// class 8 history
-import c8Chapter1History from "./blogs/class-8/history/Chapter1.jsx";
-import c8Chapter2History from "./blogs/class-8/history/Chapter2.jsx";
-import c8Chapter3History from "./blogs/class-8/history/Chapter3.jsx";
-import c8Chapter4History from "./blogs/class-8/history/Chapter4.jsx";
-import c8Chapter5History from "./blogs/class-8/history/Chapter5.jsx";
-import c8Chapter6History from "./blogs/class-8/history/Chapter6.jsx";
-import c8Chapter7History from "./blogs/class-8/history/Chapter7.jsx";
-import c8Chapter8History from "./blogs/class-8/history/Chapter8.jsx";
-import c8Chapter9History from "./blogs/class-8/history/Chapter9.jsx";
-import c8Chapter10History from "./blogs/class-8/history/Chapter10.jsx";
-import c8Chapter11History from "./blogs/class-8/history/Chapter11.jsx";
-
-
-/* ================= MAP ================= */
-
+/* =================================================================
+   LAZY-LOADED BLOG CHAPTERS
+   Each chapter is its own chunk; only the requested one is fetched.
+   This keeps the main bundle small — visitors who never open a blog
+   never download these files.
+   ================================================================= */
 const articleMap = {
-  // Geography
-  "class-10/geography/chapter-1": Chapter1Geography,
-  "class-10/geography/chapter-2": Chapter2Geography,
-  "class-10/geography/chapter-3": Chapter3Geography,
-  "class-10/geography/chapter-4": Chapter4Geography,
-  "class-10/geography/chapter-5": Chapter5Geography,
-  "class-10/geography/chapter-6": Chapter6Geography,
-  "class-10/geography/chapter-7": Chapter7Geography,
+  // ---- Class 10 — Geography ----
+  "class-10/geography/chapter-1": lazy(() => import("./blogs/class-10/geography/Chapter1.jsx")),
+  "class-10/geography/chapter-2": lazy(() => import("./blogs/class-10/geography/Chapter2.jsx")),
+  "class-10/geography/chapter-3": lazy(() => import("./blogs/class-10/geography/Chapter3.jsx")),
+  "class-10/geography/chapter-4": lazy(() => import("./blogs/class-10/geography/Chapter4.jsx")),
+  "class-10/geography/chapter-5": lazy(() => import("./blogs/class-10/geography/Chapter5.jsx")),
+  "class-10/geography/chapter-6": lazy(() => import("./blogs/class-10/geography/Chapter6.jsx")),
+  "class-10/geography/chapter-7": lazy(() => import("./blogs/class-10/geography/Chapter7.jsx")),
 
-  // History
-  "class-10/history/chapter-1": Chapter1History,
-  "class-10/history/chapter-2": Chapter2History,
-  "class-10/history/chapter-3": Chapter3History,
-  "class-10/history/chapter-4": Chapter4History,
-  "class-10/history/chapter-5": Chapter5History,
+  // ---- Class 10 — History ----
+  "class-10/history/chapter-1": lazy(() => import("./blogs/class-10/history/Chapter1.jsx")),
+  "class-10/history/chapter-2": lazy(() => import("./blogs/class-10/history/Chapter2.jsx")),
+  "class-10/history/chapter-3": lazy(() => import("./blogs/class-10/history/Chapter3.jsx")),
+  "class-10/history/chapter-4": lazy(() => import("./blogs/class-10/history/Chapter4.jsx")),
+  "class-10/history/chapter-5": lazy(() => import("./blogs/class-10/history/Chapter5.jsx")),
 
-  // Economics
-  "class-10/economics/chapter-1": Chapter1Economics,
-  "class-10/economics/chapter-2": Chapter2Economics,
-  "class-10/economics/chapter-3": Chapter3Economics,
-  "class-10/economics/chapter-4": Chapter4Economics,
-  "class-10/economics/chapter-5": Chapter5Economics,
+  // ---- Class 10 — Economics ----
+  "class-10/economics/chapter-1": lazy(() => import("./blogs/class-10/economics/Chapter1.jsx")),
+  "class-10/economics/chapter-2": lazy(() => import("./blogs/class-10/economics/Chapter2.jsx")),
+  "class-10/economics/chapter-3": lazy(() => import("./blogs/class-10/economics/Chapter3.jsx")),
+  "class-10/economics/chapter-4": lazy(() => import("./blogs/class-10/economics/Chapter4.jsx")),
+  "class-10/economics/chapter-5": lazy(() => import("./blogs/class-10/economics/Chapter5.jsx")),
 
-  // Political
-  "class-10/political-science/chapter-1": Chapter1Political,
-  "class-10/political-science/chapter-2": Chapter2Political,
-  "class-10/political-science/chapter-3": Chapter3Political,
-  "class-10/political-science/chapter-4": Chapter4Political,
-  "class-10/political-science/chapter-5": Chapter5Political,
-  "class-10/political-science/chapter-6": Chapter6Political,
-  "class-10/political-science/chapter-7": Chapter7Political,
+  // ---- Class 10 — Political Science ----
+  "class-10/political-science/chapter-1": lazy(() => import("./blogs/class-10/political-science/Chapter1.jsx")),
+  "class-10/political-science/chapter-2": lazy(() => import("./blogs/class-10/political-science/Chapter2.jsx")),
+  "class-10/political-science/chapter-3": lazy(() => import("./blogs/class-10/political-science/Chapter3.jsx")),
+  "class-10/political-science/chapter-4": lazy(() => import("./blogs/class-10/political-science/Chapter4.jsx")),
+  "class-10/political-science/chapter-5": lazy(() => import("./blogs/class-10/political-science/Chapter5.jsx")),
+  "class-10/political-science/chapter-6": lazy(() => import("./blogs/class-10/political-science/Chapter6.jsx")),
+  "class-10/political-science/chapter-7": lazy(() => import("./blogs/class-10/political-science/Chapter7.jsx")),
 
-  // Science 10
-  "class-10/science/chapter-1": Chapter1Science,
-  "class-10/science/chapter-2": Chapter2Science,
-  "class-10/science/chapter-3": Chapter3Science,
-  "class-10/science/chapter-4": Chapter4Science,
-  "class-10/science/chapter-5": Chapter5Science,
-  "class-10/science/chapter-6": Chapter6Science,
-  "class-10/science/chapter-7": Chapter7Science,
-  "class-10/science/chapter-8": Chapter8Science,
-  "class-10/science/chapter-9": Chapter9Science,
-  "class-10/science/chapter-10": Chapter10Science,
-  "class-10/science/chapter-11": Chapter11Science,
-  "class-10/science/chapter-12": Chapter12Science,
-  "class-10/science/chapter-13": Chapter13Science,
-  "class-10/science/chapter-14": Chapter14Science,
-  "class-10/science/chapter-15": Chapter15Science,
-  "class-10/science/chapter-16": Chapter16Science,
+  // ---- Class 10 — Science ----
+  "class-10/science/chapter-1": lazy(() => import("./blogs/class-10/science/Chapter1.jsx")),
+  "class-10/science/chapter-2": lazy(() => import("./blogs/class-10/science/Chapter2.jsx")),
+  "class-10/science/chapter-3": lazy(() => import("./blogs/class-10/science/Chapter3.jsx")),
+  "class-10/science/chapter-4": lazy(() => import("./blogs/class-10/science/Chapter4.jsx")),
+  "class-10/science/chapter-5": lazy(() => import("./blogs/class-10/science/Chapter5.jsx")),
+  "class-10/science/chapter-6": lazy(() => import("./blogs/class-10/science/Chapter6.jsx")),
+  "class-10/science/chapter-7": lazy(() => import("./blogs/class-10/science/Chapter7.jsx")),
+  "class-10/science/chapter-8": lazy(() => import("./blogs/class-10/science/Chapter8.jsx")),
+  "class-10/science/chapter-9": lazy(() => import("./blogs/class-10/science/Chapter9.jsx")),
+  "class-10/science/chapter-10": lazy(() => import("./blogs/class-10/science/Chapter10.jsx")),
+  "class-10/science/chapter-11": lazy(() => import("./blogs/class-10/science/Chapter11.jsx")),
+  "class-10/science/chapter-12": lazy(() => import("./blogs/class-10/science/Chapter12.jsx")),
+  "class-10/science/chapter-13": lazy(() => import("./blogs/class-10/science/Chapter13.jsx")),
+  "class-10/science/chapter-14": lazy(() => import("./blogs/class-10/science/Chapter14.jsx")),
+  "class-10/science/chapter-15": lazy(() => import("./blogs/class-10/science/Chapter15.jsx")),
+  "class-10/science/chapter-16": lazy(() => import("./blogs/class-10/science/Chapter16.jsx")),
 
-  // Class 9 science
-  "class-9/science/chapter-1": C9Chapter1,
-  "class-9/science/chapter-2": C9Chapter2,
-  "class-9/science/chapter-3": C9Chapter3,
-  "class-9/science/chapter-4": C9Chapter4,
-  "class-9/science/chapter-5": C9Chapter5,
-  "class-9/science/chapter-6": C9Chapter6,
-  "class-9/science/chapter-7": C9Chapter7,
-  "class-9/science/chapter-8": C9Chapter8,
-  "class-9/science/chapter-9": C9Chapter9,
-  "class-9/science/chapter-10": C9Chapter10,
-  "class-9/science/chapter-11": C9Chapter11,
-  "class-9/science/chapter-12": C9Chapter12,
-  "class-9/science/chapter-13": C9Chapter13,
-  "class-9/science/chapter-14": C9Chapter14,
+  // ---- Class 9 — Science ----
+  "class-9/science/chapter-1": lazy(() => import("./blogs/class-9/science/Chapter1.jsx")),
+  "class-9/science/chapter-2": lazy(() => import("./blogs/class-9/science/Chapter2.jsx")),
+  "class-9/science/chapter-3": lazy(() => import("./blogs/class-9/science/Chapter3.jsx")),
+  "class-9/science/chapter-4": lazy(() => import("./blogs/class-9/science/Chapter4.jsx")),
+  "class-9/science/chapter-5": lazy(() => import("./blogs/class-9/science/Chapter5.jsx")),
+  "class-9/science/chapter-6": lazy(() => import("./blogs/class-9/science/Chapter6.jsx")),
+  "class-9/science/chapter-7": lazy(() => import("./blogs/class-9/science/Chapter7.jsx")),
+  "class-9/science/chapter-8": lazy(() => import("./blogs/class-9/science/Chapter8.jsx")),
+  "class-9/science/chapter-9": lazy(() => import("./blogs/class-9/science/Chapter9.jsx")),
+  "class-9/science/chapter-10": lazy(() => import("./blogs/class-9/science/Chapter10.jsx")),
+  "class-9/science/chapter-11": lazy(() => import("./blogs/class-9/science/Chapter11.jsx")),
+  "class-9/science/chapter-12": lazy(() => import("./blogs/class-9/science/Chapter12.jsx")),
+  "class-9/science/chapter-13": lazy(() => import("./blogs/class-9/science/Chapter13.jsx")),
+  "class-9/science/chapter-14": lazy(() => import("./blogs/class-9/science/Chapter14.jsx")),
 
-  // Class 9 History
-"class-9/history/chapter-1": C9Chapter1History,
-"class-9/history/chapter-2": C9Chapter2History,
-"class-9/history/chapter-3": C9Chapter3History,
-"class-9/history/chapter-4": C9Chapter4History,
-"class-9/history/chapter-5": C9Chapter5History,
-"class-9/history/chapter-7": C9Chapter7History,
+  // ---- Class 9 — History ----
+  "class-9/history/chapter-1": lazy(() => import("./blogs/class-9/history/Chapter1.jsx")),
+  "class-9/history/chapter-2": lazy(() => import("./blogs/class-9/history/Chapter2.jsx")),
+  "class-9/history/chapter-3": lazy(() => import("./blogs/class-9/history/Chapter3.jsx")),
+  "class-9/history/chapter-4": lazy(() => import("./blogs/class-9/history/Chapter4.jsx")),
+  "class-9/history/chapter-5": lazy(() => import("./blogs/class-9/history/Chapter5.jsx")),
+  "class-9/history/chapter-7": lazy(() => import("./blogs/class-9/history/Chapter7.jsx")),
+
+  // ---- Class 9 — Geography ----
+  "class-9/geography/chapter-1": lazy(() => import("./blogs/class-9/geography/Chapter1.jsx")),
+  "class-9/geography/chapter-2": lazy(() => import("./blogs/class-9/geography/Chapter2.jsx")),
+  "class-9/geography/chapter-3": lazy(() => import("./blogs/class-9/geography/Chapter3.jsx")),
+  "class-9/geography/chapter-4": lazy(() => import("./blogs/class-9/geography/Chapter4.jsx")),
+  "class-9/geography/chapter-5": lazy(() => import("./blogs/class-9/geography/Chapter5.jsx")),
+
+  // ---- Class 9 — Economics ----
+  "class-9/economics/chapter-1": lazy(() => import("./blogs/class-9/economics/Chapter1.jsx")),
+  "class-9/economics/chapter-2": lazy(() => import("./blogs/class-9/economics/Chapter2.jsx")),
+  "class-9/economics/chapter-3": lazy(() => import("./blogs/class-9/economics/Chapter3.jsx")),
+  "class-9/economics/chapter-4": lazy(() => import("./blogs/class-9/economics/Chapter4.jsx")),
+
+  // ---- Class 8 — Civics ----
+  "class-8/civics/chapter-1": lazy(() => import("./blogs/class-8/civics/Chapter1.jsx")),
+  "class-8/civics/chapter-2": lazy(() => import("./blogs/class-8/civics/Chapter2.jsx")),
+  "class-8/civics/chapter-3": lazy(() => import("./blogs/class-8/civics/Chapter3.jsx")),
+  "class-8/civics/chapter-4": lazy(() => import("./blogs/class-8/civics/Chapter4.jsx")),
+  "class-8/civics/chapter-5": lazy(() => import("./blogs/class-8/civics/Chapter5.jsx")),
+  "class-8/civics/chapter-6": lazy(() => import("./blogs/class-8/civics/Chapter6.jsx")),
+  "class-8/civics/chapter-7": lazy(() => import("./blogs/class-8/civics/Chapter7.jsx")),
+  "class-8/civics/chapter-9": lazy(() => import("./blogs/class-8/civics/Chapter9.jsx")),
+  "class-8/civics/chapter-10": lazy(() => import("./blogs/class-8/civics/Chapter10.jsx")),
+
+  // ---- Class 8 — Science ----
+  "class-8/science/chapter-1": lazy(() => import("./blogs/class-8/science/Chapter1.jsx")),
+  "class-8/science/chapter-2": lazy(() => import("./blogs/class-8/science/Chapter2.jsx")),
+  "class-8/science/chapter-3": lazy(() => import("./blogs/class-8/science/Chapter3.jsx")),
+  "class-8/science/chapter-4": lazy(() => import("./blogs/class-8/science/Chapter4.jsx")),
+  "class-8/science/chapter-5": lazy(() => import("./blogs/class-8/science/Chapter5.jsx")),
+  "class-8/science/chapter-6": lazy(() => import("./blogs/class-8/science/Chapter6.jsx")),
+  "class-8/science/chapter-7": lazy(() => import("./blogs/class-8/science/Chapter7.jsx")),
+  "class-8/science/chapter-8": lazy(() => import("./blogs/class-8/science/Chapter8.jsx")),
+  "class-8/science/chapter-9": lazy(() => import("./blogs/class-8/science/Chapter9.jsx")),
+  "class-8/science/chapter-10": lazy(() => import("./blogs/class-8/science/Chapter10.jsx")),
+  "class-8/science/chapter-11": lazy(() => import("./blogs/class-8/science/Chapter11.jsx")),
+  "class-8/science/chapter-12": lazy(() => import("./blogs/class-8/science/Chapter12.jsx")),
+  "class-8/science/chapter-13": lazy(() => import("./blogs/class-8/science/Chapter13.jsx")),
+  "class-8/science/chapter-14": lazy(() => import("./blogs/class-8/science/Chapter14.jsx")),
+  "class-8/science/chapter-15": lazy(() => import("./blogs/class-8/science/Chapter15.jsx")),
+  "class-8/science/chapter-16": lazy(() => import("./blogs/class-8/science/Chapter16.jsx")),
+  "class-8/science/chapter-17": lazy(() => import("./blogs/class-8/science/Chapter17.jsx")),
+  "class-8/science/chapter-18": lazy(() => import("./blogs/class-8/science/Chapter18.jsx")),
  
-// Class 9 Geography
-"class-9/geography/chapter-1": c9Chapter1Geography,
-"class-9/geography/chapter-2": c9Chapter2Geography,
-"class-9/geography/chapter-3": c9Chapter3Geography,
-"class-9/geography/chapter-4": c9Chapter4Geography,
-"class-9/geography/chapter-5": c9Chapter5Geography,
 
-// Class 9 Economics
-"class-9/economics/chapter-1": c9Chapter1Economics,
-"class-9/economics/chapter-2": c9Chapter2Economics,
-"class-9/economics/chapter-3": c9Chapter3Economics,
-"class-9/economics/chapter-4": c9Chapter4Economics,
+  // ---- Class 8 — Geography ----
+  "class-8/geography/chapter-1": lazy(() => import("./blogs/class-8/geography/Chapter1.jsx")),
+  "class-8/geography/chapter-2": lazy(() => import("./blogs/class-8/geography/Chapter2.jsx")),
+  "class-8/geography/chapter-3": lazy(() => import("./blogs/class-8/geography/Chapter3.jsx")),
+  "class-8/geography/chapter-4": lazy(() => import("./blogs/class-8/geography/Chapter4.jsx")),
+  "class-8/geography/chapter-5": lazy(() => import("./blogs/class-8/geography/Chapter5.jsx")),
+  "class-8/geography/chapter-6": lazy(() => import("./blogs/class-8/geography/Chapter6.jsx")),
 
-// Class 8 Geography
-"class-8/geography/chapter-1": c8Chapter1Geography,
-"class-8/geography/chapter-2": c8Chapter2Geography,
-"class-8/geography/chapter-3": c8Chapter3Geography,
-"class-8/geography/chapter-4": c8Chapter4Geography,
-"class-8/geography/chapter-5": c8Chapter5Geography,
-"class-8/geography/chapter-6": c8Chapter6Geography,
-
-// Class 8 History
-"class-8/history/chapter-1": c8Chapter1History,
-"class-8/history/chapter-2": c8Chapter2History,
-"class-8/history/chapter-3": c8Chapter3History,
-"class-8/history/chapter-4": c8Chapter4History,
-"class-8/history/chapter-5": c8Chapter5History,
-"class-8/history/chapter-6": c8Chapter6History,
-"class-8/history/chapter-7": c8Chapter7History,
-"class-8/history/chapter-8": c8Chapter8History,
-"class-8/history/chapter-9": c8Chapter9History,
-"class-8/history/chapter-10": c8Chapter10History,
-"class-8/history/chapter-11": c8Chapter11History,
-
-// Class 8 Civics
-"class-8/civics/chapter-1": c8Chapter1Civics,
-"class-8/civics/chapter-2": c8Chapter2Civics,
-"class-8/civics/chapter-3": c8Chapter3Civics,
-
+  // ---- Class 8 — History ----
+  "class-8/history/chapter-1": lazy(() => import("./blogs/class-8/history/Chapter1.jsx")),
+  "class-8/history/chapter-2": lazy(() => import("./blogs/class-8/history/Chapter2.jsx")),
+  "class-8/history/chapter-3": lazy(() => import("./blogs/class-8/history/Chapter3.jsx")),
+  "class-8/history/chapter-4": lazy(() => import("./blogs/class-8/history/Chapter4.jsx")),
+  "class-8/history/chapter-5": lazy(() => import("./blogs/class-8/history/Chapter5.jsx")),
+  "class-8/history/chapter-6": lazy(() => import("./blogs/class-8/history/Chapter6.jsx")),
+  "class-8/history/chapter-7": lazy(() => import("./blogs/class-8/history/Chapter7.jsx")),
+  "class-8/history/chapter-8": lazy(() => import("./blogs/class-8/history/Chapter8.jsx")),
+  "class-8/history/chapter-9": lazy(() => import("./blogs/class-8/history/Chapter9.jsx")),
+  "class-8/history/chapter-10": lazy(() => import("./blogs/class-8/history/Chapter10.jsx")),
+  "class-8/history/chapter-11": lazy(() => import("./blogs/class-8/history/Chapter11.jsx")),
 };
 
 /* ================= COMPONENT ================= */
 
+const ChapterLoading = () => (
+  <div
+    style={{
+      minHeight: "60vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexDirection: "column",
+      gap: "16px",
+      color: "#003223",
+    }}
+  >
+    <div
+      style={{
+        width: "44px",
+        height: "44px",
+        borderRadius: "50%",
+        border: "3px solid rgba(0, 92, 58, 0.2)",
+        borderTopColor: "#005c3a",
+        animation: "blogSpin 0.8s linear infinite",
+      }}
+    />
+    <p style={{ fontSize: "14px", letterSpacing: "0.3px" }}>Loading chapter…</p>
+    <style>{`@keyframes blogSpin { to { transform: rotate(360deg); } }`}</style>
+  </div>
+);
+
 const BlogDetail = () => {
-  const { "*": slug } = useParams(); 
+  const { "*": slug } = useParams();
   const navigate = useNavigate();
   const [showTopButton, setShowTopButton] = useState(false);
   const [hoveredBtn, setHoveredBtn] = useState(null);
@@ -333,7 +274,13 @@ const BlogDetail = () => {
         )}
       </div>
 
-      {Component ? <Component /> : <h2>Blog not found</h2>}
+      {Component ? (
+        <Suspense fallback={<ChapterLoading />}>
+          <Component />
+        </Suspense>
+      ) : (
+        <h2>Blog not found</h2>
+      )}
     </div>
   );
 };

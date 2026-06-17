@@ -6,6 +6,8 @@ import {
   getCoursePublic,
   submitEnrollmentRequest,
   getMyEnrollmentRequests,
+  getTrialStatus,
+  startTrial,
 } from "../api/enrollments";
 import { useToast } from "../contexts/ToastContext";
 import { APP_URL } from "../config/urls";
@@ -39,6 +41,12 @@ const EnrollModal = ({ courseId, onClose }) => {
   const [submitError, setSubmitError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [existingStatus, setExistingStatus] = useState(null);
+
+  // Trial state
+  const [trialStatus, setTrialStatus] = useState(null);
+  const [trialStarting, setTrialStarting] = useState(false);
+  const [trialError, setTrialError] = useState("");
+  const [trialStartedSub, setTrialStartedSub] = useState(null);
 
   const initialPath = useRef(location.pathname);
 
@@ -89,6 +97,35 @@ const EnrollModal = ({ courseId, onClose }) => {
       .catch(() => {});
     return () => { cancelled = true; };
   }, [user, courseId]);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    getTrialStatus(courseId)
+      .then((data) => { if (!cancelled) setTrialStatus(data); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [user, courseId]);
+
+  const handleStartTrial = async () => {
+    setTrialError("");
+    setTrialStarting(true);
+    try {
+      const data = await startTrial(courseId);
+      setTrialStartedSub(data?.subscription || null);
+      showToast({
+        message: `Your free trial of ${course?.title} has started!`,
+        duration: 3500,
+      });
+    } catch (err) {
+      setTrialError(
+        err?.response?.data?.detail ||
+        "Could not start your free trial. Please try again."
+      );
+    } finally {
+      setTrialStarting(false);
+    }
+  };
 
   const profile = user?.profile || {};
   const profileComplete = user?.profile_complete;
@@ -221,7 +258,80 @@ const EnrollModal = ({ courseId, onClose }) => {
       );
     }
 
+    if (trialStartedSub) {
+      const trialEnd = trialStartedSub.expires_at
+        ? new Date(trialStartedSub.expires_at).toLocaleDateString("en-IN", {
+            day: "numeric", month: "long", year: "numeric",
+          })
+        : "in 30 days";
+      return (
+        <div className="em-status">
+          <div className="em-status__icon em-status__icon--success">✓</div>
+          <h3 className="em-status__heading">Your free trial has started 🎉</h3>
+          <p className="em-status__msg">
+            You now have full access to <strong>{course.title}</strong> until{" "}
+            <strong>{trialEnd}</strong>. After that, enroll to keep learning.
+          </p>
+          <button className="em-btn em-btn--primary" onClick={() => { window.location.href = APP_URL; }}>
+            Start Learning
+          </button>
+        </div>
+      );
+    }
+
+    const activeSub = trialStatus?.subscription;
+    const onActiveTrial = activeSub?.is_trial && activeSub?.status === "ACTIVE";
+    const canStartTrial = trialStatus?.can_start === true && !existingStatus;
+
+    // First-time users must take the trial — hide the payment form entirely
+    // until they've used (or are currently using) it.
+    if (canStartTrial) {
+      return (
+        <div className="em-status">
+          <div className="em-status__icon em-status__icon--success">🎁</div>
+          <h3 className="em-status__heading">
+            Try {course.title} free for {trialStatus?.trial_duration_days || 30} days
+          </h3>
+          <p className="em-status__msg">
+            Start with full access — no payment needed. After your trial ends,
+            you can enroll to keep learning.
+          </p>
+          <button
+            type="button"
+            className="em-btn em-btn--primary em-btn--submit"
+            onClick={handleStartTrial}
+            disabled={trialStarting || !profileComplete}
+            title={!profileComplete ? "Complete your profile to start your trial" : ""}
+          >
+            {trialStarting ? (
+              <><span className="em-btn-spinner" /> Starting…</>
+            ) : (
+              `Start ${trialStatus?.trial_duration_days || 30}-day free trial`
+            )}
+          </button>
+          {trialError && (
+            <div className="em-alert em-alert--error" style={{ marginTop: 12 }}>
+              {trialError}
+            </div>
+          )}
+          {!profileComplete && (
+            <p className="em-status__msg" style={{ marginTop: 12, fontSize: "0.9em" }}>
+              Complete your <Link to="/form-fillup" onClick={onClose}>profile</Link> first.
+            </p>
+          )}
+        </div>
+      );
+    }
+
     return (
+      <>
+        {onActiveTrial && (
+          <div className="enroll-trial-banner" style={{ margin: "0 0 16px 0" }}>
+            <strong>Free trial active</strong> · {activeSub.days_remaining} day{activeSub.days_remaining === 1 ? "" : "s"} remaining.
+            Enroll below to keep access — you won&apos;t lose any remaining trial days.
+          </div>
+        )}
+
       <div className="em-grid">
         {/* ── Left column ── */}
         <div className="em-col">
@@ -377,6 +487,7 @@ const EnrollModal = ({ courseId, onClose }) => {
           </form>
         </div>
       </div>
+      </>
     );
   })();
 
