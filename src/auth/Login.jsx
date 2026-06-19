@@ -18,14 +18,15 @@ import {
      li-a-2fa             → admin: 6 separate digit boxes
 ════════════════════════════════════════════════════════════════ */
 
-const STEP_ROLE        = "role";
-const STEP_EMAIL       = "email";
-const STEP_ACCT_TYPE   = "acct_type";
-const STEP_PROFILES    = "profiles";
-const STEP_PW          = "pw";
-const STEP_PIN         = "pin";
-const STEP_ADMIN_CREDS = "admin_creds";
-const STEP_2FA         = "2fa";
+const STEP_ROLE          = "role";
+const STEP_EMAIL         = "email";
+const STEP_ACCT_TYPE     = "acct_type";    // li-t-acct: Learner | Teacher (always for teacher role)
+const STEP_PROFILES      = "profiles";
+const STEP_PW            = "pw";
+const STEP_TEACHER_TYPE  = "teacher_type"; // li-t-type: Guest expert | Faculty (after teacher pw)
+const STEP_PIN           = "pin";
+const STEP_ADMIN_CREDS   = "admin_creds";
+const STEP_2FA           = "2fa";
 
 const PAL = { student: "#13899b", faculty: "#425f7f", admin: "#b9892f", guest: "#2f9d42" };
 
@@ -83,14 +84,16 @@ export default function Login() {
   /* ── helpers ── */
   const accent = role === "teacher" ? "faculty" : role === "admin" ? "admin" : "student";
   const shellRole =
-    step === STEP_ROLE || step === STEP_ACCT_TYPE ? "decision" : accent;
+    step === STEP_ROLE || step === STEP_ACCT_TYPE || step === STEP_TEACHER_TYPE
+      ? "decision" : accent;
 
   const flowLabel =
-    step === STEP_ROLE        ? "Log in" :
-    step === STEP_ACCT_TYPE   ? "Log in · Teacher" :
+    step === STEP_ROLE                             ? "Log in" :
+    step === STEP_ACCT_TYPE                        ? "Log in · Teacher" :
+    step === STEP_TEACHER_TYPE                     ? "Log in · Teacher" :
     step === STEP_ADMIN_CREDS || step === STEP_2FA ? "Log in · Admin" :
-    role === "teacher"        ? "Log in · Teacher" :
-    role === "admin"          ? "Log in · Admin" : "Log in · Student";
+    role === "teacher"                             ? "Log in · Teacher" :
+    role === "admin"                               ? "Log in · Admin" : "Log in · Student";
 
   const finishAndRedirect = (target = APP_URL) => {
     setIsRedirecting(true);
@@ -113,7 +116,9 @@ export default function Login() {
       setLookupProfiles(data.profiles || []);
       setLookupHasTeacher(!!data.has_teacher);
 
-      if (role === "teacher" && data.has_teacher) {
+      if (role === "teacher") {
+        // li-t-acct ALWAYS shown for teacher role — every teacher account
+        // can choose to browse as a Learner OR enter teaching mode.
         setStep(STEP_ACCT_TYPE);
       } else if ((data.profiles || []).length > 1) {
         setStep(STEP_PROFILES);
@@ -153,15 +158,32 @@ export default function Login() {
       setProfiles(list); setTeacher(data?.teacher || null);
       setStatusMsg("");
 
-      // Teacher entering teaching mode
-      if (role === "teacher" && teacherChoice === "teacher" && tHasTeacher) {
+      // ── Teacher chose "Teacher" mode → enter teaching context ──
+      if (role === "teacher" && teacherChoice === "teacher") {
+        if (!tHasTeacher) {
+          // Account doesn't have an approved teacher profile
+          setError("No approved teacher identity on this account. Please contact support or wait for approval.");
+          setSubmitting(false);
+          return;
+        }
         await enterTeacherMode();
-        showToast({ message: "Welcome back!", duration: 2000 });
-        finishAndRedirect(TEACHER_URL);
+        setStatusMsg("");
+
+        // li-t-type: if teacher type is BOTH, show the choice screen.
+        // Otherwise auto-route — the teacher dashboard handles GUEST vs FACULTY internally.
+        const tType = data?.teacher?.type;
+        if (tType === "BOTH") {
+          setStep(STEP_TEACHER_TYPE);
+          setSubmitting(false);
+        } else {
+          // GUEST or FACULTY — show type confirmation screen briefly, then redirect
+          setStep(STEP_TEACHER_TYPE);
+          setSubmitting(false);
+        }
         return;
       }
 
-      // Find the profile the user selected
+      // ── Teacher chose "Learner" mode, or student login ──
       const target = pickedName
         ? list.find((p) => p.display_name === pickedName) ?? (list.length === 1 ? list[0] : null)
         : list.length === 1 ? list[0] : null;
@@ -254,8 +276,8 @@ export default function Login() {
   const back = () => {
     setError("");
     const go = (s) => setStep(s);
-    if (step === STEP_EMAIL)       go(STEP_ROLE);
-    if (step === STEP_ACCT_TYPE)   go(STEP_EMAIL);
+    if (step === STEP_EMAIL)          go(STEP_ROLE);
+    if (step === STEP_ACCT_TYPE)      go(STEP_EMAIL);
     if (step === STEP_PROFILES) {
       go(teacherChoice === "learner" ? STEP_ACCT_TYPE : STEP_EMAIL);
     }
@@ -264,9 +286,10 @@ export default function Login() {
       else if (lookupProfiles.length > 1)        go(STEP_PROFILES);
       else                                        go(STEP_EMAIL);
     }
-    if (step === STEP_PIN)         go(STEP_PW);
-    if (step === STEP_ADMIN_CREDS) go(STEP_ROLE);
-    if (step === STEP_2FA)         go(STEP_ADMIN_CREDS);
+    if (step === STEP_TEACHER_TYPE)   go(STEP_PW);  // back to password from teacher-type
+    if (step === STEP_PIN)            go(STEP_PW);
+    if (step === STEP_ADMIN_CREDS)    go(STEP_ROLE);
+    if (step === STEP_2FA)            go(STEP_ADMIN_CREDS);
   };
 
   return (
@@ -452,6 +475,46 @@ export default function Login() {
               </button>
             </div>
           </form>
+        </>
+      )}
+
+      {/* ── li-t-type: Teacher type — Guest expert | Faculty ── */}
+      {step === STEP_TEACHER_TYPE && (
+        <>
+          <h1 className="af-heading">Teacher type?</h1>
+          <p className="af-sub">We route you to the right dashboard.</p>
+          <TileChoice cols={2} options={[
+            {
+              key: "guest",
+              label: "Guest expert",
+              sub: "Skills & bookings",
+              color: PAL.guest,
+              icon: <Icon name="spark" size={20} color={PAL.guest} />,
+              onClick: () => {
+                showToast({ message: "Welcome back!", duration: 2000 });
+                finishAndRedirect(TEACHER_URL);
+              },
+            },
+            {
+              key: "faculty",
+              label: "Faculty",
+              sub: "Classes & timetable",
+              color: PAL.faculty,
+              icon: <Icon name="cap" size={22} color={PAL.faculty} />,
+              onClick: () => {
+                showToast({ message: "Welcome back!", duration: 2000 });
+                finishAndRedirect(TEACHER_URL);
+              },
+            },
+          ]} />
+          {teacher?.type && teacher.type !== "BOTH" && (
+            <p style={{ marginTop: 12, fontSize: 13, color: "#9aa0a6" }}>
+              Your account: <strong style={{ color: "var(--a)" }}>
+                {teacher.type === "GUEST" ? "Guest expert" : "Faculty"}
+              </strong>
+            </p>
+          )}
+          <div className="af-spacer" />
         </>
       )}
 
