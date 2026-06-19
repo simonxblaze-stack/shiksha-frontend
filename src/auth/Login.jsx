@@ -1,27 +1,28 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
-import { HOME_URL, APP_URL } from "../config/urls";
+import { APP_URL, TEACHER_URL } from "../config/urls";
 import {
   AuthShell, Field, PasswordField, Option, FooterLink,
 } from "./AuthKit";
 
 /* ════════════════════════════════════════════════════════════════
    Login — mirrors the design's login branch:
-     login_as (role) -> email -> [student: choose profile] -> password
-   ...wired to the real two-step backend:
+     login_as (role) -> credentials -> [teacher: learner|teacher] ->
+     [student / learner: choose profile] -> [pin?] -> dashboard
+   Wired to the real two-step backend:
      1. login(email, password)              -> { profiles, teacher }
      2. selectProfile(id, pin?)  OR  enterTeacherMode()
-   The real API authenticates email+password together, so we collect
-   both on one "credentials" screen, then branch to the profile
-   chooser exactly like the design's "Choose a profile" screen.
+   Email + password are collected together (backend requires both),
+   then we branch exactly as the design's profile/account-type screens.
 ════════════════════════════════════════════════════════════════ */
 
-const STEP_ROLE     = "role";
-const STEP_CREDS    = "creds";
-const STEP_PROFILES = "profiles";
-const STEP_PIN      = "pin";
+const STEP_ROLE      = "role";
+const STEP_CREDS     = "creds";
+const STEP_ACCT_TYPE = "acct_type";  // teacher with dual identity: Learner | Teacher
+const STEP_PROFILES  = "profiles";
+const STEP_PIN       = "pin";
 
 const PAL = { student: "#138A6B", faculty: "#2F6BD8", admin: "#C2841C" };
 
@@ -36,7 +37,6 @@ export default function Login() {
   const { login, selectProfile, enterTeacherMode } = useAuth();
   const { showToast } = useToast();
   const location = useLocation();
-  const navigate = useNavigate();
 
   const [step, setStep]   = useState(STEP_ROLE);
   const [role, setRole]   = useState("");
@@ -61,10 +61,10 @@ export default function Login() {
     if (location.state?.message) setStatusMsg(location.state.message);
   }, [location.state]);
 
-  const finishToHome = () => {
+  const finishAndRedirect = (target = APP_URL) => {
     setIsRedirecting(true);
     setStatusMsg("Login successful! Redirecting…");
-    setTimeout(() => { window.location.href = APP_URL; }, 1100);
+    setTimeout(() => { window.location.href = target; }, 1100);
   };
 
   const pickRole = (r) => { setRole(r); setError(""); setStep(STEP_CREDS); };
@@ -81,24 +81,42 @@ export default function Login() {
       setTeacher(data?.teacher || null);
       setStatusMsg("");
 
-      if (role === "teacher" && !hasTeacher) {
-        setError("This account is not registered as a teacher. Please log in as a Student.");
-        setSubmitting(false);
-        return;
-      }
-      if (role === "teacher" && hasTeacher) {
-        await enterTeacherMode();
+      // ── Admin: skip profile picker, go straight to the app ──
+      if (role === "admin") {
+        // Auto-select the first learner profile so the JWT has a context.
+        // Admins reach admin-specific features inside the app.
+        if (list.length > 0) {
+          await selectProfile(list[0].id);
+        }
         showToast({ message: "Welcome back!", duration: 2000 });
-        finishToHome();
+        finishAndRedirect(APP_URL);
         return;
       }
 
+      // ── Teacher with an approved teacher identity ──
+      if (role === "teacher" && hasTeacher) {
+        if (list.length === 0) {
+          // No learner profiles — go straight to teaching dashboard.
+          await enterTeacherMode();
+          showToast({ message: "Welcome back!", duration: 2000 });
+          finishAndRedirect(TEACHER_URL);
+          return;
+        }
+        // Has BOTH learner profiles and a teacher identity →
+        // show the account-type chooser (Learner | Teacher).
+        setStep(STEP_ACCT_TYPE);
+        setSubmitting(false);
+        return;
+      }
+
+      // ── Student / teacher without an approved teacher identity ──
+      // Auto-advance if there's exactly one open profile.
       const onlyOpen =
-        list.length === 1 && !list[0].requires_pin && !hasTeacher ? list[0] : null;
+        list.length === 1 && !list[0].requires_pin ? list[0] : null;
       if (onlyOpen) {
         await selectProfile(onlyOpen.id);
         showToast({ message: "Welcome back!", duration: 2000 });
-        finishToHome();
+        finishAndRedirect(APP_URL);
         return;
       }
 
@@ -118,7 +136,7 @@ export default function Login() {
     try {
       await selectProfile(p.id);
       showToast({ message: "Welcome back!", duration: 2000 });
-      finishToHome();
+      finishAndRedirect(APP_URL);
     } catch (err) {
       setError(readErr(err, "Could not open that profile."));
       setSubmitting(false);
@@ -130,7 +148,7 @@ export default function Login() {
     try {
       await enterTeacherMode();
       showToast({ message: "Welcome back!", duration: 2000 });
-      finishToHome();
+      finishAndRedirect(TEACHER_URL);
     } catch (err) {
       setError(readErr(err, "Could not switch to teaching."));
       setSubmitting(false);
@@ -143,7 +161,7 @@ export default function Login() {
     try {
       await selectProfile(pendingProfile.id, pin);
       showToast({ message: "Welcome back!", duration: 2000 });
-      finishToHome();
+      finishAndRedirect(APP_URL);
     } catch (err) {
       setError(readErr(err, "Incorrect PIN."));
       setSubmitting(false);
@@ -152,18 +170,25 @@ export default function Login() {
 
   const back = () => {
     setError("");
-    if (step === STEP_CREDS)    setStep(STEP_ROLE);
-    if (step === STEP_PROFILES) setStep(STEP_CREDS);
-    if (step === STEP_PIN)      setStep(STEP_PROFILES);
+    if (step === STEP_CREDS)     { setStep(STEP_ROLE); }
+    if (step === STEP_ACCT_TYPE) { setStep(STEP_CREDS); }
+    // If teacher chose "Learner" from the account-type screen, back returns there.
+    if (step === STEP_PROFILES)  { setStep(teacher ? STEP_ACCT_TYPE : STEP_CREDS); }
+    if (step === STEP_PIN)       { setStep(STEP_PROFILES); }
   };
 
   const flowLabel =
-    step === STEP_ROLE ? "Log in" :
-    role === "teacher" ? "Log in · Teacher" :
-    role === "admin"   ? "Log in · Admin" : "Log in · Student";
+    step === STEP_ROLE      ? "Log in" :
+    step === STEP_ACCT_TYPE ? "Log in · Teacher" :
+    role === "teacher"      ? "Log in · Teacher" :
+    role === "admin"        ? "Log in · Admin" : "Log in · Student";
+
+  // "decision" for branching screens; role-specific accent otherwise.
+  const shellRole =
+    step === STEP_ROLE || step === STEP_ACCT_TYPE ? "decision" : accent;
 
   return (
-    <AuthShell role={step === STEP_ROLE ? "decision" : accent} flowLabel={flowLabel}>
+    <AuthShell role={shellRole} flowLabel={flowLabel}>
 
       {isRedirecting && (
         <div className="af-overlay">
@@ -228,6 +253,32 @@ export default function Login() {
               </button>
             </div>
           </form>
+        </>
+      )}
+
+      {/* Choose: Learner or Teacher */}
+      {step === STEP_ACCT_TYPE && (
+        <>
+          <h1 className="af-heading">Which account?</h1>
+          <p className="af-sub">This email has both a learner and a teaching identity. Where to?</p>
+
+          <div className="af-options">
+            <Option
+              label="Learner"
+              sub="Browse and continue my courses"
+              dot={PAL.student}
+              onClick={() => { setError(""); setStep(STEP_PROFILES); }}
+            />
+            <Option
+              label="Teacher"
+              sub="Open my teaching dashboard"
+              dot={PAL.faculty}
+              onClick={enterTeaching}
+            />
+          </div>
+
+          {error && <div className="af-error">{error}</div>}
+          <div className="af-spacer" />
         </>
       )}
 

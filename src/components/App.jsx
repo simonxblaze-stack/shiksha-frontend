@@ -191,8 +191,27 @@ function App() {
           }
         />
 
-        <Route path="/pick-profile" element={<ProtectedRoute><ProfilePicker /></ProtectedRoute>} />
-        <Route path="/manage-profiles" element={<ProtectedRoute><Page><ManageProfiles /></Page></ProtectedRoute>} />
+        {/* Profile switcher — no Page wrapper per spec */}
+        <Route
+          path="/pick-profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePicker />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Profile management — has Navbar/Footer via Page */}
+        <Route
+          path="/manage-profiles"
+          element={
+            <ProtectedRoute>
+              <Page>
+                <ManageProfiles />
+              </Page>
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/login"
