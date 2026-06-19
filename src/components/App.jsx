@@ -45,6 +45,9 @@ const TermsCondition = lazy(() => import("./TermsCondition"));
 const Faq = lazy(() => import("./Faq"));
 const Feedback = lazy(() => import("./Feedback"));
 
+// Profile picker (switch profile while already logged in)
+const ProfilePicker = lazy(() => import("../pages/ProfilePicker"));
+
 // Auth pages
 const Login = lazy(() => import("../auth/Login"));
 const Signup = lazy(() => import("../auth/Signup"));
@@ -183,6 +186,16 @@ function App() {
               <Page>
                 <Enroll />
               </Page>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Profile switcher — accessible while already logged in */}
+        <Route
+          path="/pick-profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePicker />
             </ProtectedRoute>
           }
         />
