@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
-import { HOME_URL } from "../config/urls";
+import { HOME_URL, APP_URL } from "../config/urls";
 import {
   AuthShell, Field, PasswordField, Option, FooterLink,
 } from "./AuthKit";
@@ -64,7 +64,7 @@ export default function Login() {
   const finishToHome = () => {
     setIsRedirecting(true);
     setStatusMsg("Login successful! Redirecting…");
-    setTimeout(() => { window.location.href = HOME_URL; }, 1100);
+    setTimeout(() => { window.location.href = APP_URL; }, 1100);
   };
 
   const pickRole = (r) => { setRole(r); setError(""); setStep(STEP_CREDS); };

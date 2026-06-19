@@ -47,6 +47,7 @@ const Feedback = lazy(() => import("./Feedback"));
 
 // Profile picker (switch profile while already logged in)
 const ProfilePicker = lazy(() => import("../pages/ProfilePicker"));
+const ManageProfiles = lazy(() => import("../pages/ManageProfiles"));
 
 // Auth pages
 const Login = lazy(() => import("../auth/Login"));
@@ -193,6 +194,7 @@ function App() {
         {/* Profile switcher — accessible while already logged in */}
         <Route
           path="/pick-profile"
+        <Route path="/manage-profiles" element={<ProtectedRoute><Page><ManageProfiles /></Page></ProtectedRoute>} />
           element={
             <ProtectedRoute>
               <ProfilePicker />
