@@ -466,3 +466,259 @@
   }
   .af-btn, .af-btn--secondary { width: 100%; padding: 0; }
 }
+
+/* ══════════════════════════════
+   Tile grid (design's su-role, li-as, su-ttype, etc.)
+══════════════════════════════ */
+.af-tiles {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+  max-width: 520px;
+}
+.af-tiles--c2 { grid-template-columns: 1fr 1fr; }
+.af-tiles--c3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.af-tile {
+  all: unset;
+  cursor: pointer;
+  box-sizing: border-box;
+  text-align: center;
+  border: 1.5px solid #ECECEA;
+  border-radius: 16px;
+  padding: 22px 14px;
+  background: #fff;
+  transition: transform .18s, box-shadow .18s, border-color .15s;
+}
+.af-tile:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(0,0,0,.09);
+  border-color: var(--a);
+}
+.af-tile__icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+.af-tile__label {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1f2d3d;
+}
+.af-tile__sub {
+  font-size: 11.5px;
+  color: #6b7280;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* ══════════════════════════════
+   Profile grid (design's li-s-profiles)
+══════════════════════════════ */
+.af-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
+  max-width: 520px;
+}
+.af-profile-tile {
+  all: unset;
+  cursor: pointer;
+  box-sizing: border-box;
+  text-align: center;
+  border: 1.5px solid #ECECEA;
+  border-radius: 16px;
+  padding: 20px 14px;
+  background: #fff;
+  transition: transform .18s, box-shadow .18s, border-color .15s;
+}
+.af-profile-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.08);
+  border-color: var(--a);
+}
+.af-profile-tile__num {
+  width: 50px;
+  height: 50px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  font-size: 20px;
+  font-weight: 800;
+}
+.af-profile-tile__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f2d3d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.af-profile-tile__sub {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 3px;
+}
+
+/* ══════════════════════════════
+   Profile chip list (design's su-add)
+══════════════════════════════ */
+.af-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+  max-width: 520px;
+}
+.af-chip {
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--a);
+  color: #fff;
+}
+
+/* ══════════════════════════════
+   Admin 2FA boxes (design's li-a-2fa)
+══════════════════════════════ */
+.af-2fa-boxes {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+  margin-top: 20px;
+  max-width: 460px;
+}
+.af-2fa-box {
+  width: 52px;
+  height: 60px;
+  border-radius: 14px;
+  border: 1.5px solid #E7E7E4;
+  background: #FAFAF9;
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  font-family: inherit;
+  color: #26272e;
+  transition: border-color .15s, box-shadow .15s;
+  outline: none;
+}
+.af-2fa-box:focus {
+  border-color: var(--a);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--a) 18%, transparent);
+  background: #fff;
+}
+
+/* ══════════════════════════════
+   Info banner (design's su-g-listed, su-f-waiting)
+══════════════════════════════ */
+.af-banner-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #f3f7f4;
+  border: 1px solid #dde7df;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-top: 20px;
+  max-width: 520px;
+}
+.af-banner-info__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.af-banner-info__text {
+  font-size: 13px;
+  color: #5b6470;
+  line-height: 1.55;
+}
+.af-banner-success {
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  max-width: 520px;
+  margin-top: 20px;
+  background: rgba(47,157,66,.1);
+  border: 1px solid rgba(47,157,66,.32);
+}
+.af-banner-success__icon {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  background: #2f9d42;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; margin: 0 auto 10px;
+}
+.af-banner-warn {
+  display: flex;
+  gap: 10px;
+  background: rgba(255,143,1,.09);
+  border: 1px solid rgba(217,138,30,.3);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 14px;
+  max-width: 520px;
+  font-size: 12.5px;
+  color: #7a5410;
+  line-height: 1.5;
+}
+
+/* ── Wait spinner (for review steps) ── */
+.af-wait-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f3f7f4;
+  border: 1px dashed #cdddcf;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 18px;
+  max-width: 520px;
+}
+.af-wait-spin {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 3px solid rgba(47,157,66,.2);
+  border-top-color: #2f9d42;
+  animation: af-rot .9s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Checklist rows (for faculty waiting screen) */
+.af-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  max-width: 520px;
+}
+.af-checklist__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+}
+.af-checklist__dot {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #fff;
+}
+
+@media (max-width: 760px) {
+  .af-tiles--c3 { grid-template-columns: 1fr 1fr 1fr; }
+  .af-2fa-boxes { gap: 6px; }
+  .af-2fa-box { width: 44px; height: 54px; font-size: 18px; }
+}

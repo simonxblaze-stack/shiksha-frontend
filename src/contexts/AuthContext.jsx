@@ -104,6 +104,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /**
+   * Email-first profile lookup — returns { profiles, has_teacher } without
+   * requiring a password.  Safe to call on any email; unknown emails return
+   * empty arrays (never leaks registration status).
+   */
+  const lookupEmail = async (email) => {
+    try {
+      const res = await api.post("/accounts/profiles/lookup/", {
+        email: email.trim().toLowerCase(),
+      });
+      return res.data; // { profiles: [{display_name, relationship}], has_teacher }
+    } catch {
+      return { profiles: [], has_teacher: false };
+    }
+  };
+
   const logout = async () => {
     try {
       await api.post("/accounts/logout/");
@@ -142,6 +158,7 @@ export const AuthProvider = ({ children }) => {
         switchProfile,
         enterTeacherMode,
         signup,
+        lookupEmail,
         logout,
         hasRole,
         bootstrap,
