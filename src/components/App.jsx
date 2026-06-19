@@ -191,16 +191,8 @@ function App() {
           }
         />
 
-        {/* Profile switcher — accessible while already logged in */}
-        <Route
-          path="/pick-profile"
+        <Route path="/pick-profile" element={<ProtectedRoute><ProfilePicker /></ProtectedRoute>} />
         <Route path="/manage-profiles" element={<ProtectedRoute><Page><ManageProfiles /></Page></ProtectedRoute>} />
-          element={
-            <ProtectedRoute>
-              <ProfilePicker />
-            </ProtectedRoute>
-          }
-        />
 
         <Route
           path="/login"

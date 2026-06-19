@@ -5,6 +5,7 @@ import {
   FiUser,
   FiLogOut,
   FiFileText,
+  FiUsers,
 } from "react-icons/fi";
 import "../css/Navbar.css";
 import { HashLink } from "react-router-hash-link";
@@ -214,7 +215,13 @@ const Navbar = () => {
   <FiUser size={16} />
   Profile
 </button>
-                    
+                    <button
+                      className="dropdown-item"
+                      onClick={() => { navigate("/manage-profiles"); setProfileOpen(false); }}
+                    >
+                      <FiUsers size={16} />
+                      Manage Profiles
+                    </button>
 
                     {!user.profile_complete && (
                       <button

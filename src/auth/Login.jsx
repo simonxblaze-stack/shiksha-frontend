@@ -81,7 +81,12 @@ export default function Login() {
       setTeacher(data?.teacher || null);
       setStatusMsg("");
 
-      if (role === "teacher" && hasTeacher && list.length === 0) {
+      if (role === "teacher" && !hasTeacher) {
+        setError("This account is not registered as a teacher. Please log in as a Student.");
+        setSubmitting(false);
+        return;
+      }
+      if (role === "teacher" && hasTeacher) {
         await enterTeacherMode();
         showToast({ message: "Welcome back!", duration: 2000 });
         finishToHome();
