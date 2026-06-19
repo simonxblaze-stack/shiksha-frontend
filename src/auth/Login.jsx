@@ -2,178 +2,296 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
-import "./Login.css";
+import { HOME_URL } from "../config/urls";
+import {
+  AuthShell, Field, PasswordField, Option, FooterLink,
+} from "./AuthKit";
 
-const EyeIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-);
+/* ════════════════════════════════════════════════════════════════
+   Login — mirrors the design's login branch:
+     login_as (role) -> email -> [student: choose profile] -> password
+   ...wired to the real two-step backend:
+     1. login(email, password)              -> { profiles, teacher }
+     2. selectProfile(id, pin?)  OR  enterTeacherMode()
+   The real API authenticates email+password together, so we collect
+   both on one "credentials" screen, then branch to the profile
+   chooser exactly like the design's "Choose a profile" screen.
+════════════════════════════════════════════════════════════════ */
 
-const EyeOffIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-    <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
-    <line x1="1" y1="1" x2="23" y2="23"/>
-  </svg>
-);
+const STEP_ROLE     = "role";
+const STEP_CREDS    = "creds";
+const STEP_PROFILES = "profiles";
+const STEP_PIN      = "pin";
 
-const Login = () => {
-  const { login } = useAuth();
+const PAL = { student: "#138A6B", faculty: "#2F6BD8", admin: "#C2841C" };
+
+function readErr(err, fallback) {
+  const raw = err?.message ?? err;
+  return raw instanceof Error ? raw.message
+    : typeof raw === "string" ? raw
+    : err?.response?.data?.detail || fallback;
+}
+
+export default function Login() {
+  const { login, selectProfile, enterTeacherMode } = useAuth();
   const { showToast } = useToast();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [identifier, setIdentifier] = useState("");
-  const [username, setUsername] = useState("");      // only used after a 409
-  const [needUsername, setNeedUsername] = useState(false);
-  const [password, setPassword] = useState("");
+  const [step, setStep]   = useState(STEP_ROLE);
+  const [role, setRole]   = useState("");
   const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
+  const [statusMsg, setStatusMsg]       = useState("");
+  const [submitting, setSubmitting]     = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
-  // Show message passed from signup / password-reset redirects.
+  const [email, setEmail]       = useState("");
+  const [password, setPassword] = useState("");
+  const [showPw, setShowPw]     = useState(false);
+
+  const [profiles, setProfiles] = useState([]);
+  const [teacher, setTeacher]   = useState(null);
+
+  const [pendingProfile, setPendingProfile] = useState(null);
+  const [pin, setPin] = useState("");
+
+  const accent = role === "teacher" ? "faculty" : role === "admin" ? "admin" : "student";
+
   useEffect(() => {
-    if (location.state?.message) {
-      setStatusMessage(location.state.message);
-    }
+    if (location.state?.message) setStatusMsg(location.state.message);
   }, [location.state]);
 
-  const handleSubmit = async (e) => {
+  const finishToHome = () => {
+    setIsRedirecting(true);
+    setStatusMsg("Login successful! Redirecting…");
+    setTimeout(() => { window.location.href = HOME_URL; }, 1100);
+  };
+
+  const pickRole = (r) => { setRole(r); setError(""); setStep(STEP_CREDS); };
+
+  const submitCreds = async (e) => {
     e.preventDefault();
-    setError("");
-    setStatusMessage("");
-    setSubmitting(true);
-
-    // After a 409, the user types their username; that becomes the identifier.
-    const idToSend = needUsername ? username.trim() : identifier.trim();
-
+    setError(""); setStatusMsg(""); setSubmitting(true);
     try {
-      setStatusMessage("Checking your account...");
-      const { redirect } = await login(idToSend, password);
+      setStatusMsg("Checking your account…");
+      const data = await login(email, password);
+      const list = Array.isArray(data?.profiles) ? data.profiles : [];
+      const hasTeacher = !!data?.teacher;
+      setProfiles(list);
+      setTeacher(data?.teacher || null);
+      setStatusMsg("");
 
-      showToast({ message: "You are logged in! Welcome back.", duration: 2500 });
-
-      let redirectTo = "/";
-      try {
-        const stashed = sessionStorage.getItem("post_auth_redirect");
-        if (stashed && stashed.startsWith("/") && !stashed.startsWith("//")) {
-          redirectTo = stashed;
-        }
-        sessionStorage.removeItem("post_auth_redirect");
-      } catch (_) { /* sessionStorage unavailable */ }
-
-      // If the backend points us at a dashboard on a different host, go there.
-      // Same-host (or malformed) → fall through to in-app navigation.
-      if (redirect?.dashboard_url) {
-        try {
-          const target = new URL(redirect.dashboard_url);
-          if (target.hostname !== window.location.hostname) {
-            window.location.href = redirect.dashboard_url;
-            return;
-          }
-        } catch (_) { /* malformed url — fall through */ }
+      if (role === "teacher" && hasTeacher && list.length === 0) {
+        await enterTeacherMode();
+        showToast({ message: "Welcome back!", duration: 2000 });
+        finishToHome();
+        return;
       }
 
-      navigate(redirectTo, { replace: true });
+      const onlyOpen =
+        list.length === 1 && !list[0].requires_pin && !hasTeacher ? list[0] : null;
+      if (onlyOpen) {
+        await selectProfile(onlyOpen.id);
+        showToast({ message: "Welcome back!", duration: 2000 });
+        finishToHome();
+        return;
+      }
+
+      setStep(STEP_PROFILES);
+      setSubmitting(false);
     } catch (err) {
-      setStatusMessage("");
-      if (err?.code === "ambiguous_email") {
-        // Shared email → reveal the username field and ask them to retry.
-        setNeedUsername(true);
-        setPassword("");
-        setError(
-          "This email is linked to more than one account. " +
-          "Please enter your username to sign in."
-        );
-      } else {
-        setError(err?.message || "Login failed");
-      }
+      setError(readErr(err, "Login failed"));
+      setStatusMsg("");
       setSubmitting(false);
     }
   };
 
+  const chooseProfile = async (p) => {
+    setError("");
+    if (p.requires_pin) { setPendingProfile(p); setPin(""); setStep(STEP_PIN); return; }
+    setSubmitting(true);
+    try {
+      await selectProfile(p.id);
+      showToast({ message: "Welcome back!", duration: 2000 });
+      finishToHome();
+    } catch (err) {
+      setError(readErr(err, "Could not open that profile."));
+      setSubmitting(false);
+    }
+  };
+
+  const enterTeaching = async () => {
+    setError(""); setSubmitting(true);
+    try {
+      await enterTeacherMode();
+      showToast({ message: "Welcome back!", duration: 2000 });
+      finishToHome();
+    } catch (err) {
+      setError(readErr(err, "Could not switch to teaching."));
+      setSubmitting(false);
+    }
+  };
+
+  const submitPin = async (e) => {
+    e.preventDefault();
+    setError(""); setSubmitting(true);
+    try {
+      await selectProfile(pendingProfile.id, pin);
+      showToast({ message: "Welcome back!", duration: 2000 });
+      finishToHome();
+    } catch (err) {
+      setError(readErr(err, "Incorrect PIN."));
+      setSubmitting(false);
+    }
+  };
+
+  const back = () => {
+    setError("");
+    if (step === STEP_CREDS)    setStep(STEP_ROLE);
+    if (step === STEP_PROFILES) setStep(STEP_CREDS);
+    if (step === STEP_PIN)      setStep(STEP_PROFILES);
+  };
+
+  const flowLabel =
+    step === STEP_ROLE ? "Log in" :
+    role === "teacher" ? "Log in · Teacher" :
+    role === "admin"   ? "Log in · Admin" : "Log in · Student";
+
   return (
-    <div className="login-container">
-      <div className="login-glow-center"></div>
-      <div className="login-glow-top-right"></div>
+    <AuthShell role={step === STEP_ROLE ? "decision" : accent} flowLabel={flowLabel}>
 
-      <div className="login-form">
-        <h2>Login</h2>
+      {isRedirecting && (
+        <div className="af-overlay">
+          <div className="af-overlay__card">
+            <div className="af-overlay__spin" />
+            <h3>Please wait</h3>
+            <p>{statusMsg}</p>
+          </div>
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit}>
-          {!needUsername ? (
-            <div className="login-form-group">
-              <label>Username or email</label>
-              <input
-                type="text"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                required
-                disabled={submitting}
-                autoComplete="username"
-              />
-            </div>
-          ) : (
-            <div className="login-form-group">
-              <label>Username</label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                disabled={submitting}
-                autoFocus
-                autoComplete="username"
-              />
-            </div>
-          )}
+      <div className="af-toprow">
+        {step !== STEP_ROLE
+          ? <button className="af-iconbtn" onClick={back} aria-label="Back">‹</button>
+          : <span />}
+      </div>
 
-          <div className="login-form-group">
-            <label>Password</label>
-            <div className="password-wrapper">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={submitting}
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowPassword((p) => !p)}
-              >
-                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+      {/* Log in as */}
+      {step === STEP_ROLE && (
+        <>
+          <h1 className="af-heading">Log in as</h1>
+          <p className="af-sub">Choose your account type.</p>
+          <div className="af-options">
+            <Option label="Student" sub="Learner profiles"
+              dot={PAL.student} onClick={() => pickRole("student")} />
+            <Option label="Teacher" sub="Guest expert or faculty"
+              dot={PAL.faculty} onClick={() => pickRole("teacher")} />
+            <Option label="Admin" sub="Staff access"
+              dot={PAL.admin} onClick={() => pickRole("admin")} />
+          </div>
+          <div className="af-spacer" />
+          <FooterLink>
+            Don't have an account? <Link to="/signup">Create one</Link>
+          </FooterLink>
+        </>
+      )}
+
+      {/* Credentials */}
+      {step === STEP_CREDS && (
+        <>
+          <h1 className="af-heading">Welcome back</h1>
+          <p className="af-sub">Enter your email and password to continue.</p>
+
+          <form onSubmit={submitCreds} style={{ display: "contents" }}>
+            <Field id="lf-email" label="Email" type="email" value={email}
+              onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
+              required autoFocus autoComplete="email" />
+
+            <PasswordField id="lf-password" label="Password" value={password}
+              onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
+              required autoComplete="current-password"
+              show={showPw} onToggle={() => setShowPw((p) => !p)} />
+
+            <Link to="/forgot-password" className="af-note">Forgot password?</Link>
+
+            {error && <div className="af-error">{error}</div>}
+
+            <div className="af-spacer" />
+            <div className="af-actions">
+              <button type="submit" className="af-btn af-btn--block" disabled={submitting}>
+                {submitting ? <><span className="af-spin" />Signing in…</> : "Log in"}
               </button>
             </div>
+          </form>
+        </>
+      )}
+
+      {/* Choose a profile */}
+      {step === STEP_PROFILES && (
+        <>
+          <h1 className="af-heading">Choose a profile</h1>
+          <p className="af-sub">All profiles under this account.</p>
+
+          <div className="af-options">
+            {profiles.map((p) => (
+              <Option
+                key={p.id}
+                label={p.display_name || p.name || "Profile"}
+                sub={p.requires_pin ? "PIN protected" : (p.relationship === "SELF" ? "You" : "Learner")}
+                dot={PAL.student}
+                onClick={() => chooseProfile(p)}
+              />
+            ))}
+
+            {teacher && (
+              <Option
+                label="Teaching"
+                sub="Open your teaching dashboard"
+                dot={PAL.faculty}
+                onClick={enterTeaching}
+              />
+            )}
           </div>
 
-          {error && <p className="login-error">{error}</p>}
+          {error && <div className="af-error">{error}</div>}
+          <div className="af-spacer" />
+        </>
+      )}
 
-          {statusMessage && !error && (
-            <p className="login-status">{statusMessage}</p>
-          )}
+      {/* PIN */}
+      {step === STEP_PIN && (
+        <>
+          <h1 className="af-heading">Enter PIN</h1>
+          <p className="af-sub">
+            {pendingProfile?.display_name
+              ? <>Enter the PIN for <strong>{pendingProfile.display_name}</strong>.</>
+              : "Enter your profile PIN."}
+          </p>
 
-          <button type="submit" className="login-submit-btn" disabled={submitting}>
-            {submitting ? "Please wait..." : "Login"}
-          </button>
-        </form>
+          <form onSubmit={submitPin} style={{ display: "contents" }}>
+            <div className="af-field">
+              <label htmlFor="lf-pin">PIN</label>
+              <input
+                id="lf-pin" inputMode="numeric" autoComplete="off"
+                value={pin}
+                onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+                placeholder="••••" maxLength={6} required autoFocus
+                style={{ letterSpacing: ".5em", textAlign: "center", fontSize: 18 }}
+              />
+            </div>
 
-        <p style={{ marginTop: 12 }}>
-          <Link to="/forgot-password">Forgot password?</Link>
-        </p>
+            {error && <div className="af-error">{error}</div>}
 
-        <p>
-          Don't have an account? <Link to="/signup">Sign up</Link>
-        </p>
-      </div>
-    </div>
+            <div className="af-spacer" />
+            <div className="af-actions">
+              <button type="submit" className="af-btn af-btn--block" disabled={submitting || pin.length < 4}>
+                {submitting ? <><span className="af-spin" />Unlocking…</> : "Open profile"}
+              </button>
+            </div>
+          </form>
+        </>
+      )}
+
+    </AuthShell>
   );
-};
-
-export default Login;
+}
