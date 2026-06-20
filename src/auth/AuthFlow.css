@@ -49,10 +49,9 @@
   gap: 10px;
 }
 .af-brand__logo-mark {
-  width: 34px; height: 34px; border-radius: 9px;
-  background: rgba(255,255,255,.18);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 15px; flex: none;
+  width: 36px; height: 36px; border-radius: 9px;
+  background: rgba(255,255,255,.95);
+  object-fit: contain; padding: 3px; flex: none;
 }
 
 .af-brand__body { /* middle block */ }
@@ -650,13 +649,13 @@
   text-align: center;
   max-width: 520px;
   margin-top: 20px;
-  background: rgba(47,157,66,.1);
-  border: 1px solid rgba(47,157,66,.32);
+  background: #E7F4EB;
+  border: 1px solid #bfe2c9;
 }
 .af-banner-success__icon {
   width: 50px; height: 50px;
   border-radius: 50%;
-  background: #2f9d42;
+  background: #3B9A57;
   display: flex; align-items: center; justify-content: center;
   color: #fff; margin: 0 auto 10px;
 }
@@ -689,8 +688,8 @@
 .af-wait-spin {
   width: 28px; height: 28px;
   border-radius: 50%;
-  border: 3px solid rgba(47,157,66,.2);
-  border-top-color: #2f9d42;
+  border: 3px solid rgba(59,154,87,.2);
+  border-top-color: #3B9A57;
   animation: af-rot .9s linear infinite;
   flex-shrink: 0;
 }

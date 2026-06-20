@@ -5,6 +5,7 @@
    Login.jsx and Signup.jsx compose these so the chrome stays identical
    across both. */
 import { Link } from "react-router-dom";
+import shikshaLogo from "../assets/Shiksha.png";
 import "./AuthFlow.css";
 
 /* ── Per-role accent palette (verbatim from the design) ── */
@@ -63,7 +64,7 @@ export function AuthShell({ role = "neutral", flowLabel, brandIcon = "spark", ch
       {/* LEFT — brand panel */}
       <div className="af-brand">
         <div className="af-brand__logo">
-          <span className="af-brand__logo-mark">S</span>
+          <img className="af-brand__logo-mark" src={shikshaLogo} alt="" />
           ShikshaCom
         </div>
         <div className="af-brand__body">
