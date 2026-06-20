@@ -183,7 +183,32 @@ export default function Login() {
         return;
       }
 
-      // ── Teacher chose "Learner" mode, or student login ──
+      // ── Teacher chose "Learner" mode → always auto-select the SELF profile ──
+      // Teachers may have DEPENDENT profiles (family members) under their account too.
+      // We never show the picker for the teacher→learner path; we go straight to
+      // their own SELF (learning identity). Dependents are accessible via in-app switching.
+      if (role === "teacher" && teacherChoice === "learner") {
+        const selfProfile =
+          list.find((p) => p.relationship === "SELF") ??
+          (list.length === 1 ? list[0] : null);
+
+        if (!selfProfile) {
+          setError("No learner profile found on this account.");
+          setSubmitting(false);
+          return;
+        }
+        if (selfProfile.requires_pin) {
+          setPendingProfile(selfProfile); setPin(""); setStep(STEP_PIN);
+          setSubmitting(false);
+          return;
+        }
+        await selectProfile(selfProfile.id);
+        showToast({ message: "Welcome back!", duration: 2000 });
+        finishAndRedirect(APP_URL);
+        return;
+      }
+
+      // ── Student login (or teacher who somehow skipped acct-type) ──
       const target = pickedName
         ? list.find((p) => p.display_name === pickedName) ?? (list.length === 1 ? list[0] : null)
         : list.length === 1 ? list[0] : null;
