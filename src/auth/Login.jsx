@@ -8,22 +8,31 @@ import {
 } from "./AuthKit";
 
 /* ════════════════════════════════════════════════════════════════
-   Login — exact design match:
-     li-as  → role tile grid (Student | Teacher | Admin)
-     li-s-id / li-t-id   → email only (no password yet)
-     li-t-acct            → teacher: Learner | Teacher tiles
-     li-s-profiles        → 2-col profile grid (from email lookup)
-     li-s-pw / li-t-pw   → password only → API call → dashboard
-     li-a-cred            → admin: email + password on one screen
-     li-a-2fa             → admin: 6 separate digit boxes
+   Login — REFACTORED: single password model
+
+   Steps:
+     li-as            → role tile grid (Student | Teacher | Admin)
+     li-s-id / li-t-id → email only
+     li-t-acct         → teacher: Learner | Teacher (which context?)
+     li-s-profiles     → 2-col profile grid (pre-auth lookup)
+     li-s-pw / li-t-pw → password → API call → dashboard or profile pick
+     (post-auth)        → if multiple profiles, show profile picker
+     (post-auth teacher)→ password already used, switch to teacher ctx
+     li-s-pin          → PIN entry for a dependent profile
+     li-t-type         → Teacher type: Guest | Faculty (if BOTH)
+     li-a-cred         → admin: email + password
+     li-a-2fa          → admin: 6-digit boxes
+
+   REMOVED: separate teacher password prompt.
+   Teacher context is entered with the SAME account password used to log in.
 ════════════════════════════════════════════════════════════════ */
 
 const STEP_ROLE          = "role";
 const STEP_EMAIL         = "email";
-const STEP_ACCT_TYPE     = "acct_type";    // li-t-acct: Learner | Teacher (always for teacher role)
+const STEP_ACCT_TYPE     = "acct_type";    // Learner | Teacher choice (teacher login)
 const STEP_PROFILES      = "profiles";
 const STEP_PW            = "pw";
-const STEP_TEACHER_TYPE  = "teacher_type"; // li-t-type: Guest expert | Faculty (after teacher pw)
+const STEP_TEACHER_TYPE  = "teacher_type"; // Guest expert | Faculty (after teacher context)
 const STEP_PIN           = "pin";
 const STEP_ADMIN_CREDS   = "admin_creds";
 const STEP_2FA           = "2fa";
@@ -42,27 +51,27 @@ export default function Login() {
   const { showToast } = useToast();
   const location = useLocation();
 
-  const [step, setStep]       = useState(STEP_ROLE);
-  const [role, setRole]       = useState("");
-  const [error, setError]     = useState("");
+  const [step, setStep]           = useState(STEP_ROLE);
+  const [role, setRole]           = useState("");
+  const [error, setError]         = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
 
-  // Student / teacher auth
-  const [email, setEmail]         = useState("");
-  const [password, setPassword]   = useState("");
-  const [showPw, setShowPw]       = useState(false);
+  // Auth fields
+  const [email, setEmail]       = useState("");
+  const [password, setPassword] = useState("");
+  const [showPw, setShowPw]     = useState(false);
 
   // Email lookup result (pre-auth — display names only)
-  const [lookupProfiles, setLookupProfiles] = useState([]);
+  const [lookupProfiles, setLookupProfiles]     = useState([]);
   const [lookupHasTeacher, setLookupHasTeacher] = useState(false);
 
-  // Full post-auth profiles (returned by login API)
+  // Post-auth state
   const [profiles, setProfiles] = useState([]);
   const [teacher, setTeacher]   = useState(null);
 
-  // Profile selection state
+  // Profile selection
   const [pickedName, setPickedName]         = useState(null);
   const [pendingProfile, setPendingProfile] = useState(null);
   const [pin, setPin]                       = useState("");
@@ -70,11 +79,11 @@ export default function Login() {
   // Teacher sub-choice: "learner" | "teacher"
   const [teacherChoice, setTeacherChoice] = useState("");
 
-  // Admin fields
-  const [adminEmail, setAdminEmail]       = useState("");
-  const [adminPw, setAdminPw]             = useState("");
-  const [showAdminPw, setShowAdminPw]     = useState(false);
-  const [twoFACode, setTwoFACode]         = useState(["","","","","",""]);
+  // Admin
+  const [adminEmail, setAdminEmail]   = useState("");
+  const [adminPw, setAdminPw]         = useState("");
+  const [showAdminPw, setShowAdminPw] = useState(false);
+  const [twoFACode, setTwoFACode]     = useState(["","","","","",""]);
   const twoFARefs = useRef([]);
 
   useEffect(() => {
@@ -131,13 +140,13 @@ export default function Login() {
     }
   };
 
-  /* ── teacher: pick Learner | Teacher ── */
+  /* ── teacher: pick Learner | Teacher context ── */
   const pickTeacherAccount = (choice) => {
     setTeacherChoice(choice); setError("");
     setStep(STEP_PW);
   };
 
-  /* ── profile grid: user picks a profile name ── */
+  /* ── profile grid: user picks a profile name (pre-auth) ── */
   const pickProfileName = (name) => {
     setPickedName(name); setStep(STEP_PW);
   };
@@ -154,7 +163,8 @@ export default function Login() {
       setProfiles(list); setTeacher(data?.teacher || null);
       setStatusMsg("");
 
-      // ── Teacher chose "Teacher" mode → enter teaching context ──
+      // ── Teacher chose teacher context: enter it with the SAME password ──
+      // No separate teacher password — we already have the right password.
       if (role === "teacher" && teacherChoice === "teacher") {
         if (!tHasTeacher) {
           setError("No approved teacher identity on this account. Please contact support or wait for approval.");
@@ -163,38 +173,26 @@ export default function Login() {
         }
 
         setStatusMsg("Switching to teacher dashboard…");
-
-        // ↓ FIX: pass the password the user typed — it doubles as the
-        //        teacher-context password (falls back to account password
-        //        on the backend when a separate teacher password isn't set).
+        // Pass the ACCOUNT password — same one just used to log in.
         const tmResult = await enterTeacherMode(password);
 
         if (tmResult?.needsSignup) {
           setError("No teacher identity found. Please sign up as a teacher first.");
-          setStatusMsg("");
-          setSubmitting(false);
-          return;
+          setStatusMsg(""); setSubmitting(false); return;
         }
         if (tmResult?.notApproved) {
           setError("Your teacher account is awaiting approval.");
-          setStatusMsg("");
-          setSubmitting(false);
-          return;
+          setStatusMsg(""); setSubmitting(false); return;
         }
 
         setStatusMsg("");
-        const tType = data?.teacher?.type;
-        if (tType === "BOTH") {
-          setStep(STEP_TEACHER_TYPE);
-          setSubmitting(false);
-        } else {
-          setStep(STEP_TEACHER_TYPE);
-          setSubmitting(false);
-        }
+        // Show teacher type picker (Guest vs Faculty) if needed
+        setStep(STEP_TEACHER_TYPE);
+        setSubmitting(false);
         return;
       }
 
-      // ── Teacher chose "Learner" mode → auto-select the SELF profile ──
+      // ── Teacher chose learner context: auto-select the SELF profile ──
       if (role === "teacher" && teacherChoice === "learner") {
         const selfProfile =
           list.find((p) => p.relationship === "SELF") ??
@@ -202,13 +200,11 @@ export default function Login() {
 
         if (!selfProfile) {
           setError("No learner profile found on this account.");
-          setSubmitting(false);
-          return;
+          setSubmitting(false); return;
         }
         if (selfProfile.requires_pin) {
           setPendingProfile(selfProfile); setPin(""); setStep(STEP_PIN);
-          setSubmitting(false);
-          return;
+          setSubmitting(false); return;
         }
         await selectProfile(selfProfile.id);
         showToast({ message: "Welcome back!", duration: 2000 });
@@ -216,7 +212,14 @@ export default function Login() {
         return;
       }
 
-      // ── Student login ──
+      // ── Backend auto-selected (single profile, no teacher) ──
+      if (data.auto_selected || data.context === "learner") {
+        showToast({ message: "Welcome back!", duration: 2000 });
+        finishAndRedirect(APP_URL);
+        return;
+      }
+
+      // ── Student login: resolve target profile ──
       const target = pickedName
         ? list.find((p) => p.display_name === pickedName) ?? (list.length === 1 ? list[0] : null)
         : list.length === 1 ? list[0] : null;
@@ -242,7 +245,7 @@ export default function Login() {
     }
   };
 
-  /* ── profile click from post-auth list ── */
+  /* ── post-auth profile click ── */
   const chooseProfile = async (p) => {
     setError("");
     if (p.requires_pin) { setPendingProfile(p); setPin(""); setStep(STEP_PIN); return; }
@@ -306,21 +309,20 @@ export default function Login() {
   /* ── back navigation ── */
   const back = () => {
     setError("");
-    const go = (s) => setStep(s);
-    if (step === STEP_EMAIL)          go(STEP_ROLE);
-    if (step === STEP_ACCT_TYPE)      go(STEP_EMAIL);
+    if (step === STEP_EMAIL)       setStep(STEP_ROLE);
+    if (step === STEP_ACCT_TYPE)   setStep(STEP_EMAIL);
     if (step === STEP_PROFILES) {
-      go(teacherChoice === "learner" ? STEP_ACCT_TYPE : STEP_EMAIL);
+      setStep(teacherChoice === "learner" ? STEP_ACCT_TYPE : STEP_EMAIL);
     }
     if (step === STEP_PW) {
-      if (role === "teacher" && teacherChoice)  go(STEP_ACCT_TYPE);
-      else if (lookupProfiles.length > 1)        go(STEP_PROFILES);
-      else                                        go(STEP_EMAIL);
+      if (role === "teacher" && teacherChoice) setStep(STEP_ACCT_TYPE);
+      else if (lookupProfiles.length > 1)       setStep(STEP_PROFILES);
+      else                                       setStep(STEP_EMAIL);
     }
-    if (step === STEP_TEACHER_TYPE)   go(STEP_PW);
-    if (step === STEP_PIN)            go(STEP_PW);
-    if (step === STEP_ADMIN_CREDS)    go(STEP_ROLE);
-    if (step === STEP_2FA)            go(STEP_ADMIN_CREDS);
+    if (step === STEP_TEACHER_TYPE) setStep(STEP_PW);
+    if (step === STEP_PIN)          setStep(STEP_PW);
+    if (step === STEP_ADMIN_CREDS)  setStep(STEP_ROLE);
+    if (step === STEP_2FA)          setStep(STEP_ADMIN_CREDS);
   };
 
   return (
@@ -348,28 +350,25 @@ export default function Login() {
           <h1 className="af-heading">Log in as</h1>
           <p className="af-sub">How are you signing in?</p>
           <TileChoice cols={3} options={[
-            { key: "student", label: "Student", sub: "Learner profiles", color: PAL.student,
-              icon: <Icon name="cap" size={22} color={PAL.student} />,
-              onClick: () => pickRole("student") },
-            { key: "teacher", label: "Teacher", sub: "Guest or faculty", color: PAL.faculty,
-              icon: <Icon name="spark" size={20} color={PAL.faculty} />,
-              onClick: () => pickRole("teacher") },
-            { key: "admin",   label: "Admin",   sub: "Staff access",    color: PAL.admin,
-              icon: <Icon name="shield" size={20} color={PAL.admin} />,
-              onClick: () => pickRole("admin") },
+            { key: "student", label: "Student",  sub: "Learner profiles", color: PAL.student,
+              icon: <Icon name="cap"    size={22} color={PAL.student} />, onClick: () => pickRole("student") },
+            { key: "teacher", label: "Teacher",  sub: "Guest or faculty", color: PAL.faculty,
+              icon: <Icon name="spark"  size={20} color={PAL.faculty} />, onClick: () => pickRole("teacher") },
+            { key: "admin",   label: "Admin",    sub: "Staff access",     color: PAL.admin,
+              icon: <Icon name="shield" size={20} color={PAL.admin}   />, onClick: () => pickRole("admin")   },
           ]} />
           <div className="af-spacer" />
           <FooterLink>Don't have an account? <Link to="/signup">Create one</Link></FooterLink>
         </>
       )}
 
-      {/* ── li-s-id / li-t-id: email only ── */}
+      {/* ── email ── */}
       {step === STEP_EMAIL && (
         <>
           <h1 className="af-heading">Welcome back</h1>
           <p className="af-sub">{role === "teacher" ? "Teacher sign-in." : "Student sign-in."}</p>
           <form onSubmit={submitEmail} style={{ display: "contents" }}>
-            <Field id="lf-email" label="Username or email" type="email" value={email}
+            <Field id="lf-email" label="Email" type="email" value={email}
               onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
               required autoFocus autoComplete="email" />
             {error && <div className="af-error">{error}</div>}
@@ -391,64 +390,60 @@ export default function Login() {
           <p className="af-sub">Your email can act as a learner or a teacher.</p>
           <TileChoice cols={2} options={[
             { key: "learner", label: "Learner", sub: "Browse & take classes", color: PAL.student,
-              icon: <Icon name="cap" size={22} color={PAL.student} />,
-              onClick: () => pickTeacherAccount("learner") },
-            { key: "teacher", label: "Teacher", sub: "Teach & manage", color: PAL.faculty,
-              icon: <Icon name="spark" size={20} color={PAL.faculty} />,
-              onClick: () => pickTeacherAccount("teacher") },
+              icon: <Icon name="cap"   size={22} color={PAL.student} />, onClick: () => pickTeacherAccount("learner") },
+            { key: "teacher", label: "Teacher", sub: "Teach & manage",        color: PAL.faculty,
+              icon: <Icon name="spark" size={20} color={PAL.faculty} />, onClick: () => pickTeacherAccount("teacher") },
           ]} />
           {error && <div className="af-error">{error}</div>}
           <div className="af-spacer" />
         </>
       )}
 
-      {/* ── li-s-profiles: 2-col profile grid ── */}
-      {step === STEP_PROFILES && (
+      {/* ── profile grid (pre-auth) ── */}
+      {step === STEP_PROFILES && lookupProfiles.length > 0 && profiles.length === 0 && (
         <>
           <h1 className="af-heading">Choose a profile</h1>
-          <p className="af-sub">
-            {profiles.length > 0
-              ? "All profiles under this account."
-              : "Profiles linked to this email."}
-          </p>
-
-          {profiles.length > 0 ? (
-            <div className="af-profile-grid">
-              {profiles.map((p, i) => (
-                <button key={p.id} type="button" className="af-profile-tile"
-                  onClick={() => chooseProfile(p)}>
-                  <div className="af-profile-tile__num"
-                    style={{ background: PAL.student + "22", color: PAL.student }}>
-                    {i + 1}
-                  </div>
-                  <div className="af-profile-tile__name">{p.display_name || "Profile"}</div>
-                  {p.requires_pin && <div className="af-profile-tile__sub">PIN protected</div>}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="af-profile-grid">
-              {lookupProfiles.map((p, i) => (
-                <button key={i} type="button" className="af-profile-tile"
-                  onClick={() => pickProfileName(p.display_name)}>
-                  <div className="af-profile-tile__num"
-                    style={{ background: PAL.student + "22", color: PAL.student }}>
-                    {i + 1}
-                  </div>
-                  <div className="af-profile-tile__name">{p.display_name}</div>
-                  <div className="af-profile-tile__sub">
-                    {p.relationship === "SELF" ? "You" : "Learner"}
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+          <p className="af-sub">Profiles linked to this email.</p>
+          <div className="af-profile-grid">
+            {lookupProfiles.map((p, i) => (
+              <button key={i} type="button" className="af-profile-tile"
+                onClick={() => pickProfileName(p.display_name)}>
+                <div className="af-profile-tile__num"
+                  style={{ background: PAL.student + "22", color: PAL.student }}>{i + 1}</div>
+                <div className="af-profile-tile__name">{p.display_name}</div>
+                <div className="af-profile-tile__sub">
+                  {p.relationship === "SELF" ? "You" : "Learner"}
+                </div>
+              </button>
+            ))}
+          </div>
           {error && <div className="af-error">{error}</div>}
           <div className="af-spacer" />
         </>
       )}
 
-      {/* ── li-s-pw / li-t-pw: password only ── */}
+      {/* ── profile grid (post-auth) ── */}
+      {step === STEP_PROFILES && profiles.length > 0 && (
+        <>
+          <h1 className="af-heading">Choose a profile</h1>
+          <p className="af-sub">All profiles under this account.</p>
+          <div className="af-profile-grid">
+            {profiles.map((p, i) => (
+              <button key={p.id} type="button" className="af-profile-tile"
+                onClick={() => chooseProfile(p)}>
+                <div className="af-profile-tile__num"
+                  style={{ background: PAL.student + "22", color: PAL.student }}>{i + 1}</div>
+                <div className="af-profile-tile__name">{p.display_name || "Profile"}</div>
+                {p.requires_pin && <div className="af-profile-tile__sub">PIN protected</div>}
+              </button>
+            ))}
+          </div>
+          {error && <div className="af-error">{error}</div>}
+          <div className="af-spacer" />
+        </>
+      )}
+
+      {/* ── password ── */}
       {step === STEP_PW && (
         <>
           <h1 className="af-heading">
@@ -508,33 +503,21 @@ export default function Login() {
         </>
       )}
 
-      {/* ── li-t-type: Teacher type — Guest expert | Faculty ── */}
+      {/* ── teacher type (Guest | Faculty) — shown after entering teacher ctx ── */}
       {step === STEP_TEACHER_TYPE && (
         <>
           <h1 className="af-heading">Teacher type?</h1>
           <p className="af-sub">We route you to the right dashboard.</p>
           <TileChoice cols={2} options={[
             {
-              key: "guest",
-              label: "Guest expert",
-              sub: "Skills & bookings",
-              color: PAL.guest,
+              key: "guest", label: "Guest expert", sub: "Skills & bookings", color: PAL.guest,
               icon: <Icon name="spark" size={20} color={PAL.guest} />,
-              onClick: () => {
-                showToast({ message: "Welcome back!", duration: 2000 });
-                finishAndRedirect(TEACHER_URL);
-              },
+              onClick: () => { showToast({ message: "Welcome back!", duration: 2000 }); finishAndRedirect(TEACHER_URL); },
             },
             {
-              key: "faculty",
-              label: "Faculty",
-              sub: "Classes & timetable",
-              color: PAL.faculty,
+              key: "faculty", label: "Faculty", sub: "Classes & timetable", color: PAL.faculty,
               icon: <Icon name="cap" size={22} color={PAL.faculty} />,
-              onClick: () => {
-                showToast({ message: "Welcome back!", duration: 2000 });
-                finishAndRedirect(TEACHER_URL);
-              },
+              onClick: () => { showToast({ message: "Welcome back!", duration: 2000 }); finishAndRedirect(TEACHER_URL); },
             },
           ]} />
           {teacher?.type && teacher.type !== "BOTH" && (
@@ -548,15 +531,14 @@ export default function Login() {
         </>
       )}
 
-      {/* ── li-a-cred: admin email + password ── */}
+      {/* ── admin credentials ── */}
       {step === STEP_ADMIN_CREDS && (
         <>
           <h1 className="af-heading">Admin sign-in</h1>
           <form onSubmit={submitAdminCreds} style={{ display: "contents" }}>
             <Field id="lf-adm-email" label="Admin email" type="email" value={adminEmail}
               onChange={(e) => setAdminEmail(e.target.value)}
-              placeholder="admin@shikshacom.com"
-              required autoFocus autoComplete="email" />
+              placeholder="admin@shikshacom.com" required autoFocus autoComplete="email" />
             <PasswordField id="lf-adm-pw" label="Password" value={adminPw}
               onChange={(e) => setAdminPw(e.target.value)} placeholder="••••••••"
               required autoComplete="current-password"
@@ -572,7 +554,7 @@ export default function Login() {
         </>
       )}
 
-      {/* ── li-a-2fa: six digit boxes ── */}
+      {/* ── admin 2FA ── */}
       {step === STEP_2FA && (
         <>
           <h1 className="af-heading">Two-factor authentication</h1>
@@ -580,17 +562,11 @@ export default function Login() {
           <form onSubmit={submit2FA} style={{ display: "contents" }}>
             <div className="af-2fa-boxes">
               {twoFACode.map((v, i) => (
-                <input
-                  key={i}
-                  ref={(el) => { twoFARefs.current[i] = el; }}
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={v}
+                <input key={i} ref={(el) => { twoFARefs.current[i] = el; }}
+                  inputMode="numeric" maxLength={1} value={v}
                   onChange={(e) => handle2FAInput(i, e.target.value)}
                   onKeyDown={(e) => handle2FAKey(i, e)}
-                  className="af-2fa-box"
-                  autoFocus={i === 0}
-                />
+                  className="af-2fa-box" autoFocus={i === 0} />
               ))}
             </div>
             {error && <div className="af-error">{error}</div>}

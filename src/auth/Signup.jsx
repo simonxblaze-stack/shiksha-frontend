@@ -6,47 +6,46 @@ import {
 } from "./AuthKit";
 
 /* ════════════════════════════════════════════════════════════════
-   Signup — steps:
-     su-role    → role tiles: Student | Teacher
+   Signup — REFACTORED: single-password model
+
+   REMOVED:
+     - teacher_password field (no separate teacher password)
+     - The "set a teacher password" step
+     - add-to-existing confirm screen no longer shows password labelled
+       as "teacher password" — it's just "your account password"
+
+   All other steps unchanged:
+     su-role    → Student | Teacher tiles
      su-basic   → email, username, password, confirm
-                  ↓ email check on submit ↓
-     su-exist   → (new) email already exists: confirm identity + explain what's being added
+     su-exist   → existing account: confirm identity with account password
      Student:
-       su-profile → create one profile at a time (name input)
-       su-add     → "Add another?" chip list, yes/no
-       → submit → /verify-email (new account) or /login (add-to-existing)
+       su-profile → create profiles one at a time
+       su-add     → "Add another?" chips
+       → submit → /verify-email or /login
      Teacher:
        su-ttype   → Guest expert | Faculty tiles
        Guest:
          su-g-form    → skill, method, bio
-         su-g-listed  → "You're an Expert teacher" info
+         su-g-listed  → "You're an Expert teacher"
          su-g-course  → optional course setup
-         su-g-live    → "You're live!" → /verify-email or /login
+         su-g-live    → "You're live!"
        Faculty:
          su-f-form    → qualifications, subjects, experience
-         su-f-waiting → "Application submitted" waiting screen
-
-   Email/account enforcement rules:
-     NEW email + Student              → create new account
-     NEW email + Teacher              → create new account
-     EXISTING (teacher only) + Student → add learner profiles to container
-     EXISTING (student only) + Teacher → add teacher identity to container
-     EXISTING (has student) + Student  → BLOCK: "already has learner profiles"
-     EXISTING (has teacher) + Teacher  → BLOCK: "already has teacher account"
+         su-f-waiting → "Application submitted"
 ════════════════════════════════════════════════════════════════ */
 
-const STEP_ROLE            = "role";
-const STEP_BASIC           = "basic";
-const STEP_EXISTING_CONFIRM = "existing_confirm"; // NEW: add-to-existing gate
-const STEP_PROFILE         = "profile";
-const STEP_ADD_MORE        = "add_more";
-const STEP_TEACHER_TYPE    = "ttype";
-const STEP_GUEST_FORM      = "g_form";
-const STEP_GUEST_LISTED    = "g_listed";
-const STEP_GUEST_COURSE    = "g_course";
-const STEP_GUEST_LIVE      = "g_live";
-const STEP_FAC_FORM        = "f_form";
-const STEP_FAC_WAITING     = "f_waiting";
+const STEP_ROLE             = "role";
+const STEP_BASIC            = "basic";
+const STEP_EXISTING_CONFIRM = "existing_confirm";
+const STEP_PROFILE          = "profile";
+const STEP_ADD_MORE         = "add_more";
+const STEP_TEACHER_TYPE     = "ttype";
+const STEP_GUEST_FORM       = "g_form";
+const STEP_GUEST_LISTED     = "g_listed";
+const STEP_GUEST_COURSE     = "g_course";
+const STEP_GUEST_LIVE       = "g_live";
+const STEP_FAC_FORM         = "f_form";
+const STEP_FAC_WAITING      = "f_waiting";
 
 const PAL = { student: "#13899b", faculty: "#425f7f", guest: "#2f9d42" };
 
@@ -65,10 +64,10 @@ export default function Signup() {
   const [submitting, setSubmitting] = useState(false);
 
   /* role */
-  const [role, setRole]               = useState("");  // "STUDENT" | "TEACHER"
-  const [teacherType, setTeacherType] = useState(""); // "GUEST" | "FACULTY"
+  const [role, setRole]               = useState("");   // "STUDENT" | "TEACHER"
+  const [teacherType, setTeacherType] = useState("");   // "GUEST" | "FACULTY"
 
-  /* basic details (new account) */
+  /* basic details */
   const [email, setEmail]       = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -82,7 +81,7 @@ export default function Signup() {
   const [existingPassword, setExistingPassword]       = useState("");
   const [showExistingPw, setShowExistingPw]           = useState(false);
 
-  /* student profiles — built one at a time */
+  /* student profiles */
   const [profiles, setProfiles]       = useState([]);
   const [profileName, setProfileName] = useState("");
   const [profileRel, setProfileRel]   = useState("SELF");
@@ -121,13 +120,13 @@ export default function Signup() {
   /* ── helpers ── */
   const go = (s) => { setError(""); setStep(s); };
 
-  /* ── API call: submit signup ─────────────────────────────────────────── */
+  /* ── API call: submit signup ── */
   const doSignup = async (extra) => {
     const payload = {
       email,
-      // Username not needed for add-to-existing (account already has one).
       ...(isAddingToExisting ? {} : { username }),
-      // For add-to-existing, password is the existing account password (for server-side verification).
+      // For add-to-existing: existingPassword is their account password (ownership proof).
+      // For new accounts: password is the account password they just chose.
       password: isAddingToExisting ? existingPassword : password,
       role,
       ...extra,
@@ -136,7 +135,6 @@ export default function Signup() {
     try {
       await signup(payload);
       if (isAddingToExisting) {
-        // Verified account — no email verification needed, go straight to login.
         navigate("/login", {
           replace: true,
           state: { message: "Identity added! Please log in." },
@@ -150,14 +148,11 @@ export default function Signup() {
     }
   };
 
-  /* ── back ────────────────────────────────────────────────────────────── */
+  /* ── back ── */
   const back = () => {
     setError("");
-    if (step === STEP_BASIC) {
-      go(STEP_ROLE);
-    }
+    if (step === STEP_BASIC) go(STEP_ROLE);
     if (step === STEP_EXISTING_CONFIRM) {
-      // Reset add-to-existing state when going back to STEP_BASIC.
       setIsAddingToExisting(false);
       setExistingAccountType("");
       setExistingPassword("");
@@ -177,17 +172,15 @@ export default function Signup() {
 
   /* ════════ STEP HANDLERS ════════════════════════════════════════════════ */
 
-  /* su-basic: email check on submit, then branch */
+  /* su-basic: email check then branch */
   const nextFromBasic = async (e) => {
     e.preventDefault();
     setError("");
     setSubmitting(true);
-
     try {
       const state = await checkEmail(email);
 
       if (!state.exists) {
-        /* ── Brand new email: validate fields for new account ── */
         if (password !== confirm) { setError("Passwords do not match."); return; }
         if (password.length < 8)  { setError("Password must be at least 8 characters."); return; }
         if (!username.trim())      { setError("Username is required."); return; }
@@ -196,7 +189,6 @@ export default function Signup() {
         return;
       }
 
-      /* ── Email exists: enforce rules ── */
       const { has_student, has_teacher } = state;
 
       if (role === "STUDENT") {
@@ -204,7 +196,6 @@ export default function Signup() {
           setError("This email already has learner profiles. Log in to manage them.");
           return;
         }
-        // has_teacher only → offer to add learner profiles to this container
         setIsAddingToExisting(true);
         setExistingAccountType("has_teacher");
         go(STEP_EXISTING_CONFIRM);
@@ -216,7 +207,6 @@ export default function Signup() {
           setError("This email already has a teacher account. Log in instead.");
           return;
         }
-        // has_student only → offer to add teacher identity to this container
         setIsAddingToExisting(true);
         setExistingAccountType("has_student");
         go(STEP_EXISTING_CONFIRM);
@@ -224,7 +214,7 @@ export default function Signup() {
       }
 
     } catch {
-      /* checkEmail unreachable — fail open, treat as new account */
+      // checkEmail unreachable — fail open
       if (password !== confirm) { setError("Passwords do not match."); return; }
       if (password.length < 8)  { setError("Password must be at least 8 characters."); return; }
       if (!username.trim())      { setError("Username is required."); return; }
@@ -235,7 +225,7 @@ export default function Signup() {
     }
   };
 
-  /* su-exist: existing account confirmed → proceed to identity-specific steps */
+  /* su-exist: confirm account ownership then proceed */
   const nextFromExistingConfirm = (e) => {
     e.preventDefault();
     setError("");
@@ -244,7 +234,7 @@ export default function Signup() {
     else go(STEP_TEACHER_TYPE);
   };
 
-  /* su-profile: save one profile name then go to su-add */
+  /* su-profile */
   const saveProfile = (e) => {
     e.preventDefault(); setError("");
     if (!profileName.trim()) { setError("Enter a profile name."); return; }
@@ -258,18 +248,14 @@ export default function Signup() {
     go(STEP_ADD_MORE);
   };
 
-  /* su-add "No, continue" → submit */
-  const finishProfiles = () => {
-    setError("");
-    doSubmitStudent();
-  };
+  const finishProfiles = () => { setError(""); doSubmitStudent(); };
   const doSubmitStudent = () => {
     const cleaned = profiles.filter((p) => p.display_name);
     if (cleaned.length === 0) { setError("Add at least one profile."); return; }
     doSignup({ profiles: cleaned });
   };
 
-  /* guest: submit at su-g-form then show listed */
+  /* guest */
   const submitGuestForm = async (e) => {
     e.preventDefault(); setError("");
     if (!skill.trim()) { setError("Enter the skill you teach."); return; }
@@ -281,6 +267,7 @@ export default function Signup() {
         password: isAddingToExisting ? existingPassword : password,
         role,
         teacher_type: "GUEST",
+        // NOTE: no teacher_password — single account password
       });
       setSubmitting(false);
       go(STEP_GUEST_LISTED);
@@ -290,7 +277,7 @@ export default function Signup() {
     }
   };
 
-  /* faculty: submit at su-f-form then show waiting */
+  /* faculty */
   const submitFacultyForm = async (e) => {
     e.preventDefault(); setError("");
     if (!qual.trim()) { setError("Enter your highest qualification."); return; }
@@ -302,6 +289,7 @@ export default function Signup() {
         password: isAddingToExisting ? existingPassword : password,
         role,
         teacher_type: "FACULTY",
+        // NOTE: no teacher_password — single account password
       });
       setSubmitting(false);
       go(STEP_FAC_WAITING);
@@ -311,13 +299,10 @@ export default function Signup() {
     }
   };
 
-  /* guest live: after course or skip → verify email (or login for add-to-existing) */
+  /* guest live finish */
   const finishGuestLive = () => {
     if (isAddingToExisting) {
-      navigate("/login", {
-        replace: true,
-        state: { message: "Teacher identity added! Please log in." },
-      });
+      navigate("/login", { replace: true, state: { message: "Teacher identity added! Please log in." } });
     } else {
       navigate("/verify-email", { replace: true, state: { email } });
     }
@@ -332,14 +317,14 @@ export default function Signup() {
           : <span />}
       </div>
 
-      {/* ── su-role: Student | Teacher tiles ── */}
+      {/* ── su-role ── */}
       {step === STEP_ROLE && (
         <>
           <h1 className="af-heading">Sign Up</h1>
           <p className="af-sub">First, what brings you to ShikshaCom?</p>
           <TileChoice cols={2} options={[
             { key: "STUDENT", label: "Student", sub: "Learn from experts",
-              color: PAL.student, icon: <Icon name="cap" size={22} color={PAL.student} />,
+              color: PAL.student, icon: <Icon name="cap"   size={22} color={PAL.student} />,
               onClick: () => { setRole("STUDENT"); setError(""); go(STEP_BASIC); } },
             { key: "TEACHER", label: "Teacher", sub: "Teach your skills",
               color: PAL.faculty, icon: <Icon name="spark" size={20} color={PAL.faculty} />,
@@ -350,7 +335,7 @@ export default function Signup() {
         </>
       )}
 
-      {/* ── su-basic: email, username, password ── */}
+      {/* ── su-basic ── */}
       {step === STEP_BASIC && (
         <>
           <h1 className="af-heading">
@@ -388,9 +373,7 @@ export default function Signup() {
       {step === STEP_EXISTING_CONFIRM && (
         <>
           <h1 className="af-heading">
-            {existingAccountType === "has_teacher"
-              ? "Add learner profiles"
-              : "Add teacher identity"}
+            {existingAccountType === "has_teacher" ? "Add learner profiles" : "Add teacher identity"}
           </h1>
           <p className="af-sub">
             {existingAccountType === "has_teacher"
@@ -423,7 +406,7 @@ export default function Signup() {
               label="Confirm with your account password"
               value={existingPassword}
               onChange={(e) => setExistingPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Your account password"
               required autoFocus autoComplete="current-password"
               show={showExistingPw} onToggle={() => setShowExistingPw((v) => !v)}
             />
@@ -439,25 +422,25 @@ export default function Signup() {
         </>
       )}
 
-      {/* ── su-ttype: teacher type tiles ── */}
+      {/* ── su-ttype ── */}
       {step === STEP_TEACHER_TYPE && (
         <>
           <h1 className="af-heading">What kind of teacher?</h1>
           <p className="af-sub">Guest experts teach short skill sessions. Faculty are assigned, vetted instructors.</p>
           <TileChoice cols={2} options={[
-            { key: "GUEST", label: "Guest expert", sub: "Short skill sessions",
-              color: PAL.guest, icon: <Icon name="spark" size={20} color={PAL.guest} />,
-              onClick: () => { setTeacherType("GUEST"); go(STEP_GUEST_FORM); } },
-            { key: "FACULTY", label: "Faculty", sub: "Assigned instructor",
-              color: PAL.faculty, icon: <Icon name="cap" size={22} color={PAL.faculty} />,
-              onClick: () => { setTeacherType("FACULTY"); go(STEP_FAC_FORM); } },
+            { key: "GUEST",   label: "Guest expert", sub: "Short skill sessions",
+              color: PAL.guest,   icon: <Icon name="spark" size={20} color={PAL.guest}   />,
+              onClick: () => { setTeacherType("GUEST");   go(STEP_GUEST_FORM); } },
+            { key: "FACULTY", label: "Faculty",      sub: "Assigned instructor",
+              color: PAL.faculty, icon: <Icon name="cap"   size={22} color={PAL.faculty} />,
+              onClick: () => { setTeacherType("FACULTY"); go(STEP_FAC_FORM);   } },
           ]} />
           {error && <div className="af-error">{error}</div>}
           <div className="af-spacer" />
         </>
       )}
 
-      {/* ── su-profile: create one profile at a time ── */}
+      {/* ── su-profile ── */}
       {step === STEP_PROFILE && (
         <>
           <h1 className="af-heading">Create a profile</h1>
@@ -475,17 +458,16 @@ export default function Signup() {
                   : profiles.length === 0 ? "e.g. Your own name" : "e.g. Child's name"
               }
               required autoFocus />
+
             {(profiles.length > 0 || (isAddingToExisting && existingAccountType === "has_teacher")) && (
               <div className="af-field">
                 <label htmlFor="su-prel">Relationship</label>
                 <select id="su-prel" value={profileRel}
                   onChange={(e) => setProfileRel(e.target.value)}>
-                  {/* Only allow SELF if no SELF profile exists yet on this account */}
                   {!(isAddingToExisting && existingAccountType === "has_teacher") && profiles.length === 0 && (
                     <option value="SELF">This is me</option>
                   )}
                   <option value="DEPENDENT">A child / dependent</option>
-                  {/* Allow SELF for student-only accounts that don't have a profile yet */}
                   {isAddingToExisting && existingAccountType !== "has_teacher" && profiles.length === 0 && (
                     <option value="SELF">This is me</option>
                   )}
@@ -516,18 +498,16 @@ export default function Signup() {
         </>
       )}
 
-      {/* ── su-add: add another? ── */}
+      {/* ── su-add ── */}
       {step === STEP_ADD_MORE && (
         <>
           <h1 className="af-heading">Add another profile?</h1>
           <p className="af-sub">Same email, separate profile — each gets its own progress and optional PIN.</p>
-
           <div className="af-chips" style={{ marginTop: 20 }}>
             {profiles.map((p, i) => (
               <span key={i} className="af-chip">{p.display_name}</span>
             ))}
           </div>
-
           {error && <div className="af-error">{error}</div>}
           <div className="af-spacer" />
           <div className="af-actions">
@@ -542,7 +522,7 @@ export default function Signup() {
         </>
       )}
 
-      {/* ── su-g-form: guest expert details ── */}
+      {/* ── su-g-form ── */}
       {step === STEP_GUEST_FORM && (
         <>
           <h1 className="af-heading">Guest expert — your details</h1>
@@ -556,8 +536,8 @@ export default function Signup() {
               placeholder="e.g. Project-first, 1-on-1…" />
             <div className="af-field">
               <label htmlFor="su-bio">Short bio</label>
-              <textarea id="su-bio" className="af-field" rows={3}
-                value={bio} onChange={(e) => setBio(e.target.value)}
+              <textarea id="su-bio" rows={3} value={bio}
+                onChange={(e) => setBio(e.target.value)}
                 placeholder="Your background and teaching style."
                 style={{ width: "100%", height: "auto", resize: "vertical",
                   border: "1.5px solid #E7E7E4", borderRadius: 14,
@@ -575,7 +555,7 @@ export default function Signup() {
         </>
       )}
 
-      {/* ── su-g-listed: you're now an expert ── */}
+      {/* ── su-g-listed ── */}
       {step === STEP_GUEST_LISTED && (
         <>
           <StatusChip icon="spark" role="guest" />
@@ -584,8 +564,7 @@ export default function Signup() {
             Your profile is listed in the academy's expert directory. Set up your first course now — or do it later from your dashboard.
           </p>
           <div className="af-banner-info">
-            <div className="af-banner-info__icon"
-              style={{ background: PAL.guest + "22", color: PAL.guest }}>
+            <div className="af-banner-info__icon" style={{ background: PAL.guest + "22", color: PAL.guest }}>
               <Icon name="spark" size={19} color={PAL.guest} />
             </div>
             <div className="af-banner-info__text">
@@ -604,7 +583,7 @@ export default function Signup() {
         </>
       )}
 
-      {/* ── su-g-course: optional course setup ── */}
+      {/* ── su-g-course ── */}
       {step === STEP_GUEST_COURSE && (
         <>
           <h1 className="af-heading">Set up your course</h1>
@@ -613,11 +592,9 @@ export default function Signup() {
             onChange={(e) => setCourseTitle(e.target.value)}
             placeholder="e.g. Python & Data Science — from scratch" autoFocus />
           <Field id="su-cskill" label="Skill / category" value={courseSkill}
-            onChange={(e) => setCourseSkill(e.target.value)}
-            placeholder="e.g. Coding & Web" />
+            onChange={(e) => setCourseSkill(e.target.value)} placeholder="e.g. Coding & Web" />
           <Field id="su-cprice" label="Price per hour" value={coursePrice}
-            onChange={(e) => setCoursePrice(e.target.value)}
-            placeholder="₹ 450" />
+            onChange={(e) => setCoursePrice(e.target.value)} placeholder="₹ 450" />
           <div className="af-field">
             <label htmlFor="su-cdesc">What learners will get</label>
             <textarea id="su-cdesc" rows={3} value={courseDesc}
@@ -640,7 +617,7 @@ export default function Signup() {
         </>
       )}
 
-      {/* ── su-g-live: you're live! ── */}
+      {/* ── su-g-live ── */}
       {step === STEP_GUEST_LIVE && (
         <>
           <StatusChip icon="check" role="success" />
@@ -653,14 +630,13 @@ export default function Signup() {
               Learners can now reach you
             </div>
             <div style={{ fontSize: 13, color: "#5b6470", marginTop: 6, lineHeight: 1.5 }}>
-              Your expert profile is active in the directory. Students can view you and start a conversation.
+              Your expert profile is active in the directory.
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 18, maxWidth: 520 }}>
             {["Listed in the expert directory", "Open to learner messages & bookings",
               "Manage courses any time from your dashboard"].map((s) => (
-              <div key={s} style={{ display: "flex", alignItems: "center", gap: 10,
-                fontSize: 12.5, color: "#15502a" }}>
+              <div key={s} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12.5, color: "#15502a" }}>
                 <span style={{ color: "#2f9d42" }}><Icon name="check" size={14} color="#2f9d42" /></span>
                 {s}
               </div>
@@ -675,7 +651,7 @@ export default function Signup() {
         </>
       )}
 
-      {/* ── su-f-form: faculty application ── */}
+      {/* ── su-f-form ── */}
       {step === STEP_FAC_FORM && (
         <>
           <h1 className="af-heading">Faculty — application</h1>
@@ -685,11 +661,9 @@ export default function Signup() {
               onChange={(e) => setQual(e.target.value)}
               placeholder="e.g. M.Sc Mathematics" required autoFocus />
             <Field id="su-subj" label="Subjects you'll teach" value={subj}
-              onChange={(e) => setSubj(e.target.value)}
-              placeholder="e.g. Algebra, Calculus" />
+              onChange={(e) => setSubj(e.target.value)} placeholder="e.g. Algebra, Calculus" />
             <Field id="su-exp" label="Years of experience" value={exp}
-              onChange={(e) => setExp(e.target.value)}
-              placeholder="e.g. 6 years" />
+              onChange={(e) => setExp(e.target.value)} placeholder="e.g. 6 years" />
             {error && <div className="af-error">{error}</div>}
             <div className="af-spacer" />
             <div className="af-actions">
@@ -701,60 +675,48 @@ export default function Signup() {
         </>
       )}
 
-      {/* ── su-f-waiting: application submitted ── */}
+      {/* ── su-f-waiting ── */}
       {step === STEP_FAC_WAITING && (
         <>
           <StatusChip icon="clock" role="faculty" />
           <h1 className="af-heading">Application submitted</h1>
           <p className="af-sub">Your application is now with the academy's admin team for review.</p>
-
           <div className="af-wait-row" style={{ marginTop: 18 }}>
             <div className="af-wait-spin" />
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>
-              You're in the review queue
-            </div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>You're in the review queue</div>
           </div>
-
-          <p style={{ fontSize: 13.5, color: "#5b6470", lineHeight: 1.6, margin: "12px 0 0",
-            maxWidth: 460 }}>
+          <p style={{ fontSize: 13.5, color: "#5b6470", lineHeight: 1.6, margin: "12px 0 0", maxWidth: 460 }}>
             We'll notify you by email whether you're qualified to teach within{" "}
             <strong style={{ color: "#15502a" }}>3–5 working days</strong>.
           </p>
-
           <div className="af-banner-warn">
             <Icon name="shield" size={16} color="#b9760f" />
             <div>
               <strong>Heads up:</strong> once approved, log in within{" "}
-              <strong>3 days</strong>. If you don't, your approval expires and
-              you'll need to re-apply.
+              <strong>3 days</strong>. If you don't, your approval expires and you'll need to re-apply.
             </div>
           </div>
-
           <div className="af-checklist">
             {[
               { label: "Application received", done: true },
               { label: "Admin review (3–5 days)", done: false },
               { label: "Decision emailed to you", done: false },
             ].map(({ label, done }) => (
-              <div key={label} className="af-checklist__item"
-                style={{ color: done ? "#15502a" : "#8b9090" }}>
-                <div className="af-checklist__dot"
-                  style={{ background: done ? "#2f9d42" : "#e3e8e4" }}>
+              <div key={label} className="af-checklist__item" style={{ color: done ? "#15502a" : "#8b9090" }}>
+                <div className="af-checklist__dot" style={{ background: done ? "#2f9d42" : "#e3e8e4" }}>
                   {done && <Icon name="check" size={11} color="#fff" />}
                 </div>
                 {label}
               </div>
             ))}
           </div>
-
           <div className="af-spacer" />
           <div className="af-actions">
             <Link to="/login" className="af-btn--secondary" style={{
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               height: 52, padding: "0 24px", borderRadius: 14,
               border: "1.5px solid #E7E7E4", background: "#fff",
-              color: "#3c3d44", fontSize: 14.5, fontWeight: 600,
-              textDecoration: "none" }}>
+              color: "#3c3d44", fontSize: 14.5, fontWeight: 600, textDecoration: "none" }}>
               Back to login
             </Link>
           </div>
