@@ -18,7 +18,7 @@ import { getFormFillupData } from "../api/formFillupApi";
 
 const Navbar = () => {
   const { t } = useLanguage();
-  const { isAuthenticated, user, loading, logout } = useAuth();
+  const { isAuthenticated, user, loading, logout, isTeacherContext } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -132,7 +132,9 @@ const Navbar = () => {
       normalizedRoles.includes("teacher") || singleRole === "teacher";
 
     if (isTeacher) {
-      window.location.href = TEACHER_URL;
+      // Already in teacher context → go straight to the teacher dashboard.
+      // Otherwise go to pick-profile so the user can enter the teacher password first.
+      window.location.href = isTeacherContext ? TEACHER_URL : "/pick-profile";
     } else {
       window.location.href = APP_URL;
     }

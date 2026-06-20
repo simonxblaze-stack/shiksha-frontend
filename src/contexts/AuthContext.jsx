@@ -85,10 +85,10 @@ export const AuthProvider = ({ children }) => {
 
   const switchProfile = selectProfile;
 
-  /** Enter teacher mode (no re-login). */
-  const enterTeacherMode = async () => {
+  /** Enter teacher mode (no re-login). Requires the teacher password. */
+  const enterTeacherMode = async (password = "") => {
     try {
-      await api.post("/accounts/context/teacher/");
+      await api.post("/accounts/context/teacher/", { password });
       setLoading(true);
       return await bootstrap();
     } catch (err) {
