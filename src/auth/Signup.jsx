@@ -6,36 +6,47 @@ import {
 } from "./AuthKit";
 
 /* ════════════════════════════════════════════════════════════════
-   Signup — exact design match:
+   Signup — steps:
      su-role    → role tiles: Student | Teacher
      su-basic   → email, username, password, confirm
+                  ↓ email check on submit ↓
+     su-exist   → (new) email already exists: confirm identity + explain what's being added
      Student:
        su-profile → create one profile at a time (name input)
        su-add     → "Add another?" chip list, yes/no
-       → submit → /verify-email
+       → submit → /verify-email (new account) or /login (add-to-existing)
      Teacher:
        su-ttype   → Guest expert | Faculty tiles
        Guest:
          su-g-form    → skill, method, bio
          su-g-listed  → "You're an Expert teacher" info
          su-g-course  → optional course setup
-         su-g-live    → "You're live!" → /verify-email
+         su-g-live    → "You're live!" → /verify-email or /login
        Faculty:
          su-f-form    → qualifications, subjects, experience
          su-f-waiting → "Application submitted" waiting screen
+
+   Email/account enforcement rules:
+     NEW email + Student              → create new account
+     NEW email + Teacher              → create new account
+     EXISTING (teacher only) + Student → add learner profiles to container
+     EXISTING (student only) + Teacher → add teacher identity to container
+     EXISTING (has student) + Student  → BLOCK: "already has learner profiles"
+     EXISTING (has teacher) + Teacher  → BLOCK: "already has teacher account"
 ════════════════════════════════════════════════════════════════ */
 
-const STEP_ROLE         = "role";
-const STEP_BASIC        = "basic";
-const STEP_PROFILE      = "profile";      // su-profile: one-at-a-time
-const STEP_ADD_MORE     = "add_more";     // su-add: yes / no
-const STEP_TEACHER_TYPE = "ttype";
-const STEP_GUEST_FORM   = "g_form";
-const STEP_GUEST_LISTED = "g_listed";
-const STEP_GUEST_COURSE = "g_course";
-const STEP_GUEST_LIVE   = "g_live";
-const STEP_FAC_FORM     = "f_form";
-const STEP_FAC_WAITING  = "f_waiting";
+const STEP_ROLE            = "role";
+const STEP_BASIC           = "basic";
+const STEP_EXISTING_CONFIRM = "existing_confirm"; // NEW: add-to-existing gate
+const STEP_PROFILE         = "profile";
+const STEP_ADD_MORE        = "add_more";
+const STEP_TEACHER_TYPE    = "ttype";
+const STEP_GUEST_FORM      = "g_form";
+const STEP_GUEST_LISTED    = "g_listed";
+const STEP_GUEST_COURSE    = "g_course";
+const STEP_GUEST_LIVE      = "g_live";
+const STEP_FAC_FORM        = "f_form";
+const STEP_FAC_WAITING     = "f_waiting";
 
 const PAL = { student: "#13899b", faculty: "#425f7f", guest: "#2f9d42" };
 
@@ -46,7 +57,7 @@ function readErr(err, fallback) {
 }
 
 export default function Signup() {
-  const { signup } = useAuth();
+  const { signup, checkEmail } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep]         = useState(STEP_ROLE);
@@ -57,7 +68,7 @@ export default function Signup() {
   const [role, setRole]               = useState("");  // "STUDENT" | "TEACHER"
   const [teacherType, setTeacherType] = useState(""); // "GUEST" | "FACULTY"
 
-  /* basic details */
+  /* basic details (new account) */
   const [email, setEmail]       = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -65,8 +76,14 @@ export default function Signup() {
   const [showPw, setShowPw]     = useState(false);
   const [showCf, setShowCf]     = useState(false);
 
+  /* add-to-existing state */
+  const [isAddingToExisting, setIsAddingToExisting]   = useState(false);
+  const [existingAccountType, setExistingAccountType] = useState(""); // "has_teacher" | "has_student"
+  const [existingPassword, setExistingPassword]       = useState("");
+  const [showExistingPw, setShowExistingPw]           = useState(false);
+
   /* student profiles — built one at a time */
-  const [profiles, setProfiles] = useState([]);    // accumulated [{display_name, relationship}]
+  const [profiles, setProfiles]       = useState([]);
   const [profileName, setProfileName] = useState("");
   const [profileRel, setProfileRel]   = useState("SELF");
 
@@ -76,15 +93,15 @@ export default function Signup() {
   const [bio, setBio]       = useState("");
 
   /* guest course (optional) */
-  const [courseTitle, setCourseTitle]   = useState("");
-  const [courseSkill, setCourseSkill]   = useState("");
-  const [coursePrice, setCoursePrice]   = useState("");
-  const [courseDesc, setCourseDesc]     = useState("");
+  const [courseTitle, setCourseTitle] = useState("");
+  const [courseSkill, setCourseSkill] = useState("");
+  const [coursePrice, setCoursePrice] = useState("");
+  const [courseDesc, setCourseDesc]   = useState("");
 
   /* faculty form */
-  const [qual, setQual]   = useState("");
-  const [subj, setSubj]   = useState("");
-  const [exp, setExp]     = useState("");
+  const [qual, setQual] = useState("");
+  const [subj, setSubj] = useState("");
+  const [exp, setExp]   = useState("");
 
   /* ── derived accent / label ── */
   const accent =
@@ -104,41 +121,127 @@ export default function Signup() {
   /* ── helpers ── */
   const go = (s) => { setError(""); setStep(s); };
 
-  /* ── API calls ── */
+  /* ── API call: submit signup ─────────────────────────────────────────── */
   const doSignup = async (extra) => {
-    const payload = { email, username, password, role, ...extra };
+    const payload = {
+      email,
+      // Username not needed for add-to-existing (account already has one).
+      ...(isAddingToExisting ? {} : { username }),
+      // For add-to-existing, password is the existing account password (for server-side verification).
+      password: isAddingToExisting ? existingPassword : password,
+      role,
+      ...extra,
+    };
     setSubmitting(true);
     try {
       await signup(payload);
-      navigate("/verify-email", { replace: true, state: { email } });
+      if (isAddingToExisting) {
+        // Verified account — no email verification needed, go straight to login.
+        navigate("/login", {
+          replace: true,
+          state: { message: "Identity added! Please log in." },
+        });
+      } else {
+        navigate("/verify-email", { replace: true, state: { email } });
+      }
     } catch (err) {
       setError(readErr(err, "Signup failed. Please try again."));
       setSubmitting(false);
     }
   };
 
-  /* ── back ── */
+  /* ── back ────────────────────────────────────────────────────────────── */
   const back = () => {
     setError("");
-    if (step === STEP_BASIC)        go(STEP_ROLE);
-    if (step === STEP_PROFILE)      go(profiles.length > 0 ? STEP_ADD_MORE : STEP_BASIC);
+    if (step === STEP_BASIC) {
+      go(STEP_ROLE);
+    }
+    if (step === STEP_EXISTING_CONFIRM) {
+      // Reset add-to-existing state when going back to STEP_BASIC.
+      setIsAddingToExisting(false);
+      setExistingAccountType("");
+      setExistingPassword("");
+      go(STEP_BASIC);
+    }
+    if (step === STEP_PROFILE) {
+      if (profiles.length > 0) go(STEP_ADD_MORE);
+      else go(isAddingToExisting ? STEP_EXISTING_CONFIRM : STEP_BASIC);
+    }
     if (step === STEP_ADD_MORE)     go(STEP_PROFILE);
-    if (step === STEP_TEACHER_TYPE) go(STEP_BASIC);
+    if (step === STEP_TEACHER_TYPE) go(isAddingToExisting ? STEP_EXISTING_CONFIRM : STEP_BASIC);
     if (step === STEP_GUEST_FORM)   go(STEP_TEACHER_TYPE);
     if (step === STEP_GUEST_LISTED) go(STEP_GUEST_FORM);
     if (step === STEP_GUEST_COURSE) go(STEP_GUEST_LISTED);
     if (step === STEP_FAC_FORM)     go(STEP_TEACHER_TYPE);
   };
 
-  /* ════════ STEP HANDLERS ════════ */
+  /* ════════ STEP HANDLERS ════════════════════════════════════════════════ */
 
-  /* su-basic validate */
-  const nextFromBasic = (e) => {
-    e.preventDefault(); setError("");
-    if (password !== confirm) { setError("Passwords do not match."); return; }
-    if (password.length < 8)  { setError("Password must be at least 8 characters."); return; }
+  /* su-basic: email check on submit, then branch */
+  const nextFromBasic = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+
+    try {
+      const state = await checkEmail(email);
+
+      if (!state.exists) {
+        /* ── Brand new email: validate fields for new account ── */
+        if (password !== confirm) { setError("Passwords do not match."); return; }
+        if (password.length < 8)  { setError("Password must be at least 8 characters."); return; }
+        if (!username.trim())      { setError("Username is required."); return; }
+        if (role === "STUDENT") go(STEP_PROFILE);
+        else go(STEP_TEACHER_TYPE);
+        return;
+      }
+
+      /* ── Email exists: enforce rules ── */
+      const { has_student, has_teacher } = state;
+
+      if (role === "STUDENT") {
+        if (has_student) {
+          setError("This email already has learner profiles. Log in to manage them.");
+          return;
+        }
+        // has_teacher only → offer to add learner profiles to this container
+        setIsAddingToExisting(true);
+        setExistingAccountType("has_teacher");
+        go(STEP_EXISTING_CONFIRM);
+        return;
+      }
+
+      if (role === "TEACHER") {
+        if (has_teacher) {
+          setError("This email already has a teacher account. Log in instead.");
+          return;
+        }
+        // has_student only → offer to add teacher identity to this container
+        setIsAddingToExisting(true);
+        setExistingAccountType("has_student");
+        go(STEP_EXISTING_CONFIRM);
+        return;
+      }
+
+    } catch {
+      /* checkEmail unreachable — fail open, treat as new account */
+      if (password !== confirm) { setError("Passwords do not match."); return; }
+      if (password.length < 8)  { setError("Password must be at least 8 characters."); return; }
+      if (!username.trim())      { setError("Username is required."); return; }
+      if (role === "STUDENT") go(STEP_PROFILE);
+      else go(STEP_TEACHER_TYPE);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  /* su-exist: existing account confirmed → proceed to identity-specific steps */
+  const nextFromExistingConfirm = (e) => {
+    e.preventDefault();
+    setError("");
+    if (!existingPassword) { setError("Please enter your account password."); return; }
     if (role === "STUDENT") go(STEP_PROFILE);
-    else                    go(STEP_TEACHER_TYPE);
+    else go(STEP_TEACHER_TYPE);
   };
 
   /* su-profile: save one profile name then go to su-add */
@@ -172,7 +275,13 @@ export default function Signup() {
     if (!skill.trim()) { setError("Enter the skill you teach."); return; }
     setSubmitting(true);
     try {
-      await signup({ email, username, password, role, teacher_type: "GUEST" });
+      await signup({
+        email,
+        ...(isAddingToExisting ? {} : { username }),
+        password: isAddingToExisting ? existingPassword : password,
+        role,
+        teacher_type: "GUEST",
+      });
       setSubmitting(false);
       go(STEP_GUEST_LISTED);
     } catch (err) {
@@ -187,7 +296,13 @@ export default function Signup() {
     if (!qual.trim()) { setError("Enter your highest qualification."); return; }
     setSubmitting(true);
     try {
-      await signup({ email, username, password, role, teacher_type: "FACULTY" });
+      await signup({
+        email,
+        ...(isAddingToExisting ? {} : { username }),
+        password: isAddingToExisting ? existingPassword : password,
+        role,
+        teacher_type: "FACULTY",
+      });
       setSubmitting(false);
       go(STEP_FAC_WAITING);
     } catch (err) {
@@ -196,10 +311,19 @@ export default function Signup() {
     }
   };
 
-  /* guest live: after course or skip → verify email */
-  const finishGuestLive = () => navigate("/verify-email", { replace: true, state: { email } });
+  /* guest live: after course or skip → verify email (or login for add-to-existing) */
+  const finishGuestLive = () => {
+    if (isAddingToExisting) {
+      navigate("/login", {
+        replace: true,
+        state: { message: "Teacher identity added! Please log in." },
+      });
+    } else {
+      navigate("/verify-email", { replace: true, state: { email } });
+    }
+  };
 
-  /* ════════ RENDER ════════ */
+  /* ════════ RENDER ════════════════════════════════════════════════════════ */
   return (
     <AuthShell role={accent} flowLabel={flowLabel}>
       <div className="af-toprow">
@@ -239,7 +363,7 @@ export default function Signup() {
               required autoFocus autoComplete="email" />
             <Field id="su-username" label="Username" value={username}
               onChange={(e) => setUsername(e.target.value)} placeholder="your_username"
-              required autoComplete="username" />
+              autoComplete="username" />
             <PasswordField id="su-pw" label="Password" value={password}
               onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters"
               required autoComplete="new-password"
@@ -251,10 +375,67 @@ export default function Signup() {
             {error && <div className="af-error">{error}</div>}
             <div className="af-spacer" />
             <div className="af-actions">
-              <button type="submit" className="af-btn af-btn--block">Continue</button>
+              <button type="submit" className="af-btn af-btn--block" disabled={submitting}>
+                {submitting ? <><span className="af-spin" />Checking…</> : "Continue"}
+              </button>
             </div>
           </form>
           <FooterLink>Already have an account? <Link to="/login">Sign in</Link></FooterLink>
+        </>
+      )}
+
+      {/* ── su-exist: add identity to existing account ── */}
+      {step === STEP_EXISTING_CONFIRM && (
+        <>
+          <h1 className="af-heading">
+            {existingAccountType === "has_teacher"
+              ? "Add learner profiles"
+              : "Add teacher identity"}
+          </h1>
+          <p className="af-sub">
+            {existingAccountType === "has_teacher"
+              ? "This email already has a teacher account."
+              : "This email already has learner profiles."}
+          </p>
+
+          <div className="af-banner-info">
+            <div className="af-banner-info__icon"
+              style={{
+                background: (existingAccountType === "has_teacher" ? PAL.student : PAL.faculty) + "22",
+                color: existingAccountType === "has_teacher" ? PAL.student : PAL.faculty,
+              }}>
+              <Icon
+                name={existingAccountType === "has_teacher" ? "cap" : "spark"}
+                size={19}
+                color={existingAccountType === "has_teacher" ? PAL.student : PAL.faculty}
+              />
+            </div>
+            <div className="af-banner-info__text">
+              {existingAccountType === "has_teacher"
+                ? <>Your new <strong>learner profiles</strong> will be added to this email's container alongside the existing teacher account.</>
+                : <>A new <strong>teacher identity</strong> will be added to this email's container alongside the existing learner profiles.</>}
+            </div>
+          </div>
+
+          <form onSubmit={nextFromExistingConfirm} style={{ display: "contents" }}>
+            <PasswordField
+              id="su-existing-pw"
+              label="Confirm with your account password"
+              value={existingPassword}
+              onChange={(e) => setExistingPassword(e.target.value)}
+              placeholder="••••••••"
+              required autoFocus autoComplete="current-password"
+              show={showExistingPw} onToggle={() => setShowExistingPw((v) => !v)}
+            />
+            {error && <div className="af-error">{error}</div>}
+            <div className="af-spacer" />
+            <div className="af-actions">
+              <button type="submit" className="af-btn af-btn--block"
+                disabled={!existingPassword || submitting}>
+                Continue
+              </button>
+            </div>
+          </form>
         </>
       )}
 
@@ -281,21 +462,33 @@ export default function Signup() {
         <>
           <h1 className="af-heading">Create a profile</h1>
           <p className="af-sub">
-            One email can hold several learner profiles.{" "}
-            {profiles.length === 0 ? "Name this one." : "Add another name below."}
+            {isAddingToExisting && existingAccountType === "has_teacher"
+              ? "Your teacher account already has a learner profile for yourself. Add profiles for family members below."
+              : "One email can hold several learner profiles. " + (profiles.length === 0 ? "Name this one." : "Add another name below.")}
           </p>
           <form onSubmit={saveProfile} style={{ display: "contents" }}>
             <Field id="su-pname" label="Profile name"
               value={profileName} onChange={(e) => setProfileName(e.target.value)}
-              placeholder={profiles.length === 0 ? "e.g. Your own name" : "e.g. Child's name"}
+              placeholder={
+                isAddingToExisting && existingAccountType === "has_teacher"
+                  ? "e.g. Child's name"
+                  : profiles.length === 0 ? "e.g. Your own name" : "e.g. Child's name"
+              }
               required autoFocus />
-            {profiles.length > 0 && (
+            {(profiles.length > 0 || (isAddingToExisting && existingAccountType === "has_teacher")) && (
               <div className="af-field">
                 <label htmlFor="su-prel">Relationship</label>
                 <select id="su-prel" value={profileRel}
                   onChange={(e) => setProfileRel(e.target.value)}>
-                  <option value="SELF">This is me</option>
+                  {/* Only allow SELF if no SELF profile exists yet on this account */}
+                  {!(isAddingToExisting && existingAccountType === "has_teacher") && profiles.length === 0 && (
+                    <option value="SELF">This is me</option>
+                  )}
                   <option value="DEPENDENT">A child / dependent</option>
+                  {/* Allow SELF for student-only accounts that don't have a profile yet */}
+                  {isAddingToExisting && existingAccountType !== "has_teacher" && profiles.length === 0 && (
+                    <option value="SELF">This is me</option>
+                  )}
                 </select>
               </div>
             )}
@@ -476,7 +669,7 @@ export default function Signup() {
           <div className="af-spacer" />
           <div className="af-actions">
             <button type="button" className="af-btn af-btn--block" onClick={finishGuestLive}>
-              Verify email to continue
+              {isAddingToExisting ? "Go to login" : "Verify email to continue"}
             </button>
           </div>
         </>

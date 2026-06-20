@@ -120,6 +120,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /**
+   * Email state check for signup gate.
+   * Returns { exists, has_student, has_teacher, is_verified }.
+   * Determines whether signup should create a new account or add an identity
+   * to an existing one — or block entirely.
+   *
+   * Safe to call on any email: unknown emails return exists=false.
+   */
+  const checkEmail = async (email) => {
+    try {
+      const res = await api.post("/accounts/email/check/", {
+        email: email.trim().toLowerCase(),
+      });
+      return res.data; // { exists, has_student, has_teacher, is_verified }
+    } catch {
+      // If the endpoint is unreachable, fail open so signup still works.
+      return { exists: false, has_student: false, has_teacher: false, is_verified: false };
+    }
+  };
+
   const logout = async () => {
     try {
       await api.post("/accounts/logout/");
@@ -159,6 +179,7 @@ export const AuthProvider = ({ children }) => {
         enterTeacherMode,
         signup,
         lookupEmail,
+        checkEmail,           // NEW
         logout,
         hasRole,
         bootstrap,
