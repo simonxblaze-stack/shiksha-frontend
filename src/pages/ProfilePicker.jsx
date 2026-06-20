@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { HOME_URL, LOGIN_URL, TEACHER_URL } from "../config/urls";
+import { HOME_URL, LOGIN_URL } from "../config/urls";
 import "./ProfilePicker.css";
 
 const Avatar = ({ profile }) => {
@@ -23,27 +23,26 @@ const ProfilePicker = () => {
   } = useAuth();
   const navigate = useNavigate();
 
-  const [pinFor, setPinFor]       = useState(null);
-  const [pin, setPin]             = useState("");
-  const [teachPwOpen, setTeachPwOpen] = useState(false);
-  const [teachPw, setTeachPw]     = useState("");
-  const [busy, setBusy]           = useState(false);
-  const [error, setError]         = useState("");
+  const [pinFor, setPinFor]   = useState(null); // profile id awaiting a PIN
+  const [pin, setPin]         = useState("");
+  const [busy, setBusy]       = useState(false);
+  const [error, setError]     = useState("");
 
+  // ── FIX: teacher-mode password prompt ──
+  const [teachPwVisible, setTeachPwVisible] = useState(false);
+  const [teachPw, setTeachPw]               = useState("");
+
+  // Bounce out if there's no account session, or a context is already chosen.
   useEffect(() => {
     if (loading) return;
     if (!isAuthenticated) {
       window.location.href = LOGIN_URL;
-      return;
+    } else if (context && context !== "account") {
+      window.location.href = HOME_URL;
     }
-    // Already in teacher context → go straight to teacher dashboard.
-    if (context === "teacher") {
-      window.location.href = TEACHER_URL;
-    }
-    // learner context is fine here — they may still want to switch to teacher mode.
   }, [loading, isAuthenticated, context]);
 
-  const goHome = () => { window.location.href = HOME_URL; };
+  const go = () => { window.location.href = HOME_URL; };
 
   const choose = async (profile) => {
     setError("");
@@ -55,28 +54,38 @@ const ProfilePicker = () => {
     setBusy(true);
     try {
       await selectProfile(profile.id, profile.requires_pin ? pin : undefined);
-      goHome();
+      go();
     } catch (err) {
       setError(err?.message || "Could not open that profile.");
       setBusy(false);
     }
   };
 
+  // ── FIX: first click reveals the password field; second click submits ──
   const teach = async () => {
     setError("");
+    if (!teachPwVisible) {
+      setTeachPwVisible(true);
+      setTeachPw("");
+      return;
+    }
     setBusy(true);
     try {
-      await enterTeacherMode(teachPw);
-      window.location.href = TEACHER_URL;
-    } catch (err) {
-      const code = err?.raw?.response?.data?.code;
-      if (code === "bad_password") {
-        setError("Incorrect teacher password.");
-      } else if (code === "not_approved") {
-        setError("Your teacher account is awaiting approval.");
-      } else {
-        setError(err?.message || "Could not switch to teaching.");
+      const result = await enterTeacherMode(teachPw); // ← FIX: pass password
+      if (result?.needsSignup) {
+        setError("No teacher identity found on this account.");
+        setBusy(false);
+        return;
       }
+      if (result?.notApproved) {
+        setError("Your teacher account is awaiting approval.");
+        setBusy(false);
+        return;
+      }
+      go();
+    } catch (err) {
+      setError(err?.message || "Incorrect password.");
+      setTeachPw("");
       setBusy(false);
     }
   };
@@ -116,11 +125,7 @@ const ProfilePicker = () => {
                     onKeyDown={(e) => e.key === "Enter" && choose(p)}
                     disabled={busy}
                   />
-                  <button
-                    className="pp-pin-go"
-                    disabled={busy || pin.length < 4}
-                    onClick={() => choose(p)}
-                  >
+                  <button className="pp-pin-go" disabled={busy || pin.length < 4} onClick={() => choose(p)}>
                     Go
                   </button>
                 </div>
@@ -134,7 +139,7 @@ const ProfilePicker = () => {
                 type="button"
                 className="pp-card-btn pp-teach"
                 disabled={busy}
-                onClick={() => { setTeachPwOpen(true); setError(""); }}
+                onClick={teach}
               >
                 <div className="pp-avatar pp-avatar-fallback pp-teach-avatar">T</div>
                 <span className="pp-name">Teaching</span>
@@ -145,12 +150,13 @@ const ProfilePicker = () => {
                 </span>
               </button>
 
-              {teachPwOpen && (
+              {/* ── FIX: inline password prompt (appears on first click) ── */}
+              {teachPwVisible && (
                 <div className="pp-pin-row">
                   <input
                     className="pp-pin"
                     type="password"
-                    placeholder="Teacher password"
+                    placeholder="Password"
                     value={teachPw}
                     autoFocus
                     onChange={(e) => setTeachPw(e.target.value)}

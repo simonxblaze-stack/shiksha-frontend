@@ -131,3 +131,8 @@
   .pp-pin-row { width: 108px; }
   .pp-avatar, .pp-avatar-fallback { width: 60px; height: 60px; }
 }
+
+/* ── Teacher password prompt (matches PIN row style) ── */
+.pp-teach .pp-pin-row {
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
