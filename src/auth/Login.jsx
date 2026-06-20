@@ -117,18 +117,14 @@ export default function Login() {
       setLookupHasTeacher(!!data.has_teacher);
 
       if (role === "teacher") {
-        // li-t-acct ALWAYS shown for teacher role — every teacher account
-        // can choose to browse as a Learner OR enter teaching mode.
         setStep(STEP_ACCT_TYPE);
       } else if ((data.profiles || []).length > 1) {
         setStep(STEP_PROFILES);
       } else {
-        // 0 or 1 profiles — go straight to password
         if ((data.profiles || []).length === 1) setPickedName(data.profiles[0].display_name);
         setStep(STEP_PW);
       }
     } catch {
-      // Lookup failure: still allow login attempt
       setStep(STEP_PW);
     } finally {
       setSubmitting(false);
@@ -161,32 +157,44 @@ export default function Login() {
       // ── Teacher chose "Teacher" mode → enter teaching context ──
       if (role === "teacher" && teacherChoice === "teacher") {
         if (!tHasTeacher) {
-          // Account doesn't have an approved teacher profile
           setError("No approved teacher identity on this account. Please contact support or wait for approval.");
           setSubmitting(false);
           return;
         }
-        await enterTeacherMode();
-        setStatusMsg("");
 
-        // li-t-type: if teacher type is BOTH, show the choice screen.
-        // Otherwise auto-route — the teacher dashboard handles GUEST vs FACULTY internally.
+        setStatusMsg("Switching to teacher dashboard…");
+
+        // ↓ FIX: pass the password the user typed — it doubles as the
+        //        teacher-context password (falls back to account password
+        //        on the backend when a separate teacher password isn't set).
+        const tmResult = await enterTeacherMode(password);
+
+        if (tmResult?.needsSignup) {
+          setError("No teacher identity found. Please sign up as a teacher first.");
+          setStatusMsg("");
+          setSubmitting(false);
+          return;
+        }
+        if (tmResult?.notApproved) {
+          setError("Your teacher account is awaiting approval.");
+          setStatusMsg("");
+          setSubmitting(false);
+          return;
+        }
+
+        setStatusMsg("");
         const tType = data?.teacher?.type;
         if (tType === "BOTH") {
           setStep(STEP_TEACHER_TYPE);
           setSubmitting(false);
         } else {
-          // GUEST or FACULTY — show type confirmation screen briefly, then redirect
           setStep(STEP_TEACHER_TYPE);
           setSubmitting(false);
         }
         return;
       }
 
-      // ── Teacher chose "Learner" mode → always auto-select the SELF profile ──
-      // Teachers may have DEPENDENT profiles (family members) under their account too.
-      // We never show the picker for the teacher→learner path; we go straight to
-      // their own SELF (learning identity). Dependents are accessible via in-app switching.
+      // ── Teacher chose "Learner" mode → auto-select the SELF profile ──
       if (role === "teacher" && teacherChoice === "learner") {
         const selfProfile =
           list.find((p) => p.relationship === "SELF") ??
@@ -208,7 +216,7 @@ export default function Login() {
         return;
       }
 
-      // ── Student login (or teacher who somehow skipped acct-type) ──
+      // ── Student login ──
       const target = pickedName
         ? list.find((p) => p.display_name === pickedName) ?? (list.length === 1 ? list[0] : null)
         : list.length === 1 ? list[0] : null;
@@ -224,7 +232,6 @@ export default function Login() {
         setSubmitting(false); return;
       }
 
-      // Fallback: show full profile list
       if (list.length > 0) { setStep(STEP_PROFILES); setSubmitting(false); return; }
 
       setError("No profiles found on this account.");
@@ -292,7 +299,6 @@ export default function Login() {
   };
   const submit2FA = (e) => {
     e.preventDefault();
-    // 2FA backend not yet wired — proceed after UI verification
     showToast({ message: "Welcome back!", duration: 2000 });
     finishAndRedirect(APP_URL);
   };
@@ -311,7 +317,7 @@ export default function Login() {
       else if (lookupProfiles.length > 1)        go(STEP_PROFILES);
       else                                        go(STEP_EMAIL);
     }
-    if (step === STEP_TEACHER_TYPE)   go(STEP_PW);  // back to password from teacher-type
+    if (step === STEP_TEACHER_TYPE)   go(STEP_PW);
     if (step === STEP_PIN)            go(STEP_PW);
     if (step === STEP_ADMIN_CREDS)    go(STEP_ROLE);
     if (step === STEP_2FA)            go(STEP_ADMIN_CREDS);
@@ -407,7 +413,6 @@ export default function Login() {
           </p>
 
           {profiles.length > 0 ? (
-            /* Post-auth: full list with IDs */
             <div className="af-profile-grid">
               {profiles.map((p, i) => (
                 <button key={p.id} type="button" className="af-profile-tile"
@@ -422,7 +427,6 @@ export default function Login() {
               ))}
             </div>
           ) : (
-            /* Pre-auth: display names from email lookup */
             <div className="af-profile-grid">
               {lookupProfiles.map((p, i) => (
                 <button key={i} type="button" className="af-profile-tile"
@@ -464,6 +468,7 @@ export default function Login() {
               show={showPw} onToggle={() => setShowPw((v) => !v)} />
             <Link to="/forgot-password" className="af-note">Forgot password?</Link>
             {error && <div className="af-error">{error}</div>}
+            {statusMsg && !error && <div className="af-status">{statusMsg}</div>}
             <div className="af-spacer" />
             <div className="af-actions">
               <button type="submit" className="af-btn af-btn--block" disabled={submitting}>
