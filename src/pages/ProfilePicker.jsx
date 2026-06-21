@@ -1,8 +1,25 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { HOME_URL, LOGIN_URL, APP_DASHBOARD_URL, TEACHER_DASHBOARD_URL } from "../config/urls";
+import {
+  HOME_URL, LOGIN_URL, APP_DASHBOARD_URL,
+  TEACHER_DASHBOARD_URL, TEACHER_ACADEMY_URL, TEACHER_SKILL_URL,
+  signupAddTrackUrl,
+} from "../config/urls";
 import "./ProfilePicker.css";
+
+/* ════════════════════════════════════════════════════════════════
+   ProfilePicker — the "who am I right now" switchboard.
+
+   Learner tiles (people) + one Teaching tile (a mode). For teachers
+   approved on BOTH tracks, choosing Teaching reveals a second step:
+   pick the dashboard (Academy or Skill Dev). A track still in admin
+   review shows an "In review" note; a track never applied for shows
+   an "Apply" link that deep-links to the add-a-track signup.
+════════════════════════════════════════════════════════════════ */
+
+const TRACK_NAME = { academy: "Academy", skill: "Skill Dev" };
+const ALL_TRACKS = ["academy", "skill"];
 
 const Avatar = ({ profile }) => {
   if (profile.avatar_type === "image" && profile.avatar) {
@@ -28,9 +45,14 @@ const ProfilePicker = () => {
   const [busy, setBusy]       = useState(false);
   const [error, setError]     = useState("");
 
-  // ── FIX: teacher-mode password prompt ──
+  // Teacher-mode: reveal password, then (if 2 approved tracks) choose a dashboard.
   const [teachPwVisible, setTeachPwVisible] = useState(false);
   const [teachPw, setTeachPw]               = useState("");
+  const [chooseTrack, setChooseTrack]       = useState(false);
+
+  const approved = teacherInfo?.approved_tracks || [];
+  const pending  = teacherInfo?.pending_tracks  || [];
+  const locked   = ALL_TRACKS.filter((t) => !approved.includes(t) && !pending.includes(t));
 
   // Bounce out if there's no account session, or a context is already chosen.
   useEffect(() => {
@@ -44,10 +66,10 @@ const ProfilePicker = () => {
     }
   }, [loading, isAuthenticated, context]);
 
-  // Route to the correct dashboard by context (was hardcoded to HOME_URL,
-  // which is why entering teacher mode never reached the teacher dashboard).
   const goLearner = () => { window.location.href = APP_DASHBOARD_URL; };
-  const goTeacher = () => { window.location.href = TEACHER_DASHBOARD_URL; };
+  const goTeacherTrack = (track) => {
+    window.location.href = track === "academy" ? TEACHER_ACADEMY_URL : TEACHER_SKILL_URL;
+  };
 
   const choose = async (profile) => {
     setError("");
@@ -66,33 +88,42 @@ const ProfilePicker = () => {
     }
   };
 
-  // ── FIX: first click reveals the password field; second click submits ──
+  // First click reveals the password; with two approved tracks the next click
+  // opens the dashboard chooser; otherwise it enters the single approved track.
   const teach = async () => {
     setError("");
-    if (!teachPwVisible) {
-      setTeachPwVisible(true);
-      setTeachPw("");
+    if (approved.length === 0) {
+      setError(pending.length
+        ? "Your teacher application is still in review."
+        : "No approved teaching track yet.");
       return;
     }
+    if (!teachPwVisible) { setTeachPwVisible(true); setTeachPw(""); return; }
+    if (!teachPw) return;
+    if (approved.length >= 2 && !chooseTrack) { setChooseTrack(true); return; }
+    await doEnterTeacher(approved[0]);
+  };
+
+  const doEnterTeacher = async (track) => {
     setBusy(true);
     try {
-      const result = await enterTeacherMode(teachPw); // ← FIX: pass password
-      if (result?.needsSignup) {
-        setError("No teacher identity found on this account.");
-        setBusy(false);
-        return;
-      }
-      if (result?.notApproved) {
-        setError("Your teacher account is awaiting approval.");
-        setBusy(false);
-        return;
-      }
-      goTeacher();
+      const result = await enterTeacherMode(teachPw, track);
+      if (result?.needsSignup)  { setError("No teacher identity found on this account."); setBusy(false); return; }
+      if (result?.notApproved)  { setError("Your teacher account is awaiting approval."); setBusy(false); return; }
+      if (result?.trackPending) { setError("That track is still in review."); setBusy(false); return; }
+      if (result?.trackLocked)  { setError("You haven't been assigned to that track yet."); setBusy(false); return; }
+      goTeacherTrack(track);
     } catch (err) {
       setError(err?.message || "Incorrect password.");
-      setTeachPw("");
-      setBusy(false);
+      setTeachPw(""); setBusy(false);
     }
+  };
+
+  const teacherSubtitle = () => {
+    if (approved.length >= 2) return "Academy + Skill Dev";
+    if (approved.length === 1) return TRACK_NAME[approved[0]];
+    if (pending.length) return `${TRACK_NAME[pending[0]]} — in review`;
+    return "Teaching";
   };
 
   return (
@@ -148,15 +179,11 @@ const ProfilePicker = () => {
               >
                 <div className="pp-avatar pp-avatar-fallback pp-teach-avatar">T</div>
                 <span className="pp-name">Teaching</span>
-                <span className="pp-tag">
-                  {teacherInfo.type === "GUEST" ? "Guest expert"
-                    : teacherInfo.type === "FACULTY" ? "Faculty"
-                    : "Teacher"}
-                </span>
+                <span className="pp-tag">{teacherSubtitle()}</span>
               </button>
 
-              {/* ── FIX: inline password prompt (appears on first click) ── */}
-              {teachPwVisible && (
+              {/* Step 1: account password */}
+              {teachPwVisible && !chooseTrack && (
                 <div className="pp-pin-row">
                   <input
                     className="pp-pin"
@@ -173,10 +200,35 @@ const ProfilePicker = () => {
                     disabled={busy || teachPw.length < 1}
                     onClick={teach}
                   >
-                    Go
+                    {approved.length >= 2 ? "Next" : "Go"}
                   </button>
                 </div>
               )}
+
+              {/* Step 2 (both tracks): choose which dashboard */}
+              {chooseTrack && (
+                <div className="pp-track-choose">
+                  <p className="pp-track-choose__label">Open which dashboard?</p>
+                  {approved.map((t) => (
+                    <button key={t} className="pp-track-btn" disabled={busy}
+                      onClick={() => doEnterTeacher(t)}>
+                      {TRACK_NAME[t]}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Track still in admin review */}
+              {pending.map((t) => (
+                <p key={t} className="pp-track-note">{TRACK_NAME[t]} — in review</p>
+              ))}
+
+              {/* Track never applied for → deep-link to add-a-track signup */}
+              {locked.map((t) => (
+                <a key={t} className="pp-track-apply" href={signupAddTrackUrl(t)}>
+                  + Apply for {TRACK_NAME[t]}
+                </a>
+              ))}
             </div>
           )}
         </div>

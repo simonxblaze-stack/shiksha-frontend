@@ -127,6 +127,15 @@ export default function ManageProfiles() {
 
   useEffect(() => { load(); }, []);
 
+  // Opened from the profile menu's "Add account" → jump straight to the form.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("add") === "1") {
+      setFormErr("");
+      setModal({ mode: "create" });
+    }
+  }, []);
+
   const openCreate = () => { setFormErr(""); setModal({ mode: "create" }); };
   const openEdit   = p  => { setFormErr(""); setModal({ mode: "edit", profile: p }); };
   const closeModal = () => { setModal(null); };

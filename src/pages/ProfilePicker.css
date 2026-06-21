@@ -136,3 +136,47 @@
 .pp-teach .pp-pin-row {
   border-top: 1px solid rgba(255,255,255,0.2);
 }
+
+/* ── Dashboard chooser (teacher approved on both tracks) ── */
+.pp-track-choose {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 130px;
+  margin-top: 0.5rem;
+}
+.pp-track-choose__label {
+  font-size: 0.7rem;
+  color: rgba(245, 245, 220, 0.7);
+  text-align: center;
+  margin: 0 0 0.15rem;
+}
+.pp-track-btn {
+  background: rgba(245, 245, 220, 0.12);
+  border: 1px solid rgba(245, 245, 220, 0.3);
+  color: #f5f5dc;
+  border-radius: 8px;
+  padding: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pp-track-btn:hover:not(:disabled) { background: rgba(245, 245, 220, 0.22); }
+.pp-track-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* ── Track status notes under the Teaching tile ── */
+.pp-track-note {
+  font-size: 0.72rem;
+  color: #f0c674;
+  text-align: center;
+  margin: 0.45rem 0 0;
+}
+.pp-track-apply {
+  display: block;
+  font-size: 0.72rem;
+  color: #9fd0a6;
+  text-align: center;
+  text-decoration: none;
+  margin: 0.35rem 0 0;
+}
+.pp-track-apply:hover { text-decoration: underline; }

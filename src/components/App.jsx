@@ -90,7 +90,14 @@ function RedirectExternal({ to }) {
 
 function App() {
   const { isAuthenticated, isLearnerContext, isTeacherContext, loading } = useAuth();
+  const location = useLocation();
   useAnalytics();
+
+  // Adding a teaching track to an already-signed-in account is the one signup
+  // flow allowed while authenticated (it skips email/username and just takes
+  // the track application + password). Detect it so the guard lets it through.
+  const isAddTrackSignup =
+    new URLSearchParams(location.search).get("add_track") != null;
 
   // Show spinner while bootstrap runs — but keep the route tree mounted
   // (do NOT return null, that unmounts Routes and causes remount loops)
@@ -158,7 +165,9 @@ function App() {
         } />
 
         <Route path="/signup" element={
-          isAuthenticated ? <Navigate to="/" replace /> : <Page><Signup /></Page>
+          (isAuthenticated && !isAddTrackSignup)
+            ? <Navigate to="/" replace />
+            : <Page><Signup /></Page>
         } />
 
         <Route path="/verify-email"   element={<VerifyEmail />} />

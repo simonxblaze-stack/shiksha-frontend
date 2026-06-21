@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import {
   AuthShell, Field, PasswordField, TileChoice, Option, StatusChip, FooterLink, Icon,
@@ -48,6 +48,13 @@ const STEP_GUEST_LIVE       = "g_live";
 const STEP_FAC_FORM         = "f_form";
 const STEP_FAC_WAITING      = "f_waiting";
 
+/* Add-a-track flow (existing account gains the OTHER teaching track).
+   Reached via /signup?role=teacher&add_track=academy|skill — email + username
+   are skipped because the account already exists. */
+const STEP_ADDTRACK_FORM    = "at_form";
+const STEP_ADDTRACK_CONFIRM = "at_confirm";
+const STEP_ADDTRACK_DONE    = "at_done";
+
 const PAL = { student: "#13899b", faculty: "#425f7f", guest: "#2f9d42" };
 
 function readErr(err, fallback) {
@@ -57,12 +64,17 @@ function readErr(err, fallback) {
 }
 
 export default function Signup() {
-  const { signup, checkEmail } = useAuth();
+  const { signup, checkEmail, user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [step, setStep]         = useState(STEP_ROLE);
   const [error, setError]       = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  /* add-a-track mode: "academy" | "skill" | "" */
+  const [addTrack, setAddTrack] = useState("");
+  const TRACK_LABEL = { academy: "Academy (Faculty)", skill: "Skill (Guest expert)" };
 
   /* role */
   const [role, setRole]               = useState("");   // "STUDENT" | "TEACHER"
@@ -104,6 +116,22 @@ export default function Signup() {
   const [qual, setQual] = useState("");
   const [subj, setSubj] = useState("");
   const [exp, setExp]   = useState("");
+
+  /* ── Init add-a-track mode from the URL (once) ──
+     A signed-in teacher who taps a locked track in their dashboard lands here
+     with ?add_track=academy|skill. We pre-set the track and jump straight to
+     its application form — no email/username/role choices. */
+  useEffect(() => {
+    const at = (searchParams.get("add_track") || "").toLowerCase();
+    if (at !== "academy" && at !== "skill") return;
+    setAddTrack(at);
+    setRole("TEACHER");
+    setTeacherType(at === "academy" ? "FACULTY" : "GUEST");
+    setIsAddingToExisting(true);
+    if (user?.email) setEmail(user.email);
+    setStep(STEP_ADDTRACK_FORM);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, user]);
 
   /* ── derived accent / label ── */
   const accent =
@@ -181,6 +209,10 @@ export default function Signup() {
     if (step === STEP_GUEST_LISTED) go(STEP_GUEST_FORM);
     if (step === STEP_GUEST_COURSE) go(STEP_GUEST_LISTED);
     if (step === STEP_FAC_FORM)     go(STEP_TEACHER_TYPE);
+    // add-a-track: form is the entry point → leaving returns to where they came
+    // from (their dashboard); confirm steps back to the form.
+    if (step === STEP_ADDTRACK_FORM)    { navigate(-1); return; }
+    if (step === STEP_ADDTRACK_CONFIRM) go(STEP_ADDTRACK_FORM);
   };
 
   /* ════════ STEP HANDLERS ════════════════════════════════════════════════ */
@@ -344,6 +376,46 @@ export default function Signup() {
     } else {
       navigate("/verify-email", { replace: true, state: { email } });
     }
+  };
+
+  /* ── add-a-track handlers ── */
+  const nextFromAddTrackForm = (e) => {
+    e.preventDefault(); setError("");
+    if (addTrack === "skill" && !skill.trim()) {
+      setError("Tell us the skill you'll teach."); return;
+    }
+    if (addTrack === "academy" && !qual.trim()) {
+      setError("Enter your highest qualification."); return;
+    }
+    go(STEP_ADDTRACK_CONFIRM);
+  };
+
+  const submitAddTrack = async (e) => {
+    e.preventDefault(); setError("");
+    const emailToUse = (user?.email || email || "").trim();
+    if (!emailToUse)        { setError("Enter your account email."); return; }
+    if (!existingPassword)  { setError("Enter your account password to confirm."); return; }
+    setSubmitting(true);
+    try {
+      await signup({
+        email: emailToUse,
+        password: existingPassword,           // ownership proof — the account password
+        role: "TEACHER",
+        teacher_type: addTrack === "academy" ? "FACULTY" : "GUEST",
+      });
+      setSubmitting(false);
+      go(STEP_ADDTRACK_DONE);
+    } catch (err) {
+      setError(readErr(err, "Could not add the track. Please try again."));
+      setSubmitting(false);
+    }
+  };
+
+  const finishAddTrack = () => {
+    const msg = addTrack === "academy"
+      ? "Faculty application submitted. We'll email you when it's approved — your current track stays live."
+      : "Skill (Guest expert) track added. You can switch to it from your dashboard now.";
+    navigate("/login", { replace: true, state: { message: msg } });
   };
 
   /* ════════ RENDER ════════════════════════════════════════════════════════ */
@@ -810,6 +882,109 @@ export default function Signup() {
               color: "#3c3d44", fontSize: 14.5, fontWeight: 600, textDecoration: "none" }}>
               Back to login
             </Link>
+          </div>
+        </>
+      )}
+
+      {/* ── at-form: add-a-track application ── */}
+      {step === STEP_ADDTRACK_FORM && (
+        <>
+          <h1 className="af-heading">Add {TRACK_LABEL[addTrack] || "a track"}</h1>
+          <p className="af-sub">
+            {addTrack === "academy"
+              ? "Apply to teach academic classes (8–12). Your current track stays live while admins review this one."
+              : "Add the Guest-expert track to teach short skill sessions. It goes live as soon as you finish."}
+          </p>
+
+          <div className="af-banner-info">
+            <div className="af-banner-info__icon"
+              style={{
+                background: (addTrack === "academy" ? PAL.faculty : PAL.guest) + "22",
+                color: addTrack === "academy" ? PAL.faculty : PAL.guest,
+              }}>
+              <Icon name={addTrack === "academy" ? "cap" : "spark"} size={19}
+                color={addTrack === "academy" ? PAL.faculty : PAL.guest} />
+            </div>
+            <div className="af-banner-info__text">
+              {user?.email
+                ? <>Adding to <strong>{user.email}</strong>. No new account — same login.</>
+                : <>This adds a track to your existing account. You'll confirm with your account password next.</>}
+            </div>
+          </div>
+
+          <form onSubmit={nextFromAddTrackForm} style={{ display: "contents" }}>
+            {addTrack === "skill" ? (
+              <Field id="at-skill" label="Skill you'll teach" value={skill}
+                onChange={(e) => setSkill(e.target.value)}
+                placeholder="e.g. Python & Data Science" required autoFocus />
+            ) : (
+              <Field id="at-qual" label="Highest qualification" value={qual}
+                onChange={(e) => setQual(e.target.value)}
+                placeholder="e.g. M.Sc Mathematics" required autoFocus />
+            )}
+            {error && <div className="af-error">{error}</div>}
+            <div className="af-spacer" />
+            <div className="af-actions">
+              <button type="submit" className="af-btn af-btn--block">Continue</button>
+            </div>
+          </form>
+        </>
+      )}
+
+      {/* ── at-confirm: ownership password ── */}
+      {step === STEP_ADDTRACK_CONFIRM && (
+        <>
+          <h1 className="af-heading">Confirm it's you</h1>
+          <p className="af-sub">Enter your account password to add this track.</p>
+          <form onSubmit={submitAddTrack} style={{ display: "contents" }}>
+            {user?.email ? (
+              <div className="af-field">
+                <label>Account</label>
+                <input value={user.email} readOnly tabIndex={-1}
+                  style={{ background: "#F2F2EF", color: "#6b6c72" }} />
+              </div>
+            ) : (
+              <Field id="at-email" label="Account email" type="email" value={email}
+                onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
+                required autoComplete="email" />
+            )}
+            <PasswordField id="at-pw" label="Account password" value={existingPassword}
+              onChange={(e) => setExistingPassword(e.target.value)}
+              placeholder="Your account password" required autoFocus
+              autoComplete="current-password"
+              show={showExistingPw} onToggle={() => setShowExistingPw((v) => !v)} />
+            {error && <div className="af-error">{error}</div>}
+            <div className="af-spacer" />
+            <div className="af-actions">
+              <button type="submit" className="af-btn af-btn--block"
+                disabled={!existingPassword || submitting}>
+                {submitting
+                  ? <><span className="af-spin" />Adding…</>
+                  : addTrack === "academy" ? "Submit application" : "Add track"}
+              </button>
+            </div>
+          </form>
+        </>
+      )}
+
+      {/* ── at-done ── */}
+      {step === STEP_ADDTRACK_DONE && (
+        <>
+          <StatusChip icon={addTrack === "academy" ? "clock" : "check"}
+            role={addTrack === "academy" ? "faculty" : "success"} />
+          <h1 className="af-heading">
+            {addTrack === "academy" ? "Application submitted" : "Track added"}
+          </h1>
+          <p className="af-sub">
+            {addTrack === "academy"
+              ? "Your Faculty application is now in the admin review queue. We'll email you the decision — your current track keeps working."
+              : "The Guest-expert track is live on your account. Use the dashboard switch to jump into it."}
+          </p>
+          <div className="af-spacer" />
+          <div className="af-actions">
+            <button type="button" className="af-btn af-btn--block" onClick={finishAddTrack}>
+              Back to dashboard
+            </button>
           </div>
         </>
       )}
