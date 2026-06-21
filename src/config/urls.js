@@ -47,7 +47,11 @@ const clean = (s) => s.replace(/\/$/, "");
 
 export const HOME_URL    = clean(import.meta.env.VITE_HOME_URL    || ENV.HOME);
 export const APP_URL     = clean(import.meta.env.VITE_APP_URL     || ENV.APP);
-export const TEACHER_URL = clean(import.meta.env.VITE_TEACHER_URL || ENV.TEACHER);
+// TEACHER_URL — normalise: strip any /teacher/dashboard suffix the env var
+// may already include (old convention), so TEACHER_DASHBOARD_URL is never doubled.
+const _teacherRaw  = clean(import.meta.env.VITE_TEACHER_URL || ENV.TEACHER);
+export const TEACHER_URL          = _teacherRaw.replace(/\/teacher\/dashboard\/?$/, "");
+export const TEACHER_DASHBOARD_URL = TEACHER_URL + "/teacher/dashboard";
 export const WS_HOST     =       import.meta.env.VITE_WS_HOST     || ENV.WS;
 
 // API_URL: if the env var is set it must already include /api.
@@ -60,4 +64,4 @@ export const SIGNUP_URL            = HOME_URL    + "/signup";
 export const PICK_PROFILE_URL      = HOME_URL    + "/pick-profile";
 export const FORM_FILLUP_URL       = HOME_URL    + "/form-fillup";
 export const APP_DASHBOARD_URL     = APP_URL;
-export const TEACHER_DASHBOARD_URL = TEACHER_URL + "/teacher/dashboard";
+
