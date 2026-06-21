@@ -164,13 +164,17 @@ export function AuthProvider({ children }) {
     try {
       const res  = await api.post("/accounts/login/", { email, password });
       const data = res.data;
+      // Stash what the login response told us so the picker has profiles/teacher
+      // available immediately after bootstrap, even if /me/ returns slightly
+      // different shape data.
       setProfiles(data.profiles || []);
       setTeacherInfo(data.teacher || null);
       setContext(data.context);
-      if (data.context === "learner") {
-        setLoading(true);
-        await bootstrap();
-      }
+      // ALWAYS bootstrap — this populates `user` (isAuthenticated) regardless
+      // of context. Without it, "account" context navigated to /pick-profile
+      // while user was still null, causing ProtectedRoute to kick back to /login.
+      setLoading(true);
+      await bootstrap();
       return data;
     } catch (err) {
       return Promise.reject({ message: extractError(err), raw: err });

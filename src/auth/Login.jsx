@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
-import { APP_URL } from "../config/urls";
 import { AuthShell, Field, PasswordField, FooterLink } from "./AuthKit";
 
 /* ════════════════════════════════════════════════════════════════
@@ -40,10 +39,8 @@ function readErr(err, fallback) {
 }
 
 export default function Login() {
-  const { login, lookupEmail, hasRole } = useAuth();
-  const { showToast } = useToast();
+  const { login, lookupEmail } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
 
   const [step, setStep]             = useState(STEP_EMAIL);
   const [email, setEmail]           = useState("");
@@ -52,7 +49,6 @@ export default function Login() {
   const [greetName, setGreetName]   = useState("");
   const [error, setError]           = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState(false);
   const [statusMsg, setStatusMsg]   = useState("");
 
   // Carry messages forwarded from signup / "identity added" flows.
@@ -60,11 +56,7 @@ export default function Login() {
     if (location.state?.message) setStatusMsg(location.state.message);
   }, [location.state]);
 
-  const finishAndRedirect = (target) => {
-    setIsRedirecting(true);
-    setStatusMsg("Login successful! Redirecting…");
-    setTimeout(() => { window.location.href = target; }, 1000);
-  };
+
 
   /* ── Step 1: email → friendly greeting, then password ── */
   const submitEmail = async (e) => {
@@ -87,32 +79,29 @@ export default function Login() {
     }
   };
 
-  /* ── Step 2: password → real login → route by context ── */
+  /* ── Step 2: password → real login → let App.jsx route by context ── */
   const submitPw = async (e) => {
     e.preventDefault();
     setError(""); setSubmitting(true);
     try {
       setStatusMsg("Checking your account…");
-      const data = await login(email, password);
-      setStatusMsg("");
-
-      // ── ADMIN (routed by role, no separate UI) ──
-      // Admins log in with the same email + password. When you have an admin
-      // destination, set VITE_ADMIN_URL and route here:
-      //   if (hasRole("ADMIN")) return finishAndRedirect(ADMIN_URL);
-      // (Left out by request — there is no admin dashboard in scope yet.)
-
-      // ── Backend auto-selected a single PIN-free learner, no teacher ──
-      if (data?.context === "learner" || data?.auto_selected) {
-        showToast({ message: "Welcome back!", duration: 2000 });
-        finishAndRedirect(APP_URL);
-        return;
-      }
-
-      // ── Everything else → the picker decides (multiple profiles, a PIN,
-      //    or a teacher identity exists). Smooth SPA navigation — no reload,
-      //    the AuthProvider state set by login() carries straight into it. ──
-      navigate("/pick-profile");
+      await login(email, password);
+      // login() now always runs bootstrap() before returning, so by the time
+      // we reach here: isAuthenticated=true, context is set, user is populated.
+      //
+      // App.jsx's /login route already handles all three outcomes:
+      //   context="learner"  → window.location.replace(APP_DASHBOARD_URL)
+      //   context="teacher"  → window.location.replace(TEACHER_DASHBOARD_URL)
+      //   context="account"  → <Navigate to="/pick-profile" replace />
+      //
+      // Because login() calls setLoading(true) internally, App.jsx renders
+      // <RouteFallback /> during bootstrap which UNMOUNTS this component.
+      // Any code after `await login()` runs on an unmounted component — React
+      // 18 makes setState no-ops, but window.location calls still fire. So we
+      // do nothing here and let the App.jsx route tree handle navigation.
+      //
+      // (Admin: same email+password, routed by role. Hook stub:)
+      //   if (hasRole("ADMIN")) window.location.href = ADMIN_URL;
     } catch (err) {
       setError(readErr(err, "Login failed."));
       setStatusMsg(""); setSubmitting(false);
@@ -127,15 +116,7 @@ export default function Login() {
   return (
     <AuthShell role="student" flowLabel="Log in">
 
-      {isRedirecting && (
-        <div className="af-overlay">
-          <div className="af-overlay__card">
-            <div className="af-overlay__spin" />
-            <h3>Please wait</h3>
-            <p>{statusMsg}</p>
-          </div>
-        </div>
-      )}
+
 
       <div className="af-toprow">
         {step !== STEP_EMAIL
