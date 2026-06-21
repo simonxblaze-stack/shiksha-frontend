@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { HOME_URL, LOGIN_URL } from "../config/urls";
+import { HOME_URL, LOGIN_URL, APP_DASHBOARD_URL, TEACHER_DASHBOARD_URL } from "../config/urls";
 import "./ProfilePicker.css";
 
 const Avatar = ({ profile }) => {
@@ -37,12 +37,17 @@ const ProfilePicker = () => {
     if (loading) return;
     if (!isAuthenticated) {
       window.location.href = LOGIN_URL;
-    } else if (context && context !== "account") {
-      window.location.href = HOME_URL;
+    } else if (context === "learner") {
+      window.location.href = APP_DASHBOARD_URL;
+    } else if (context === "teacher") {
+      window.location.href = TEACHER_DASHBOARD_URL;
     }
   }, [loading, isAuthenticated, context]);
 
-  const go = () => { window.location.href = HOME_URL; };
+  // Route to the correct dashboard by context (was hardcoded to HOME_URL,
+  // which is why entering teacher mode never reached the teacher dashboard).
+  const goLearner = () => { window.location.href = APP_DASHBOARD_URL; };
+  const goTeacher = () => { window.location.href = TEACHER_DASHBOARD_URL; };
 
   const choose = async (profile) => {
     setError("");
@@ -54,7 +59,7 @@ const ProfilePicker = () => {
     setBusy(true);
     try {
       await selectProfile(profile.id, profile.requires_pin ? pin : undefined);
-      go();
+      goLearner();
     } catch (err) {
       setError(err?.message || "Could not open that profile.");
       setBusy(false);
@@ -82,7 +87,7 @@ const ProfilePicker = () => {
         setBusy(false);
         return;
       }
-      go();
+      goTeacher();
     } catch (err) {
       setError(err?.message || "Incorrect password.");
       setTeachPw("");

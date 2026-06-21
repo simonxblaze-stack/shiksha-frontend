@@ -85,6 +85,7 @@ export default function Signup() {
   const [profiles, setProfiles]       = useState([]);
   const [profileName, setProfileName] = useState("");
   const [profileRel, setProfileRel]   = useState("SELF");
+  const [profilePin, setProfilePin]   = useState("");   // optional 4–6 digit PIN
 
   /* guest teacher form */
   const [skill, setSkill]   = useState("");
@@ -238,13 +239,22 @@ export default function Signup() {
   const saveProfile = (e) => {
     e.preventDefault(); setError("");
     if (!profileName.trim()) { setError("Enter a profile name."); return; }
+    if (profilePin && !/^\d{4,6}$/.test(profilePin)) {
+      setError("PIN must be 4–6 digits (or leave it blank).");
+      return;
+    }
     const isFirst = profiles.length === 0;
     setProfiles((l) => [
       ...l,
-      { display_name: profileName.trim(), relationship: isFirst ? "SELF" : profileRel },
+      {
+        display_name: profileName.trim(),
+        relationship: isFirst ? "SELF" : profileRel,
+        ...(profilePin ? { pin: profilePin } : {}),
+      },
     ]);
     setProfileName("");
     setProfileRel("DEPENDENT");
+    setProfilePin("");
     go(STEP_ADD_MORE);
   };
 
@@ -474,6 +484,16 @@ export default function Signup() {
                 </select>
               </div>
             )}
+
+            <div className="af-field">
+              <label htmlFor="su-ppin">PIN <span className="af-note">(optional)</span></label>
+              <input id="su-ppin" inputMode="numeric" autoComplete="off"
+                value={profilePin}
+                onChange={(e) => setProfilePin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="4–6 digits to lock this profile"
+                maxLength={6}
+                style={{ letterSpacing: ".3em" }} />
+            </div>
 
             {profiles.length > 0 && (
               <div style={{ marginTop: 14 }}>
