@@ -1,12 +1,19 @@
 /**
- * AuthContext.jsx  ·  UPDATED — imports from config/urls.js
- * ──────────────────────────────────────────────────────────
- * Copy into all three apps: src/contexts/AuthContext.jsx
- * All URL fallbacks now come from ../config/urls
- * (or ../../config/urls for landing page if contexts/ is one level deeper).
+ * src/contexts/AuthContext.jsx — FIXED
  *
- * For landing_page: the import path is "../config/urls"
- * For student/teacher dashboards: same "../config/urls"
+ * The two bugs that caused the infinite reload loop on /login:
+ *
+ * BUG 1: interceptor was intercepting /me/ calls.
+ *   Bootstrap calls /me/ → gets 401 → interceptor fires → refresh fails
+ *   → window.location.href = LOGIN_URL → hard reload of /login
+ *   → bootstrap calls /me/ again → same → infinite loop.
+ *   FIX: skip the interceptor for /me/ and /notifications/ calls.
+ *        Let bootstrap handle its own /me/ 401 gracefully.
+ *
+ * BUG 2: interceptor redirected to LOGIN_URL even when already on /login.
+ *   FIX: only redirect if the current path is not an auth page.
+ *
+ * Both fixes match the original api/apiClient.js behaviour that was working.
  */
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
@@ -31,18 +38,30 @@ api.interceptors.response.use(
     const orig = error.config;
     const st   = error.response?.status;
     const url  = orig?.url || "";
+
+    // FIX 1: never intercept /me/ or /notifications/ — bootstrap handles /me/ 401
+    // itself; intercepting it causes an infinite reload on the /login page.
+    const isMeCall           = url.includes("/me/");
+    const isNotificationCall = url.includes("/notifications/");
+    if (isMeCall || isNotificationCall) {
+      return Promise.reject(error);
+    }
+
     if (
-      st !== 401 || orig._retry ||
+      st !== 401 ||
+      orig._retry ||
       url.includes("/accounts/refresh/") ||
       url.includes("/accounts/login/")
     ) {
       return Promise.reject(error);
     }
+
     if (_isRefreshing) {
       return new Promise((res, rej) =>
         _queue.push({ resolve: res, reject: rej })
       ).then(() => api(orig));
     }
+
     orig._retry   = true;
     _isRefreshing = true;
     try {
@@ -51,7 +70,19 @@ api.interceptors.response.use(
       return api(orig);
     } catch (e) {
       _flush(e);
-      window.location.href = LOGIN_URL;
+      // FIX 2: only redirect if we are NOT already on an auth page.
+      // Without this check, arriving at /login triggers another redirect
+      // to /login, which triggers another, forever.
+      const p = window.location.pathname;
+      const onAuthPage =
+        p === "/login" ||
+        p === "/signup" ||
+        p.startsWith("/verify-email") ||
+        p.startsWith("/forgot-password") ||
+        p.startsWith("/email-verified");
+      if (!onAuthPage) {
+        window.location.href = LOGIN_URL;
+      }
       return Promise.reject(e);
     } finally {
       _isRefreshing = false;
@@ -92,6 +123,7 @@ export function AuthProvider({ children }) {
   const isLearnerContext      = context === "learner";
 
   // ── Bootstrap ─────────────────────────────────────────────────────────────
+  // The interceptor skips /me/ calls, so bootstrap handles refresh manually.
   const bootstrap = useCallback(async () => {
     const apply = (data) => {
       setUser(data);
@@ -104,10 +136,22 @@ export function AuthProvider({ children }) {
       const res = await api.get("/accounts/me/");
       return apply(res.data);
     } catch {
-      try   { await api.post("/accounts/refresh/"); }
-      catch { setUser(null); setLoading(false); return null; }
-      try   { return apply((await api.get("/accounts/me/")).data); }
-      catch { setUser(null); return null; }
+      // /me/ failed — try refreshing the token once
+      try {
+        await api.post("/accounts/refresh/");
+      } catch {
+        // Refresh also failed — user is not logged in
+        setUser(null);
+        setLoading(false);
+        return null;
+      }
+      // Refresh succeeded — retry /me/
+      try {
+        return apply((await api.get("/accounts/me/")).data);
+      } catch {
+        setUser(null);
+        return null;
+      }
     } finally {
       setLoading(false);
     }
@@ -209,10 +253,15 @@ export function AuthProvider({ children }) {
   };
 
   // ── Logout ─────────────────────────────────────────────────────────────────
+  // Does NOT do window.location.href — the caller (Navbar.handleLogout) uses
+  // navigate("/login") which keeps React Router in control and avoids a hard
+  // reload that would restart the bootstrap loop.
   const logout = async () => {
     try { await api.post("/accounts/logout/"); } catch { /* ignore */ }
-    setUser(null); setProfiles([]); setTeacherInfo(null); setContext(null);
-    window.location.href = LOGIN_URL;
+    setUser(null);
+    setProfiles([]);
+    setTeacherInfo(null);
+    setContext(null);
   };
 
   // ── Role check ─────────────────────────────────────────────────────────────
@@ -241,19 +290,7 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) {
-    console.warn("useAuth was called outside AuthProvider.");
-    return {
-      user: null, profiles: [], teacherInfo: null, context: null,
-      activeProfile: null, isAuthenticated: false, needsProfileSelection: false,
-      isTeacherContext: false, isLearnerContext: false, loading: false, api,
-      login: async () => null, selectProfile: async () => null, switchProfile: async () => null,
-      enterTeacherMode: async () => ({ ok: false }), setProfilePin: async () => null,
-      signup: async () => null, checkEmail: async () => ({}),
-      lookupEmail: async () => ({ profiles: [], has_teacher: false }),
-      logout: () => {}, hasRole: () => false, bootstrap: async () => null,
-    };
-  }
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
   return ctx;
 }
 

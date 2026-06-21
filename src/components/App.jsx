@@ -10,44 +10,44 @@ import RequireProfileComplete from "../routes/RequireProfileComplete";
 import ProfileFillupModal from "./ProfileFillupModal";
 import { ProfileModalProvider } from "../contexts/ProfileModalContext";
 import { useAuth } from "../contexts/AuthContext";
-import { APP_URL, APP_DASHBOARD_URL } from "../config/urls";
+import { APP_DASHBOARD_URL, TEACHER_DASHBOARD_URL } from "../config/urls";
 import Profile from "../pages/Profile";
 
 import "../css/App.css";
 
-const Dashboard       = lazy(() => import("./Dashboard"));
-const FormFillup      = lazy(() => import("./FormFillup"));
-const Enroll          = lazy(() => import("./Enroll"));
-const Courses         = lazy(() => import("./Courses"));
-const Placements      = lazy(() => import("./Placements"));
-const GeneralStudies  = lazy(() => import("./GeneralStudies"));
-const Blogs           = lazy(() => import("./Blogs"));
-const BlogDetail      = lazy(() => import("./BlogDetail"));
-const Counselling     = lazy(() => import("./Counselling"));
-const Explore         = lazy(() => import("./Explore"));
-const CurrentAffairs  = lazy(() => import("./CurrentAffairs"));
-const Payment         = lazy(() => import("./Payment"));
+const Dashboard        = lazy(() => import("./Dashboard"));
+const FormFillup       = lazy(() => import("./FormFillup"));
+const Enroll           = lazy(() => import("./Enroll"));
+const Courses          = lazy(() => import("./Courses"));
+const Placements       = lazy(() => import("./Placements"));
+const GeneralStudies   = lazy(() => import("./GeneralStudies"));
+const Blogs            = lazy(() => import("./Blogs"));
+const BlogDetail       = lazy(() => import("./BlogDetail"));
+const Counselling      = lazy(() => import("./Counselling"));
+const Explore          = lazy(() => import("./Explore"));
+const CurrentAffairs   = lazy(() => import("./CurrentAffairs"));
+const Payment          = lazy(() => import("./Payment"));
 const SkillDevelopment = lazy(() => import("./SkillDevelopment"));
-const Upcoming        = lazy(() => import("./Upcoming"));
-const ExploreServices = lazy(() => import("./ExploreServices"));
-const About           = lazy(() => import("./About"));
-const About2          = lazy(() => import("./About2"));
-const Vision          = lazy(() => import("./Vision"));
-const Mission         = lazy(() => import("./Mission"));
-const Values          = lazy(() => import("./Values"));
-const WhySiksha       = lazy(() => import("./WhySiksha"));
-const Contact         = lazy(() => import("./Contact"));
-const TermsCondition  = lazy(() => import("./TermsCondition"));
-const Faq             = lazy(() => import("./Faq"));
-const Feedback        = lazy(() => import("./Feedback"));
-const ProfilePicker   = lazy(() => import("../pages/ProfilePicker"));
-const ManageProfiles  = lazy(() => import("../pages/ManageProfiles"));
-const Login           = lazy(() => import("../auth/Login"));
-const Signup          = lazy(() => import("../auth/Signup"));
-const VerifyEmail     = lazy(() => import("../auth/VerifyEmail"));
-const EmailVerified   = lazy(() => import("../auth/EmailVerified"));
-const ForgotPassword  = lazy(() => import("../auth/ForgotPassword"));
-const ThreadListPage  = lazy(() => import("../forum/ThreadListPage"));
+const Upcoming         = lazy(() => import("./Upcoming"));
+const ExploreServices  = lazy(() => import("./ExploreServices"));
+const About            = lazy(() => import("./About"));
+const About2           = lazy(() => import("./About2"));
+const Vision           = lazy(() => import("./Vision"));
+const Mission          = lazy(() => import("./Mission"));
+const Values           = lazy(() => import("./Values"));
+const WhySiksha        = lazy(() => import("./WhySiksha"));
+const Contact          = lazy(() => import("./Contact"));
+const TermsCondition   = lazy(() => import("./TermsCondition"));
+const Faq              = lazy(() => import("./Faq"));
+const Feedback         = lazy(() => import("./Feedback"));
+const ProfilePicker    = lazy(() => import("../pages/ProfilePicker"));
+const ManageProfiles   = lazy(() => import("../pages/ManageProfiles"));
+const Login            = lazy(() => import("../auth/Login"));
+const Signup           = lazy(() => import("../auth/Signup"));
+const VerifyEmail      = lazy(() => import("../auth/VerifyEmail"));
+const EmailVerified    = lazy(() => import("../auth/EmailVerified"));
+const ForgotPassword   = lazy(() => import("../auth/ForgotPassword"));
+const ThreadListPage   = lazy(() => import("../forum/ThreadListPage"));
 const ThreadDetailPage = lazy(() => import("../forum/ThreadDetailPage"));
 const CreateThreadPage = lazy(() => import("../forum/CreateThreadPage"));
 const NotificationsPage = lazy(() => import("../forum/NotificationsPage"));
@@ -68,23 +68,6 @@ function Page({ children }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// AppEntry — handles the / route
-//
-// FIX: the old version used APP_URL hostname comparison to decide whether to
-// treat this domain as the "app" (student dashboard). That caused a loop when
-// VITE_APP_URL was set to the same domain as the landing page on the dev server.
-//
-// New logic:
-//   - The landing page (www / dev) always shows <HomePage /> at /
-//   - It never redirects unauthenticated visitors away from /
-//   - Authenticated users who somehow land here just see the home page too
-//   - The student dashboard app.* handles its own redirect-to-login
-// ─────────────────────────────────────────────────────────────────────────────
-function AppEntry({ isAuthenticated }) {
-  return <HomePage />;
-}
-
 function RouteFallback() {
   return (
     <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -101,13 +84,11 @@ function RouteFallback() {
 }
 
 function App() {
-  const { isAuthenticated, isLearnerContext, loading } = useAuth();
+  const { isAuthenticated, isLearnerContext, isTeacherContext, loading } = useAuth();
   useAnalytics();
 
-  // FIX: never block the entire page on loading — let routes render.
-  // ProtectedRoute already handles the loading state per-route.
-  // Returning null here while loading caused the /login → / → /login loop
-  // because the route tree was not mounted when bootstrap resolved.
+  // Show spinner while bootstrap runs — but keep the route tree mounted
+  // (do NOT return null, that unmounts Routes and causes remount loops)
   if (loading) return <RouteFallback />;
 
   return (
@@ -118,138 +99,80 @@ function App() {
 
       <Suspense fallback={<RouteFallback />}>
       <Routes>
-        <Route path="/" element={<AppEntry isAuthenticated={isAuthenticated} />} />
+        {/* Home — always shows the landing page, never redirects away */}
+        <Route path="/" element={<HomePage />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <RequireProfileComplete>
-                <Page>
-                  <Dashboard />
-                </Page>
-              </RequireProfileComplete>
-            </ProtectedRoute>
-          }
-        />
+        {/* Protected app routes */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <RequireProfileComplete>
+              <Page><Dashboard /></Page>
+            </RequireProfileComplete>
+          </ProtectedRoute>
+        } />
 
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <Profile />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/profile" element={
+          <ProtectedRoute><Page><Profile /></Page></ProtectedRoute>
+        } />
 
-        <Route
-          path="/form-fillup"
-          element={
-            <ProtectedRoute>
-              <RequireProfileComplete>
-                <Page>
-                  <FormFillup />
-                </Page>
-              </RequireProfileComplete>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/form-fillup" element={
+          <ProtectedRoute>
+            <RequireProfileComplete>
+              <Page><FormFillup /></Page>
+            </RequireProfileComplete>
+          </ProtectedRoute>
+        } />
 
-        <Route
-          path="/enroll/:courseId"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <Enroll />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/enroll/:courseId" element={
+          <ProtectedRoute><Page><Enroll /></Page></ProtectedRoute>
+        } />
 
-        <Route
-          path="/pick-profile"
-          element={
-            <ProtectedRoute>
-              <ProfilePicker />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/pick-profile" element={
+          <ProtectedRoute><ProfilePicker /></ProtectedRoute>
+        } />
 
-        <Route
-          path="/manage-profiles"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <ManageProfiles />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/manage-profiles" element={
+          <ProtectedRoute><Page><ManageProfiles /></Page></ProtectedRoute>
+        } />
 
         {/*
-          FIX: the old code did isAuthenticated ? <Navigate to="/" /> : <Login />
-          That caused a loop: authenticated user → / → (old AppEntry redirected
-          back to /login if isAppDomain was wrongly true) → /login → / → ...
-
-          New logic:
-            - If authenticated AND already in learner context → go straight to
-              the student dashboard (hard redirect, cross-domain).
-            - If authenticated but context is "account" (profile not yet selected)
-              → stay on /pick-profile so they can choose.
-            - If not authenticated → show login form.
+          /login — only show the login form if the user is NOT authenticated.
+          If they are authenticated:
+            - learner context  → send to the student dashboard (cross-domain, hard redirect)
+            - teacher context  → send to the teacher dashboard (cross-domain, hard redirect)
+            - account context  → send to pick-profile (still on this domain)
         */}
-        <Route
-          path="/login"
-          element={
-            isAuthenticated
-              ? isLearnerContext
-                ? (() => { window.location.href = APP_DASHBOARD_URL; return null; })()
+        <Route path="/login" element={
+          !isAuthenticated
+            ? <Page><Login /></Page>
+            : isLearnerContext
+              ? (() => { window.location.replace(APP_DASHBOARD_URL); return null; })()
+              : isTeacherContext
+                ? (() => { window.location.replace(TEACHER_DASHBOARD_URL); return null; })()
                 : <Navigate to="/pick-profile" replace />
-              : (
-                <Page>
-                  <Login />
-                </Page>
-              )
-          }
-        />
+        } />
 
-        <Route
-          path="/signup"
-          element={
-            isAuthenticated ? <Navigate to="/" replace /> : (
-              <Page>
-                <Signup />
-              </Page>
-            )
-          }
-        />
+        <Route path="/signup" element={
+          isAuthenticated ? <Navigate to="/" replace /> : <Page><Signup /></Page>
+        } />
 
-        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/verify-email"   element={<VerifyEmail />} />
         <Route path="/email-verified" element={<EmailVerified />} />
 
-        <Route
-          path="/forgot-password"
-          element={
-            isAuthenticated ? <Navigate to="/" replace /> : (
-              <Page>
-                <ForgotPassword />
-              </Page>
-            )
-          }
-        />
+        <Route path="/forgot-password" element={
+          isAuthenticated ? <Navigate to="/" replace /> : <Page><ForgotPassword /></Page>
+        } />
 
-        <Route path="/about"   element={<Page><About2 /><About /></Page>} />
-        <Route path="/vision"  element={<Page><Vision /></Page>} />
-        <Route path="/mission" element={<Page><Mission /></Page>} />
-        <Route path="/values"  element={<Page><Values /></Page>} />
-        <Route path="/why-shiksha" element={<Page><WhySiksha /></Page>} />
-        <Route path="/contact" element={<Page><Contact /></Page>} />
-        <Route path="/terms"   element={<Page><TermsCondition /></Page>} />
-        <Route path="/faq"     element={<Page><Faq /></Page>} />
-        <Route path="/feedback" element={<Page><Feedback /></Page>} />
-
+        {/* Public content pages */}
+        <Route path="/about"           element={<Page><About2 /><About /></Page>} />
+        <Route path="/vision"          element={<Page><Vision /></Page>} />
+        <Route path="/mission"         element={<Page><Mission /></Page>} />
+        <Route path="/values"          element={<Page><Values /></Page>} />
+        <Route path="/why-shiksha"     element={<Page><WhySiksha /></Page>} />
+        <Route path="/contact"         element={<Page><Contact /></Page>} />
+        <Route path="/terms"           element={<Page><TermsCondition /></Page>} />
+        <Route path="/faq"             element={<Page><Faq /></Page>} />
+        <Route path="/feedback"        element={<Page><Feedback /></Page>} />
         <Route path="/courses"         element={<Page><Courses /></Page>} />
         <Route path="/placements"      element={<Page><Placements /></Page>} />
         <Route path="/general-studies" element={<Page><GeneralStudies /></Page>} />
@@ -261,11 +184,10 @@ function App() {
         <Route path="/skill-development" element={<SkillDevelopment />} />
         <Route path="/upcoming"        element={<Upcoming />} />
         <Route path="/payment"         element={<Page><Payment /></Page>} />
-
-        <Route path="/forum"                  element={<Page><ThreadListPage /></Page>} />
-        <Route path="/forum/create"           element={<Page><CreateThreadPage /></Page>} />
-        <Route path="/forum/notifications"    element={<Page><NotificationsPage /></Page>} />
-        <Route path="/forum/:threadId"        element={<Page><ThreadDetailPage /></Page>} />
+        <Route path="/forum"           element={<Page><ThreadListPage /></Page>} />
+        <Route path="/forum/create"    element={<Page><CreateThreadPage /></Page>} />
+        <Route path="/forum/notifications" element={<Page><NotificationsPage /></Page>} />
+        <Route path="/forum/:threadId" element={<Page><ThreadDetailPage /></Page>} />
       </Routes>
       </Suspense>
     </div>

@@ -1,16 +1,14 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-// FIX: the old ProtectedRoute used window.location.href = LOGIN_URL
-// which caused a hard redirect. On the landing page, /login is an
-// in-app route — using <Navigate> keeps it within React Router,
-// avoids a full page reload, and prevents the loop where the page
-// would reload mid-bootstrap and briefly see loading=true again.
-//
-// window.location.href is still correct when crossing domains
-// (e.g. from the student dashboard back to the landing page login).
-// On the landing page, /login is local, so <Navigate> is right.
-
+/**
+ * Uses <Navigate> instead of window.location.href = LOGIN_URL.
+ *
+ * The /login route is local to this React app — window.location.href
+ * causes a full hard reload, which re-runs bootstrap from scratch and
+ * can briefly flip auth state in a way that triggers repeated redirects.
+ * <Navigate> stays within React Router and avoids the reload entirely.
+ */
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
@@ -20,10 +18,10 @@ const ProtectedRoute = ({ children }) => {
   if (!isAuthenticated) {
     try {
       const here = location.pathname + location.search;
-      if (here && here.startsWith("/") && !here.startsWith("//")) {
+      if (here.startsWith("/") && !here.startsWith("//")) {
         sessionStorage.setItem("post_auth_redirect", here);
       }
-    } catch (_) { /* sessionStorage unavailable */ }
+    } catch { /* sessionStorage unavailable */ }
 
     return <Navigate to="/login" replace />;
   }
