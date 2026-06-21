@@ -37,6 +37,7 @@ import {
 const STEP_ROLE             = "role";
 const STEP_BASIC            = "basic";
 const STEP_EXISTING_CONFIRM = "existing_confirm";
+const STEP_UPGRADE_CONFIRM  = "upgrade_confirm";   // GUEST expert adding FACULTY
 const STEP_PROFILE          = "profile";
 const STEP_ADD_MORE         = "add_more";
 const STEP_TEACHER_TYPE     = "ttype";
@@ -78,6 +79,7 @@ export default function Signup() {
   /* add-to-existing state */
   const [isAddingToExisting, setIsAddingToExisting]   = useState(false);
   const [existingAccountType, setExistingAccountType] = useState(""); // "has_teacher" | "has_student"
+  const [existingTeacherType, setExistingTeacherType] = useState(""); // "GUEST" | "FACULTY" on the existing account
   const [existingPassword, setExistingPassword]       = useState("");
   const [showExistingPw, setShowExistingPw]           = useState(false);
 
@@ -136,9 +138,12 @@ export default function Signup() {
     try {
       await signup(payload);
       if (isAddingToExisting) {
+        const upgradeMsg = step === STEP_UPGRADE_CONFIRM
+          ? "Faculty application submitted! Your Guest expert profile is still live. Log in to check status."
+          : "Identity added! Please log in.";
         navigate("/login", {
           replace: true,
-          state: { message: "Identity added! Please log in." },
+          state: { message: upgradeMsg },
         });
       } else {
         navigate("/verify-email", { replace: true, state: { email } });
@@ -156,6 +161,13 @@ export default function Signup() {
     if (step === STEP_EXISTING_CONFIRM) {
       setIsAddingToExisting(false);
       setExistingAccountType("");
+      setExistingTeacherType("");
+      setExistingPassword("");
+      go(STEP_BASIC);
+    }
+    if (step === STEP_UPGRADE_CONFIRM) {
+      setIsAddingToExisting(false);
+      setExistingTeacherType("");
       setExistingPassword("");
       go(STEP_BASIC);
     }
@@ -205,6 +217,14 @@ export default function Signup() {
 
       if (role === "TEACHER") {
         if (has_teacher) {
+          // Case 7: GUEST expert adding FACULTY — offer upgrade, don't block.
+          if (state.teacher_type === "GUEST" && teacherType === "FACULTY") {
+            setIsAddingToExisting(true);
+            setExistingTeacherType("GUEST");
+            go(STEP_UPGRADE_CONFIRM);
+            return;
+          }
+          // FACULTY adding GUEST, or same type again → block
           setError("This email already has a teacher account. Log in instead.");
           return;
         }
@@ -233,6 +253,14 @@ export default function Signup() {
     if (!existingPassword) { setError("Please enter your account password."); return; }
     if (role === "STUDENT") go(STEP_PROFILE);
     else go(STEP_TEACHER_TYPE);
+  };
+
+  /* su-upgrade: GUEST expert confirms password to add FACULTY track */
+  const submitUpgrade = (e) => {
+    e.preventDefault();
+    setError("");
+    if (!existingPassword) { setError("Please enter your account password."); return; }
+    doSignup({ teacher_type: "FACULTY" });
   };
 
   /* su-profile */
@@ -426,6 +454,49 @@ export default function Signup() {
               <button type="submit" className="af-btn af-btn--block"
                 disabled={!existingPassword || submitting}>
                 Continue
+              </button>
+            </div>
+          </form>
+        </>
+      )}
+
+      {/* ── su-upgrade: GUEST expert adding FACULTY track ── */}
+      {step === STEP_UPGRADE_CONFIRM && (
+        <>
+          <h1 className="af-heading">Add Faculty application</h1>
+          <p className="af-sub">
+            You already have a Guest expert account on this email. Adding a Faculty application
+            upgrades your account to both tracks — your expert listing stays live while your
+            Faculty application goes through admin review.
+          </p>
+
+          <div className="af-banner-info">
+            <div className="af-banner-info__icon"
+              style={{ background: PAL.faculty + "22", color: PAL.faculty }}>
+              <Icon name="cap" size={19} color={PAL.faculty} />
+            </div>
+            <div className="af-banner-info__text">
+              Your <strong>Guest expert</strong> identity stays active. The new <strong>Faculty</strong>{" "}
+              track will be reviewed by the admin team (3–5 days) before it's activated.
+            </div>
+          </div>
+
+          <form onSubmit={submitUpgrade} style={{ display: "contents" }}>
+            <PasswordField
+              id="su-upgrade-pw"
+              label="Confirm with your account password"
+              value={existingPassword}
+              onChange={(e) => setExistingPassword(e.target.value)}
+              placeholder="Your account password"
+              required autoFocus autoComplete="current-password"
+              show={showExistingPw} onToggle={() => setShowExistingPw((v) => !v)}
+            />
+            {error && <div className="af-error">{error}</div>}
+            <div className="af-spacer" />
+            <div className="af-actions">
+              <button type="submit" className="af-btn af-btn--block"
+                disabled={!existingPassword || submitting}>
+                {submitting ? <><span className="af-spin" />Submitting…</> : "Submit Faculty application"}
               </button>
             </div>
           </form>
