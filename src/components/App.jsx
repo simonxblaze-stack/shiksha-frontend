@@ -83,6 +83,11 @@ function RouteFallback() {
   );
 }
 
+function RedirectExternal({ to }) {
+  useEffect(() => { window.location.replace(to); }, [to]);
+  return null;
+}
+
 function App() {
   const { isAuthenticated, isLearnerContext, isTeacherContext, loading } = useAuth();
   useAnalytics();
@@ -146,9 +151,9 @@ function App() {
           !isAuthenticated
             ? <Page><Login /></Page>
             : isLearnerContext
-              ? (() => { window.location.replace(APP_DASHBOARD_URL); return null; })()
+              ? <RedirectExternal to={APP_DASHBOARD_URL} />
               : isTeacherContext
-                ? (() => { window.location.replace(TEACHER_DASHBOARD_URL); return null; })()
+                ? <RedirectExternal to={TEACHER_DASHBOARD_URL} />
                 : <Navigate to="/pick-profile" replace />
         } />
 
