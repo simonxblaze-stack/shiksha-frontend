@@ -1,31 +1,13 @@
-/**
- * src/config/urls.js  ·  SINGLE SOURCE OF TRUTH
- * ─────────────────────────────────────────────────
- * Copy this file into all three apps:
- *   landing_page/src/config/urls.js       ← replaces existing
- *   student_dashboard/src/config/urls.js  ← create new
- *   teacher_dashboard/src/config/urls.js  ← create new
- *
- * Then replace every inline fallback like:
- *   import.meta.env.VITE_HOME_URL || "https://www.shikshacom.com"
- * with:
- *   import { HOME_URL } from "../config/urls"   (adjust path depth)
- *
- * HOW IT WORKS
- * ────────────
- * Priority 1: explicit VITE_* env var (set in .env on each droplet — always wins)
- * Priority 2: runtime hostname detection — no env var needed on dev server
- * Priority 3: production URLs (only reached if running on an unknown host
- *             AND no env vars are set — i.e. local dev machine)
- *
- * Dev detection covers:
- *   dev.shikshacom.com
- *   *.dev.shikshacom.com   (app.dev, teacher.dev, api.dev …)
- *   localhost / 127.0.0.1 / local network IPs
- */
+// src/config/urls.js — single source of truth for all three apps
+//
+// Priority: VITE_* env var → runtime hostname detection → production fallback
+//
+// Dev detection: dev.shikshacom.com, *.dev.shikshacom.com, localhost, LAN IPs
+// No env vars needed on the dev droplet — auto-detection handles it.
+// Only set VITE_* vars if you have a staging environment with a non-standard domain.
 
-const host   = typeof window !== "undefined" ? window.location.hostname : "";
-const isDev  =
+const host  = typeof window !== "undefined" ? window.location.hostname : "";
+const isDev =
   host === "dev.shikshacom.com" ||
   host.endsWith(".dev.shikshacom.com") ||
   host === "localhost" ||
@@ -35,7 +17,7 @@ const isDev  =
 
 const PROD = {
   HOME:    "https://www.shikshacom.com",
-  APP:     "https://app.shikshacom.com",
+  APP:     "https://app.shikshacom.com",       // no trailing slash
   TEACHER: "https://teacher.shikshacom.com",
   API:     "https://api.shikshacom.com",
   WS:      "api.shikshacom.com",
@@ -43,7 +25,7 @@ const PROD = {
 
 const DEV = {
   HOME:    "https://dev.shikshacom.com",
-  APP:     "https://app.dev.shikshacom.com",
+  APP:     "https://app.dev.shikshacom.com",   // no trailing slash
   TEACHER: "https://teacher.dev.shikshacom.com",
   API:     "https://api.dev.shikshacom.com",
   WS:      "api.dev.shikshacom.com",
@@ -51,22 +33,17 @@ const DEV = {
 
 const ENV = isDev ? DEV : PROD;
 
-// ── Exported URLs ─────────────────────────────────────────────────────────────
-// Each one: VITE var wins → runtime auto-detect → fallback
+// Base URLs (no trailing slash — safe to append paths)
+export const HOME_URL    = (import.meta.env.VITE_HOME_URL    || ENV.HOME).replace(/\/$/, "");
+export const APP_URL     = (import.meta.env.VITE_APP_URL     || ENV.APP).replace(/\/$/, "");
+export const TEACHER_URL = (import.meta.env.VITE_TEACHER_URL || ENV.TEACHER).replace(/\/$/, "");
+export const API_URL     = (import.meta.env.VITE_API_URL     || ENV.API + "/api");
+export const WS_HOST     =  import.meta.env.VITE_WS_HOST     || ENV.WS;
 
-export const HOME_URL    = import.meta.env.VITE_HOME_URL    || ENV.HOME;
-export const APP_URL     = import.meta.env.VITE_APP_URL     || ENV.APP;
-export const TEACHER_URL = import.meta.env.VITE_TEACHER_URL || ENV.TEACHER;
-export const API_URL     = import.meta.env.VITE_API_URL     || ENV.API + "/api";
-export const WS_HOST     = import.meta.env.VITE_WS_HOST     || ENV.WS;
-
-// Convenience composites
-export const LOGIN_URL        = HOME_URL + "/login";
-export const PICK_PROFILE_URL = HOME_URL + "/pick-profile";
-export const SIGNUP_URL       = HOME_URL + "/signup";
-export const FORM_FILLUP_URL  = HOME_URL + "/form-fillup";
-
-// Teacher dashboard entry point (with path)
-export const TEACHER_DASHBOARD_URL = TEACHER_URL + "/teacher/dashboard";
-// Student dashboard entry point
-export const APP_DASHBOARD_URL     = APP_URL;
+// Composite URLs used throughout the apps
+export const LOGIN_URL            = HOME_URL    + "/login";
+export const SIGNUP_URL           = HOME_URL    + "/signup";
+export const PICK_PROFILE_URL     = HOME_URL    + "/pick-profile";
+export const FORM_FILLUP_URL      = HOME_URL    + "/form-fillup";
+export const APP_DASHBOARD_URL    = APP_URL;                              // student dashboard root
+export const TEACHER_DASHBOARD_URL = TEACHER_URL + "/teacher/dashboard";  // teacher dashboard entry
