@@ -14,6 +14,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { APP_URL, TEACHER_URL } from "../config/urls";
+import ProfileSwitcher from "../shared/ProfileSwitcher";
 import { getFormFillupData } from "../api/formFillupApi";
 
 const Navbar = () => {
@@ -191,68 +192,11 @@ const Navbar = () => {
 
           <div className="header-right">
             {isAuthenticated && user ? (
-              <div className="header-profile-wrap" ref={profileMenuRef}>
-                <span className="header-user-name">Hi, {firstName}</span>
-
-                <button
-                  type="button"
-                  className="profile-btn"
-                  onClick={() => setProfileOpen((prev) => !prev)}
-                >
-                  <FiUser size={18} />
-                </button>
-                {profileOpen && (
-                  <div className="profile-dropdown">
-                    <div className="profile-dropdown-user">
-                      <span className="profile-dropdown-name">Hi, {firstName}</span>
-                    </div>
-
-                    <button
-  className="dropdown-item"
-  onClick={() => {
-    navigate("/profile");
-    setProfileOpen(false);
-  }}
->
-  <FiUser size={16} />
-  Profile
-</button>
-                    <button
-                      className="dropdown-item"
-                      onClick={() => { navigate("/manage-profiles"); setProfileOpen(false); }}
-                    >
-                      <FiUsers size={16} />
-                      Manage Profiles
-                    </button>
-
-                    {!user.profile_complete && (
-                      <button
-                        className="dropdown-item"
-                        onClick={() => { navigate("/form-fillup"); setProfileOpen(false); }}
-                      >
-                        <FiFileText size={16} />
-                        Fill Form
-                      </button>
-                    )}
-
-                    <button
-                      className="dropdown-item"
-                      onClick={() => { window.location.href = `${APP_URL}/change-password`; setProfileOpen(false); }}
-                    >
-                      <FiFileText size={16} />
-                      Change Password
-                    </button>
-
-                    <button
-                      className="dropdown-item logout"
-                      onClick={handleLogout}
-                    >
-                      <FiLogOut size={16} />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
+              <ProfileSwitcher
+                teacherSignupUrl="/signup?role=teacher"
+                learnUrl={APP_URL}
+                teachUrl={TEACHER_URL}
+              />
             ) : (
               <div className="header-auth">
                 <Link to="/login" className="header-login-btn">
