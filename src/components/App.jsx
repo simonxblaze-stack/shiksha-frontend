@@ -30,6 +30,8 @@ const Payment          = lazy(() => import("./Payment"));
 const SkillDevelopment = lazy(() => import("./SkillDevelopment"));
 const Upcoming         = lazy(() => import("./Upcoming"));
 const ExploreServices  = lazy(() => import("./ExploreServices"));
+const SkillBrowsePage  = lazy(() => import("../pages/SkillBrowsePage"));
+const ExpertProfilePage= lazy(() => import("../pages/ExpertProfilePage"));
 const About            = lazy(() => import("./About"));
 const About2           = lazy(() => import("./About2"));
 const Vision           = lazy(() => import("./Vision"));
@@ -196,6 +198,8 @@ function App() {
         <Route path="/explore"         element={<Page><Explore /></Page>} />
         <Route path="/current-affairs" element={<Page><CurrentAffairs /></Page>} />
         <Route path="/skill-development" element={<SkillDevelopment />} />
+        <Route path="/skill/browse"  element={<SkillBrowsePage />} />
+        <Route path="/experts/:id"   element={<ExpertProfilePage />} />
         <Route path="/upcoming"        element={<Upcoming />} />
         <Route path="/payment"         element={<Page><Payment /></Page>} />
         <Route path="/forum"           element={<Page><ThreadListPage /></Page>} />
