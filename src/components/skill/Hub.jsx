@@ -1,9 +1,34 @@
 /* Hub.jsx — Skill Development landing: two doors (learn / teach) + skill rail. */
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Icon } from "./icons";
-import { SKILL_CATEGORIES, TEACHERS } from "./data";
+import { SKILL_CATEGORIES as FALLBACK_CATS } from "./data";
+import { fetchTeachers } from "../../api/skillApi";
+import api from "../../api/apiClient";
 
 export default function Hub({ nav }) {
+  const [categories, setCategories] = useState(FALLBACK_CATS);
+  const [teacherCounts, setTeacherCounts] = useState({});
+
+  useEffect(() => {
+    // Fetch real categories
+    api.get("/skill/categories/")
+      .then(r => {
+        if (Array.isArray(r.data) && r.data.length) setCategories(r.data);
+      })
+      .catch(() => {/* keep fallback */});
+
+    // Fetch teachers to compute per-category counts
+    fetchTeachers()
+      .then(teachers => {
+        const counts = {};
+        teachers.forEach(t => {
+          if (t.cat) counts[t.cat] = (counts[t.cat] || 0) + 1;
+        });
+        setTeacherCounts(counts);
+      })
+      .catch(() => {/* ignore, counts stay 0 */});
+  }, []);
+
   return (
     <div className="sd-screen sd-grid-bg" style={{ padding: "40px 48px 60px", position: "relative", minHeight: 600 }}>
       <div style={{ position: "absolute", width: 480, height: 480, borderRadius: "50%",
@@ -87,10 +112,12 @@ export default function Hub({ nav }) {
             </button>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-            {SKILL_CATEGORIES.map(s => {
-              const count = TEACHERS.filter(t => t.cat === s.id).length;
+            {categories.map(s => {
+              // Backend uses slug for category matching; data.js uses id — slug wins.
+              const key = s.slug || s.id;
+              const count = teacherCounts[key] || 0;
               return (
-                <button key={s.id} onClick={() => nav("discovery", { skill: s.id })}
+                <button key={key} onClick={() => nav("discovery", { skill: key })}
                   style={{ all: "unset", cursor: "pointer", background: "#fff", border: "1px solid var(--c-border)",
                     borderRadius: 12, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12, transition: "all .15s" }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = s.color; e.currentTarget.style.background = "#fdfaf0"; }}
