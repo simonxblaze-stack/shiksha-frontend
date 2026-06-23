@@ -15,7 +15,7 @@
    interceptor — so these calls are already auth-aware. */
 import api from "./apiClient";
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 const wait = (ms = 600) => new Promise(r => setTimeout(r, ms));
 
 /* ── Teacher directory ────────────────────────────────────── */
