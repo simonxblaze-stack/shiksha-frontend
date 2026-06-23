@@ -13,7 +13,7 @@ import "../css/SkillDevelopment.css";
 import Hub from "./skill/Hub";
 import { RoleChooser, StudentSignup, TeacherSignup } from "./skill/Register";
 import Discovery from "./skill/Discovery";
-import Profile, { ContactModal } from "./skill/Profile";
+import Profile from "./skill/Profile";
 import { PaymentScreen, SessionConfirmed, SessionRoom } from "./skill/Booking";
 import { ApplicationStatus, ScheduleInterview, InterviewRoom, InterviewResult, ReviewerQueue } from "./skill/Screening";
 
@@ -22,11 +22,9 @@ export default function SkillDevelopment() {
   const [activeTeacher, setActiveTeacher] = useState(null);
   const [sessionDraft, setSessionDraft] = useState(null);
   const [applicant, setApplicant] = useState(null);
-  const [applicationId, setApplicationId] = useState(null);
   const [interview, setInterview] = useState({});
   const [candidate, setCandidate] = useState(null);
   const [reviewedId, setReviewedId] = useState(null);
-  const [contactOpen, setContactOpen] = useState(false);
   const [initialSkill, setInitialSkill] = useState("all");
 
   const nav = (s, extra = {}) => {
@@ -34,7 +32,6 @@ export default function SkillDevelopment() {
     if (extra.skill !== undefined) setInitialSkill(extra.skill);
     if (extra.sessionDraft) setSessionDraft(extra.sessionDraft);
     if (extra.applicant) setApplicant(extra.applicant);
-    if (extra.applicationId) setApplicationId(extra.applicationId);
     if (extra.interview) setInterview(iv => ({ ...iv, ...extra.interview }));
     if (extra.candidate) setCandidate(extra.candidate);
     if (extra.reviewed) setReviewedId(extra.reviewed);
@@ -58,7 +55,7 @@ export default function SkillDevelopment() {
         {screen === "teacher" && <TeacherSignup nav={nav} />}
         {screen === "discovery" && <Discovery nav={nav} initialSkill={initialSkill} />}
         {screen === "profile" && activeTeacher && (
-          <Profile t={activeTeacher} nav={nav} openContact={() => setContactOpen(true)} />
+          <Profile t={activeTeacher} nav={nav} />
         )}
 
         {/* Booking */}
@@ -68,7 +65,7 @@ export default function SkillDevelopment() {
 
         {/* Screening — applicant */}
         {screen === "application-status" && <ApplicationStatus applicant={applicant} interview={interview} nav={nav} />}
-        {screen === "schedule-interview" && <ScheduleInterview nav={nav} applicationId={applicationId} />}
+        {screen === "schedule-interview" && <ScheduleInterview nav={nav} />}
         {screen === "interview-room" && <InterviewRoom mode="applicant" applicant={applicant} interview={interview} nav={nav} />}
         {screen === "interview-result" && <InterviewResult applicant={applicant} nav={nav} />}
 
@@ -77,10 +74,6 @@ export default function SkillDevelopment() {
         {screen === "interview-panel" && <InterviewRoom mode="reviewer" candidate={candidate} nav={nav} />}
       </div>
 
-      {contactOpen && activeTeacher && (
-          <ContactModal t={activeTeacher} onClose={() => setContactOpen(false)}
-            onRequestPayment={(draft) => { setContactOpen(false); nav("payment", { sessionDraft: draft }); }} />
-        )}
       </div>
 
       <Footer />

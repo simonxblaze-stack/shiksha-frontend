@@ -1,143 +1,189 @@
-/* skillApi.js — live API seam for the Skill Development feature.
+/* skillApi.js — API seam for the Skill Development feature.
    ────────────────────────────────────────────────────────────────
-   USE_MOCK is now false: every screen talks to the Django backend
-   mounted at /api/skill/ (see skills/urls.py). The component-facing
-   function signatures are unchanged; the mapping from each screen's
-   payload to the backend's expected fields lives here so the screens
-   stay (mostly) untouched.
+   Every screen talks to the backend ONLY through these functions, so
+   you have one place to wire real endpoints. Until the backend exists,
+   each call resolves against a mock (USE_MOCK = true) so the whole UI
+   is fully clickable today.
 
-   Auth is cookie-based via the shared apiClient (withCredentials +
-   401-refresh), so calls that need a logged-in account / active learner
-   profile are already authorised by the session.
+   When your Django endpoints are ready:
+     1. set USE_MOCK = false (or remove the mock branch),
+     2. confirm the paths below match your DRF routes,
+     3. the components don't change at all.
 
-   NOTE on registration (see comments on registerStudent / registerTeacher):
-   account creation now goes through the unified accounts signup. The skill
-   StudentSignup screen should redirect new users to /signup; the skill
-   TeacherSignup screen becomes the APPLICATION form for a logged-in teacher. */
+   `api` is your existing axios client (src/api/apiClient.js) with
+   baseURL = API_URL and withCredentials, including the 401-refresh
+   interceptor — so these calls are already auth-aware. */
 import api from "./apiClient";
 
-const USE_MOCK = false;
+const USE_MOCK = true;
+const wait = (ms = 600) => new Promise(r => setTimeout(r, ms));
 
 /* ── Teacher directory ────────────────────────────────────── */
 export async function fetchTeachers(params = {}) {
-  // params may include { cat, search }
+  if (USE_MOCK) { await wait(200); const { TEACHERS } = await import("../components/skill/data"); return TEACHERS; }
   const { data } = await api.get("/skill/teachers/", { params });
   return data;
 }
 
 export async function fetchTeacher(id) {
+  if (USE_MOCK) { await wait(150); const { TEACHERS } = await import("../components/skill/data"); return TEACHERS.find(t => t.id === id); }
   const { data } = await api.get(`/skill/teachers/${id}/`);
   return data;
 }
 
-export async function fetchCategories() {
-  const { data } = await api.get("/skill/categories/");
+/* ── Teacher profile: reviews + self-paced course ─────────────
+   The wired "Teacher Profile final" screen reads through these. */
+
+export async function fetchExpertReviews(expertId) {
+  if (USE_MOCK) {
+    await wait(150);
+    const { REVIEWS, reviewCount } = await import("../components/skill/data");
+    const list = (REVIEWS[expertId] || []).map(r => ({ rating: r.r, reviewer: r.n, body: r.t }));
+    return { count: reviewCount[expertId] || list.length, reviews: list };
+  }
+  // GET /skill/teachers/<id>/reviews/  →  { count, reviews:[{id,rating,body,created_at,reviewer}] }
+  const { data } = await api.get(`/skill/teachers/${expertId}/reviews/`);
+  return {
+    count: data.count,
+    reviews: (data.reviews || []).map(r => ({ rating: r.rating, reviewer: r.reviewer, body: r.body })),
+  };
+}
+
+/* Format seconds → "MM:SS" or "H:MM" for lecture rows. */
+function clock(sec = 0) {
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+const CAP = s => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
+/* Normalize a backend SkillCourseDetail payload into the exact shape the
+   Profile JSX renders (matches data.js COURSES entries). */
+export function normalizeCourse(api, { rating, ratingCount } = {}) {
+  if (!api) return null;
+  const sections = api.sections || [];
+  const allLectures = sections.flatMap(s => s.lectures || []);
+  const totalSec = allLectures.reduce((a, l) => a + (l.duration_sec || 0), 0);
+  return {
+    id: api.id,
+    title: api.title,
+    price: api.price_rupees != null ? api.price_rupees : Math.round((api.price || 0) / 100),
+    old: null,                                   // backend has no list/strike price
+    hours: Math.max(1, Math.round(totalSec / 3600)),
+    lectures: api.lecture_count != null ? api.lecture_count : allLectures.length,
+    level: CAP(api.level) || "All levels",
+    students: api.students_count != null ? api.students_count : null,
+    rating: rating != null ? rating : null,
+    ratingCount: ratingCount != null ? ratingCount : null,
+    updated: api.created_at ? new Date(api.created_at).toLocaleDateString("en-IN", { month: "short", year: "numeric" }) : null,
+    learn: api.outcomes || [],
+    curriculum: sections.map(s => ({
+      t: s.title,
+      l: (s.lectures || []).map(l => ({ n: l.title, d: clock(l.duration_sec), p: l.is_preview })),
+    })),
+  };
+}
+
+/* Fetch the expert's self-paced course (one per expert in this product).
+   Mock returns the bundled COURSES[id]; real backend lists approved courses
+   and matches the one whose teacher_id is this expert. */
+export async function fetchExpertCourse(expertId, meta = {}) {
+  if (USE_MOCK) {
+    await wait(150);
+    const { COURSES } = await import("../components/skill/data");
+    return COURSES[expertId] || null;
+  }
+  const { data } = await api.get("/skill/courses/", { params: { teacher: expertId } });
+  const list = Array.isArray(data) ? data : (data.results || []);
+  const card = list.find(c => String(c.teacher_id) === String(expertId)) || list[0];
+  if (!card) return null;
+  const { data: detail } = await api.get(`/skill/courses/${card.id}/`);
+  return normalizeCourse(detail, meta);
+}
+
+export async function enrollCourse(courseId) {
+  if (USE_MOCK) { await wait(700); return { ok: true, enrollmentId: "mock-enr-1" }; }
+  const { data } = await api.post(`/skill/courses/${courseId}/enroll/`, {});
   return data;
 }
 
-/* ── Registration ─────────────────────────────────────────── */
-
-/* Guest student signup.
-   RECOMMENDED: retire this screen and send new learners to the main
-   /signup (accounts). Kept working here by mapping onto the unified
-   signup so a brand-new learner account + one profile is created. */
-export async function registerStudent(data) {
-  const username =
-    (data.email || "").split("@")[0] +
-    "-" + Math.random().toString(36).slice(2, 6);
-  const payload = {
-    email: data.email,
-    username,
-    password: data.password,
-    role: "STUDENT",
-    profiles: [{ display_name: data.fullName, relationship: "SELF" }],
-  };
-  const { data: res } = await api.post("/accounts/signup/", payload);
-  return { ok: true, ...res };
+/* ── Messaging ────────────────────────────────────────────── */
+export async function startConversation(expertId) {
+  if (USE_MOCK) { await wait(200); return { id: "mock-conv-1", messages: [] }; }
+  const { data } = await api.post("/skill/conversations/", { expert: expertId });
+  return data;
 }
 
-/* Guest-expert application.
-   Assumes the teacher is already a logged-in account (signed up via
-   accounts with teacher_type=GUEST). Maps the rich form `data` onto the
-   TeacherApplication fields. Returns { applicationId } — thread this into
-   the scheduler instead of a locally-built id. */
-export async function registerTeacher(data) {
-  const primarySkill =
-    (data.customSkills && data.customSkills[0]) ||
-    (data.categories && data.categories[0]) ||
-    data.skill_name ||
-    "Skill";
+export async function sendMessage(convId, body) {
+  if (USE_MOCK) { await wait(300); return { ok: true }; }
+  const { data } = await api.post(`/skill/conversations/${convId}/messages/`, { body });
+  return data;
+}
 
-  const payload = {
-    track: "GUEST",
-    category: (data.categories && data.categories[0]) || null, // category slug
-    skill_name: primarySkill,
-    headline: data.headline || "",
-    experience: data.experience || "",
-    method_note: data.bio || "",
-    skill_tags: [...(data.customSkills || []), ...(data.categories || [])],
-  };
-  const { data: res } = await api.post("/skill/teacher-applications/", payload);
-  return { ok: true, applicationId: res.applicationId, status: res.status };
+/* Convenience: open (or reuse) a thread and post the first message. */
+export async function messageExpert(expertId, body) {
+  const conv = await startConversation(expertId);
+  if (body && body.trim()) await sendMessage(conv.id, body.trim());
+  return conv;
+}
+
+/* ── Registration ─────────────────────────────────────────── */
+export async function registerStudent(payload) {
+  if (USE_MOCK) { await wait(); return { ok: true }; }
+  // Adjust to your accounts flow; you may prefer useAuth().signup with role: "STUDENT".
+  const { data } = await api.post("/skill/students/", payload);
+  return data;
+}
+
+export async function registerTeacher(payload) {
+  if (USE_MOCK) { await wait(); return { ok: true, applicationId: "mock-app-1" }; }
+  // Creates a teacher APPLICATION (status: pending screening), not a live teacher.
+  const { data } = await api.post("/skill/teacher-applications/", payload);
+  return data;
 }
 
 /* ── Interview screening ──────────────────────────────────── */
 export async function fetchInterviewSlots() {
+  if (USE_MOCK) { await wait(150); return null; /* screens use built-in demo slots */ }
   const { data } = await api.get("/skill/interview-slots/");
   return data;
 }
 
 export async function scheduleInterview({ applicationId, slot }) {
-  // `slot` may be a slot id or a raw datetime; backend accepts either.
-  const body = typeof slot === "object" && slot?.id ? { slot: slot.id } : { slot };
-  const { data } = await api.post(
-    `/skill/teacher-applications/${applicationId}/schedule/`, body
-  );
+  if (USE_MOCK) { await wait(); return { ok: true, slot }; }
+  const { data } = await api.post(`/skill/teacher-applications/${applicationId}/schedule/`, { slot });
   return data;
 }
 
 export async function fetchReviewQueue() {
+  if (USE_MOCK) { await wait(200); const { CANDIDATES } = await import("../components/skill/data"); return CANDIDATES; }
   const { data } = await api.get("/skill/admin/interview-queue/");
   return data;
 }
 
 export async function submitEvaluation({ candidateId, decision, tier, scores, feedback }) {
-  // candidateId is the application id returned by the review queue.
-  const { data } = await api.post(
-    `/skill/admin/interviews/${candidateId}/evaluation/`,
-    { decision, tier, scores: scores || {}, feedback: feedback || "" }
-  );
+  if (USE_MOCK) { await wait(); return { ok: true }; }
+  const { data } = await api.post(`/skill/admin/interviews/${candidateId}/evaluation/`, { decision, tier, scores, feedback });
   return data;
 }
 
 /* ── Sessions & payments ──────────────────────────────────── */
-
-/* Learner requests a session/contact. Needs an active learner profile in
-   the session (selected via the profile picker); the backend reads it from
-   the JWT. */
-export async function requestSession(payload = {}) {
-  const body = {
-    expert: payload.expert || payload.teacherId,
-    contact_mode: payload.mode || payload.contact_mode || "session",
-    note: payload.draft || payload.note || "",
-    scheduled_for: payload.scheduled_for || null,
-  };
-  const { data } = await api.post("/skill/sessions/", body);
-  return { ok: true, sessionId: data.sessionId };
+export async function requestSession(payload) {
+  if (USE_MOCK) { await wait(); return { ok: true, sessionId: "mock-sess-1" }; }
+  const { data } = await api.post("/skill/sessions/", payload);
+  return data;
 }
 
 export async function payForSession({ teacherId, draft, method, amount }) {
-  // Creates a pending-payment session + (stub) order. Wire Razorpay checkout
-  // on the client against the returned order, then verify server-side.
-  const { data } = await api.post("/skill/payments/create-order/", {
-    teacherId, draft, method, amount,
-  });
-  return { ok: true, bookingId: data.bookingId, sessionId: data.sessionId };
+  if (USE_MOCK) { await wait(900); return { ok: true, bookingId: "SHK-" + Math.floor(100000 + Math.random() * 900000) }; }
+  // Wire your Razorpay order-create here, then verify the signature server-side.
+  const { data } = await api.post("/skill/payments/create-order/", { teacherId, draft, method, amount });
+  return data;
 }
 
 export default {
-  fetchTeachers, fetchTeacher, fetchCategories,
+  fetchTeachers, fetchTeacher, fetchExpertReviews, fetchExpertCourse, normalizeCourse,
   registerStudent, registerTeacher,
   fetchInterviewSlots, scheduleInterview, fetchReviewQueue, submitEvaluation,
-  requestSession, payForSession,
+  requestSession, payForSession, enrollCourse,
+  startConversation, sendMessage, messageExpert,
 };

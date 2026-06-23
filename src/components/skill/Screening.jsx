@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import { Icon } from "./icons";
 import { PANEL, STAGES, RUBRIC, AGENDA, TIERS, CANDIDATES, DEFAULT_APPLICANT } from "./data";
 import { Stepper, StatusPill, DotRating, Field, FormRow } from "./ui";
-import { submitEvaluation, scheduleInterview } from "../../api/skillApi";
+import { submitEvaluation } from "../../api/skillApi";
 
 /* ════════════════ APPLICANT · STATUS ════════════════ */
 export function ApplicationStatus({ applicant = DEFAULT_APPLICANT, interview = {}, nav }) {
@@ -112,7 +112,7 @@ function MiniStat({ icon, label, value }) {
 }
 
 /* ════════════════ APPLICANT · SCHEDULE ════════════════ */
-export function ScheduleInterview({ nav, applicationId }) {
+export function ScheduleInterview({ nav }) {
   const days = [
     { d: "Mon", n: "2", slots: ["10:00 AM", "2:30 PM", "4:30 PM"] },
     { d: "Tue", n: "3", slots: ["11:00 AM", "3:00 PM", "5:15 PM"] },
@@ -120,23 +120,6 @@ export function ScheduleInterview({ nav, applicationId }) {
     { d: "Thu", n: "5", slots: ["10:30 AM", "12:30 PM"] },
   ];
   const [sel, setSel] = useState(null);
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
-
-  const confirm = async () => {
-    if (!sel) return;
-    const slot = `${sel.day} Jun ${sel.n} · ${sel.time}`;
-    setBusy(true);
-    setErr("");
-    try {
-      await scheduleInterview({ applicationId, slot });
-      nav("application-status", { interview: { slot } });
-    } catch (e) {
-      setErr(e?.message || "Slot booking failed — please try again.");
-      setBusy(false);
-    }
-  };
-
   return (
     <div className="sd-screen" style={{ background: "var(--c-cream-2)", minHeight: 560 }}>
       <div style={{ padding: "30px 48px 60px", maxWidth: 860, margin: "0 auto" }}>
@@ -164,14 +147,11 @@ export function ScheduleInterview({ nav, applicationId }) {
             ))}
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 20, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 20 }}>
           <div style={{ flex: 1, fontSize: 13, color: "var(--c-ink-soft)" }}>
             {sel ? <>Selected: <strong style={{ color: "var(--c-forest)" }}>{sel.day} Jun {sel.n} · {sel.time}</strong></> : "Choose a time above to continue."}
           </div>
-          {err && <div style={{ width: "100%", fontSize: 12.5, color: "#dc2626" }}>{err}</div>}
-          <button onClick={confirm} disabled={!sel || busy} className="sd-btn sd-btn-primary">
-            {busy ? "Booking…" : <>Confirm slot <Icon.arrow size={14} /></>}
-          </button>
+          <button onClick={() => sel && nav("application-status", { interview: { slot: `${sel.day} Jun ${sel.n} · ${sel.time}` } })} disabled={!sel} className="sd-btn sd-btn-primary">Confirm slot <Icon.arrow size={14} /></button>
         </div>
       </div>
     </div>

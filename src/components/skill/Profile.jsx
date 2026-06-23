@@ -1,219 +1,509 @@
-/* Profile.jsx — single teacher profile + contact modal (message / session / video). */
-import React, { useState, useRef, useEffect } from "react";
-import { Icon } from "./icons";
+/* Profile.jsx — wired Skill Development teacher profile.
+   ────────────────────────────────────────────────────────────────
+   A 1:1 React port of "Teacher Profile final.html" (the green/orange
+   ShikshaCom guest-expert profile with the two ways to learn — live
+   1-on-1 + self-paced Udemy-style course). It is wired to the Django
+   backend through ../../api/skillApi.js:
+
+     • course      → fetchExpertCourse(expert.id)   GET /skill/courses/
+     • reviews     → fetchExpertReviews(expert.id)  GET /skill/teachers/<id>/reviews/
+     • book a slot → requestSession(...)            POST /skill/sessions/
+     • buy course  → enrollCourse(course.id)        POST /skill/courses/<id>/enroll/
+     • message     → messageExpert(expert.id, txt)  POST /skill/conversations/
+
+   With USE_MOCK = true in skillApi.js it runs entirely on the bundled
+   mock data, so it's fully clickable before the backend is reachable.
+
+   Props:
+     t    — expert object in the directory shape (id, name, title, skills,
+            cat, rating, sessions, rate, img, bio, availability, badges)
+     nav  — host navigator; nav("discovery") powers "All guest experts"
+     initialMode — optional "live" | "course" */
+import React, { useState, useEffect } from "react";
 import { SKILL_CATEGORIES } from "./data";
-import { Field, FormRow } from "./ui";
+import { SDAvail } from "./availability";
+import * as skillApi from "../../api/skillApi";
+import "./SkillProfile.css";
 
-export default function Profile({ t, nav, openContact }) {
+/* ── inline icon set (matches the SVGs in the source HTML) ───────── */
+function Ic({ n, w = 16, h, sw = 2, cls }) {
+  const base = { width: w, height: h || w, viewBox: "0 0 24 24", className: cls };
+  const stroke = { fill: "none", stroke: "currentColor", strokeWidth: sw, strokeLinecap: "round", strokeLinejoin: "round" };
+  switch (n) {
+    case "seal":
+      return (
+        <svg {...base} fill="currentColor">
+          <path d="M12 1 9.3 3.4 5.8 3 4.6 6.3 1.6 8.2 3 11.5 1.6 14.8l3 1.9L5.8 20l3.5-.4L12 22l2.7-2.4 3.5.4-.2-3.3 3-1.9-1.4-3.3 1.4-3.3-3-1.9L17.4 3l-3.5.4z" fill="#1b9c85" />
+          <path d="m8.5 12 2.2 2.2L15.5 9.5" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    case "shield":   return <svg {...base} {...stroke}><path d="M12 2 4 5v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V5z" /><path d="m9 11 2 2 4-4" /></svg>;
+    case "clock":    return <svg {...base} {...stroke}><circle cx="12" cy="12" r="9" /><path d="M12 8v4l3 2" /></svg>;
+    case "pin":      return <svg {...base} {...stroke}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
+    case "cal":      return <svg {...base} {...stroke}><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>;
+    case "camera":   return <svg {...base} {...stroke}><path d="M15 10l4.55-2.28A1 1 0 0 1 21 8.62v6.76a1 1 0 0 1-1.45.9L15 14M3 6h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" /></svg>;
+    case "book":     return <svg {...base} {...stroke}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>;
+    case "arrow":    return <svg {...base} {...stroke} className={cls || "arrow"}><path d="M5 12h14M13 5l7 7-7 7" /></svg>;
+    case "check":    return <svg {...base} {...stroke}><path d="M20 6 9 17l-5-5" /></svg>;
+    case "play":     return <svg {...base} {...stroke}><path d="M20 7v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7" /><path d="m10 11 4 2-4 2z" /></svg>;
+    case "users":    return <svg {...base} {...stroke}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0 .01M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>;
+    case "mortar":   return <svg {...base} {...stroke}><path d="m12 14 9-5-9-5-9 5 9 5z" /><path d="M12 14v7" /></svg>;
+    case "file":     return <svg {...base} {...stroke}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>;
+    case "lifetime": return <svg {...base} {...stroke}><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16z" /><path d="M12 6v6l4 2" /></svg>;
+    case "grad":     return <svg {...base} {...stroke}><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>;
+    case "qa":       return <svg {...base} {...stroke}><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" /><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" /></svg>;
+    case "mobile":   return <svg {...base} {...stroke}><rect x="2" y="6" width="20" height="14" rx="2" /><path d="M12 11v4M8 11v4M16 11v4" /></svg>;
+    case "chev":     return <svg {...base} {...stroke} className={cls || "chev"}><path d="M9 18l6-6-6-6" /></svg>;
+    case "lecplay":  return <svg {...base} {...stroke}><circle cx="12" cy="12" r="9" /><path d="m10 9 5 3-5 3z" /></svg>;
+    case "msg":      return <svg {...base} {...stroke}><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z" /></svg>;
+    case "cart":     return <svg {...base} {...stroke}><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6" /></svg>;
+    case "playlist": return <svg {...base} {...stroke}><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>;
+    case "graph":    return <svg {...base} {...stroke}><path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" /></svg>;
+    case "guard":    return <svg {...base} {...stroke}><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z" /><path d="m9 12 2 2 4-4" /></svg>;
+    case "close":    return <svg {...base} {...stroke}><path d="M18 6 6 18M6 6l12 12" /></svg>;
+    case "send":     return <svg {...base} {...stroke}><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z" /></svg>;
+    case "card":     return <svg {...base} {...stroke}><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg>;
+    case "back":     return <svg {...base} {...stroke}><path d="M19 12H5M12 19l-7-7 7-7" /></svg>;
+    default:         return null;
+  }
+}
+
+/* ── weekly availability grid (shared store; presentational) ─────── */
+function AvailLegend() {
+  return (
+    <div className="avlegend">
+      <span><i style={{ background: "rgba(29,202,171,.5)" }} />Open</span>
+      <span><i style={{ background: "#f0a23b" }} />Booked</span>
+      <span><i style={{ background: "#f1ece1" }} />Closed</span>
+    </div>
+  );
+}
+function AvailGrid({ tid, interactive, selected, onPick }) {
+  const d = SDAvail.get(tid);
+  return (
+    <div className="avgrid">
+      <div />
+      {SDAvail.DAYS.map(x => <div key={x} className="avhd">{x}</div>)}
+      {SDAvail.SLOTS.map((sl, si) => (
+        <React.Fragment key={si}>
+          <div className="avrow">{sl}</div>
+          {SDAvail.DAYS.map((dd, di) => {
+            const k = di + "-" + si;
+            const st = d.booked.includes(k) ? "booked" : d.open.includes(k) ? "open" : "closed";
+            if (st === "open" && interactive) {
+              return (
+                <button key={k} type="button"
+                  className={"avslot open" + (selected === k ? " on" : "")}
+                  title={SDAvail.label(k)} onClick={() => onPick(k)} />
+              );
+            }
+            return <div key={k} className={"avslot " + st}
+              title={st === "booked" ? "Already booked" : st === "open" ? SDAvail.label(k) : "Closed"} />;
+          })}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+export default function Profile({ t, nav, initialMode }) {
   const cat = SKILL_CATEGORIES.find(s => s.id === t.cat) || SKILL_CATEGORIES[0];
-  return (
-    <div className="sd-screen" style={{ background: "var(--c-cream-2)", minHeight: 560 }}>
-      <div style={{ padding: "30px 48px 60px", maxWidth: 1080, margin: "0 auto" }}>
-        <button onClick={() => nav("discovery")} className="sd-btn sd-btn-ghost" style={{ padding: "6px 12px", fontSize: 12, marginBottom: 18 }}>
-          <Icon.back size={14} /> Back to teachers
-        </button>
+  const first = (t.name || "").split(" ")[0];
 
-        <div style={{ background: "#fff", border: "1px solid var(--c-border)", borderRadius: 20, overflow: "hidden", display: "grid", gridTemplateColumns: "300px 1fr", boxShadow: "0 10px 32px rgba(18,80,39,.08)" }}>
-          <div style={{ position: "relative", background: "var(--c-forest-dk)" }}>
-            <img src={t.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-            <div style={{ position: "absolute", left: 12, bottom: 12, background: cat.color, color: "#fff", padding: "5px 12px", borderRadius: 100, fontSize: 11.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
-              <span>{cat.icon}</span> {cat.label}
-            </div>
-          </div>
-          <div style={{ padding: 30, display: "flex", flexDirection: "column", gap: 14 }}>
-            <div>
-              <div style={{ fontSize: 11.5, color: "var(--c-orange)", fontWeight: 700, letterSpacing: ".5px", textTransform: "uppercase" }}>Guest teacher</div>
-              <h2 style={{ fontSize: 32, fontWeight: 900, color: "var(--c-forest)", letterSpacing: "-1px", marginTop: 4 }}>{t.name}</h2>
-              <p style={{ fontSize: 14, color: "var(--c-ink-soft)", marginTop: 4 }}>{t.title}</p>
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {t.skills.map(s => (
-                <span key={s} style={{ fontSize: 12, padding: "5px 12px", borderRadius: 100, background: "rgba(18,80,39,.07)", color: "var(--c-forest)", fontWeight: 600 }}>{s}</span>
-              ))}
-            </div>
-            <div style={{ display: "flex", gap: 22, padding: "14px 0", borderTop: "1px solid var(--c-border)", borderBottom: "1px solid var(--c-border)" }}>
-              <Stat label="Rating" value={<><Icon.star size={13} /> {t.rating}</>} />
-              <Stat label="Sessions" value={t.sessions} />
-              <Stat label="Rate" value={`₹${t.rate}`} sub="per session" />
-              <Stat label="Available" value={t.availability} small />
-            </div>
-            <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-              <button onClick={openContact} className="sd-btn sd-btn-primary"><Icon.msg size={14} /> Contact teacher</button>
-              <button className="sd-btn sd-btn-ghost"><Icon.cal size={14} /> Save for later</button>
-              {t.badges.includes("Verified") && (
-                <span style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--c-forest-mid)", fontWeight: 600 }}>
-                  <Icon.shield size={13} /> ID-verified
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 18, marginTop: 18 }}>
-          <div style={{ background: "#fff", border: "1px solid var(--c-border)", borderRadius: 16, padding: 26 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--c-forest)", letterSpacing: ".3px", textTransform: "uppercase", marginBottom: 12 }}>About</h3>
-            <p style={{ fontSize: 14, color: "var(--c-ink)", lineHeight: 1.7 }}>{t.bio}</p>
-            <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--c-forest)", letterSpacing: ".3px", textTransform: "uppercase", marginTop: 24, marginBottom: 12 }}>What sessions look like</h3>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-              {["60-min one-on-one sessions over video or in person.", "First session is a free 15-min intro — see if we click.", "I'll share a personalised plan after our intro call.", "Reschedule any time up to 12 hours before the session."].map((l, i) => (
-                <li key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13.5, color: "var(--c-ink-soft)" }}>
-                  <span style={{ color: "var(--c-forest-mid)", marginTop: 2 }}><Icon.check size={14} /></span><span>{l}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ background: "var(--c-forest-dk)", borderRadius: 16, padding: 22, color: "#fff" }}>
-              <div style={{ fontSize: 11, opacity: .65, letterSpacing: ".5px", textTransform: "uppercase" }}>Ready?</div>
-              <div style={{ fontFamily: "var(--font-head)", fontSize: 18, fontWeight: 800, marginTop: 4 }}>Reach out to {t.name.split(" ")[0]} directly</div>
-              <p style={{ fontSize: 12.5, color: "rgba(255,255,255,.6)", marginTop: 6, lineHeight: 1.55 }}>Send a message, request a session, or jump on a quick video call.</p>
-              <button onClick={openContact} className="sd-btn sd-btn-accent" style={{ marginTop: 14, width: "100%", justifyContent: "center" }}><Icon.msg size={14} /> Open contact</button>
-            </div>
-            <div style={{ background: "#fff", border: "1px solid var(--c-border)", borderRadius: 16, padding: 22 }}>
-              <h3 style={{ fontSize: 13, fontWeight: 800, color: "var(--c-forest)", letterSpacing: ".3px", textTransform: "uppercase", marginBottom: 10 }}>Recent reviews</h3>
-              {[{ name: "Ruati", text: "Patient, structured, didn't make me feel stupid for asking basic things.", rating: 5 },
-                { name: "Andrew", text: "Honest feedback on my work. Wish I started sessions sooner.", rating: 5 }].map((r, i) => (
-                <div key={i} style={{ paddingTop: i === 0 ? 0 : 14, borderTop: i === 0 ? "none" : "1px solid var(--c-border)", marginTop: i === 0 ? 0 : 14 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-forest)" }}>{r.name}</div>
-                    <div style={{ color: "var(--c-orange)", display: "inline-flex", gap: 1 }}>
-                      {Array.from({ length: r.rating }).map((_, j) => <Icon.star key={j} size={11} />)}
-                    </div>
-                  </div>
-                  <p style={{ fontSize: 12.5, color: "var(--c-ink-soft)", lineHeight: 1.5 }}>{r.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Stat({ label, value, sub, small }) {
-  return (
-    <div>
-      <div style={{ fontSize: 10.5, color: "var(--c-ink-soft)", textTransform: "uppercase", letterSpacing: ".4px", fontWeight: 600 }}>{label}</div>
-      <div style={{ fontFamily: "var(--font-head)", fontWeight: 800, fontSize: small ? 13 : 18, color: "var(--c-forest)", marginTop: 2, display: "inline-flex", alignItems: "center", gap: 4 }}>{value}</div>
-      {sub && <div style={{ fontSize: 10, color: "var(--c-ink-soft)" }}>{sub}</div>}
-    </div>
-  );
-}
-
-/* ── Contact modal ────────────────────────────────────────── */
-export function ContactModal({ t, onClose, onRequestPayment }) {
-  const [tab, setTab] = useState("message");
-  const [sent, setSent] = useState(false);
-  const [msg, setMsg] = useState("");
-  const [sessionTopic, setSessionTopic] = useState("");
-  const [sessionDate, setSessionDate] = useState("");
-  const [sessionTime, setSessionTime] = useState("");
-  const [sessionMode, setSessionMode] = useState("online");
-  const overlayRef = useRef(null);
+  const [course, setCourse] = useState(undefined);            // undefined=loading | null=none | object
+  const [reviews, setReviews] = useState({ count: 0, list: [] });
+  const [mode, setMode] = useState(initialMode === "course" ? "course" : "live");
+  const [modal, setModal] = useState(null);                   // null|book|buy|msg|okBook|okBuy|okMsg|busy
+  const [slot, setSlot] = useState(null);
+  const [allOpen, setAllOpen] = useState({ 0: true });        // curriculum accordion open-state
+  // modal fields
+  const [bTopic, setBTopic] = useState("");
+  const [bDur, setBDur] = useState(0);
+  const [pay, setPay] = useState("UPI");
+  const [buyEmail, setBuyEmail] = useState("");
+  const [msgText, setMsgText] = useState("");
 
   useEffect(() => {
-    const onKey = e => { if (e.key === "Escape") onClose(); };
+    let alive = true;
+    setCourse(undefined);
+    skillApi.fetchExpertReviews(t.id).then(r => {
+      if (!alive) return;
+      setReviews({ count: r.count, list: r.reviews });
+      // course rating/count come from the expert + reviews
+      skillApi.fetchExpertCourse(t.id, { rating: t.rating, ratingCount: r.count })
+        .then(c => alive && setCourse(c || null));
+    }).catch(() => {
+      if (!alive) return;
+      setReviews({ count: 0, list: [] });
+      skillApi.fetchExpertCourse(t.id, { rating: t.rating }).then(c => alive && setCourse(c || null)).catch(() => setCourse(null));
+    });
+    return () => { alive = false; };
+  }, [t.id, t.rating]);
+
+  useEffect(() => {
+    const onKey = e => { if (e.key === "Escape") setModal(null); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, []);
 
-  const submitMessage = () => { setSent(true); setTimeout(() => { setSent(false); onClose(); }, 1800); };
+  const hasCourse = !!course;
+  const totalLectures = hasCourse ? course.curriculum.reduce((a, s) => a + s.l.length, 0) : 0;
+  const reviewN = reviews.count;
+  const responds = t.sessions > 120 ? "within 1 hour" : t.sessions > 80 ? "within 2 hours" : "within 4 hours";
+  const loc = "Online only";
+  const off = hasCourse && course.old ? Math.round((1 - course.price / course.old) * 100) : 0;
+
+  const effMode = hasCourse ? mode : "live";
+
+  function scrollToCard() {
+    if (window.innerWidth > 900) window.scrollTo({ top: 0, behavior: "smooth" });
+    else if (effMode === "course") document.getElementById("sdp-courseBlock")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function toggleSect(i) { setAllOpen(o => ({ ...o, [i]: !o[i] })); }
+  function toggleAll() {
+    if (!hasCourse) return;
+    const everyOpen = course.curriculum.every((_, i) => allOpen[i]);
+    const next = {};
+    course.curriculum.forEach((_, i) => { next[i] = !everyOpen; });
+    setAllOpen(next);
+  }
+  const everyOpen = hasCourse && course.curriculum.every((_, i) => allOpen[i]);
+
+  /* ── action handlers (wired) ──────────────────────────────────── */
+  async function confirmBook() {
+    setModal("busy");
+    const when = slot ? SDAvail.label(slot) : "your chosen time";
+    try {
+      await skillApi.requestSession({
+        expert: t.id, contact_mode: "session",
+        duration_mins: [60, 90, 120][bDur] || 60,
+        note: (bTopic ? `Topic: ${bTopic}. ` : "") + `Requested slot: ${when}.`,
+      });
+    } catch (e) { console.warn("requestSession failed (demo continues):", e?.message); }
+    setModal({ ok: "book", when });
+  }
+  async function confirmBuy() {
+    setModal("busy");
+    try { if (course?.id) await skillApi.enrollCourse(course.id); }
+    catch (e) { console.warn("enrollCourse failed (demo continues):", e?.message); }
+    setModal({ ok: "buy" });
+  }
+  async function confirmMsg() {
+    setModal("busy");
+    try { await skillApi.messageExpert(t.id, msgText); }
+    catch (e) { console.warn("messageExpert failed (demo continues):", e?.message); }
+    setModal({ ok: "msg" });
+  }
+  function openBook() { setSlot(null); setBTopic(""); setBDur(0); setModal("book"); }
 
   return (
-    <div ref={overlayRef} onClick={e => { if (e.target === overlayRef.current) onClose(); }}
-      style={{ position: "fixed", inset: 0, background: "rgba(14,28,15,.5)", backdropFilter: "blur(4px)",
-        display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 24 }}>
-      <div style={{ background: "#fff", borderRadius: 18, width: "min(560px, 100%)", maxHeight: "90vh", overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,.4)", display: "flex", flexDirection: "column" }}>
-        <div style={{ padding: "20px 22px", borderBottom: "1px solid var(--c-border)", display: "flex", alignItems: "center", gap: 14 }}>
-          <img src={t.img} alt="" style={{ width: 48, height: 48, borderRadius: 12, objectFit: "cover" }} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: "var(--font-head)", fontWeight: 800, fontSize: 16, color: "var(--c-forest)", letterSpacing: "-.3px" }}>Contact {t.name}</div>
-            <div style={{ fontSize: 12, color: "var(--c-ink-soft)" }}>{t.title}</div>
-          </div>
-          <button onClick={onClose} style={{ background: "var(--c-cream-2)", border: "none", width: 32, height: 32, borderRadius: 10, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--c-ink)" }}>
-            <Icon.close size={15} />
-          </button>
-        </div>
+    <div className="sd-prof">
+      <div className="cover">
+        <span className="catpill" style={{ background: cat.color }}>{cat.label}</span>
+        <a className="back-link" onClick={() => nav && nav("discovery")} style={{ cursor: "pointer" }}>
+          <Ic n="back" w={14} sw={2.2} /> All guest experts
+        </a>
+      </div>
 
-        <div style={{ display: "flex", padding: "0 22px", borderBottom: "1px solid var(--c-border)" }}>
-          {[["message", "Message", Icon.msg], ["session", "Request session", Icon.cal], ["video", "Video call", Icon.vid]].map(([k, label, Ic]) => (
-            <button key={k} onClick={() => setTab(k)} style={{ all: "unset", cursor: "pointer", padding: "12px 4px", marginRight: 20, fontSize: 12.5, fontWeight: 600,
-              color: tab === k ? "var(--c-forest)" : "var(--c-ink-soft)", borderBottom: tab === k ? "2px solid var(--c-forest)" : "2px solid transparent", display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <Ic size={13} /> {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="sd-scroll" style={{ padding: 22, overflowY: "auto", flex: 1 }}>
-          {sent ? (
-            <div style={{ textAlign: "center", padding: "30px 0" }}>
-              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(29,202,171,.18)", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--c-forest-mid)" }}>
-                <Icon.check size={26} />
-              </div>
-              <div style={{ fontFamily: "var(--font-head)", fontWeight: 800, fontSize: 18, color: "var(--c-forest)", marginTop: 14 }}>Sent to {t.name.split(" ")[0]}</div>
-              <p style={{ fontSize: 13, color: "var(--c-ink-soft)", marginTop: 6 }}>You'll see their reply in your inbox.</p>
-            </div>
-          ) : tab === "message" ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <Field label="Your message">
-                <textarea className="sd-textarea" rows={6} value={msg} onChange={e => setMsg(e.target.value)}
-                  placeholder={`Hi ${t.name.split(" ")[0]} — I'd like to learn ${t.skills[0]}. I'm a beginner and have about 3 hrs a week. Could we chat?`} />
-              </Field>
-              <div style={{ fontSize: 11.5, color: "var(--c-ink-soft)" }}>Replies go to your registered email. Average reply time: 4 hours.</div>
-              <button onClick={submitMessage} className="sd-btn sd-btn-primary" style={{ justifyContent: "center" }} disabled={!msg.trim()}><Icon.msg size={14} /> Send message</button>
-            </div>
-          ) : tab === "session" ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <Field label="Topic / what you want to cover">
-                <input className="sd-input" value={sessionTopic} onChange={e => setSessionTopic(e.target.value)} placeholder={`e.g. Intro to ${t.skills[0]}`} />
-              </Field>
-              <FormRow>
-                <Field label="Preferred date"><input className="sd-input" type="date" value={sessionDate} onChange={e => setSessionDate(e.target.value)} /></Field>
-                <Field label="Preferred time"><input className="sd-input" type="time" value={sessionTime} onChange={e => setSessionTime(e.target.value)} /></Field>
-              </FormRow>
-              <Field label="Session mode">
-                <div style={{ display: "flex", gap: 8 }}>
-                  {[["online", "Online"], ["inperson", "In-person"]].map(([id, label]) => (
-                    <button key={id} type="button" onClick={() => setSessionMode(id)} className={"sd-chip " + (sessionMode === id ? "sd-chip-on" : "")} style={{ flex: 1, justifyContent: "center", padding: "10px 12px" }}>{label}</button>
-                  ))}
-                </div>
-              </Field>
-              <div style={{ background: "var(--c-cream-2)", padding: "12px 14px", borderRadius: 10, fontSize: 12.5, color: "var(--c-ink-soft)" }}>
-                Sessions are <strong style={{ color: "var(--c-forest)" }}>₹{t.rate}</strong> &mdash; you'll pay on the next step. Cancel free up to 12 hours before.
-              </div>
-              <button onClick={() => onRequestPayment({ topic: sessionTopic, date: sessionDate, time: sessionTime, mode: sessionMode })}
-                className="sd-btn sd-btn-primary" style={{ justifyContent: "center" }} disabled={!sessionTopic || !sessionDate || !sessionTime}>
-                Continue to payment <Icon.arrow size={14} />
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ background: "linear-gradient(135deg, var(--c-forest-dk), var(--c-forest))", color: "#fff", padding: 22, borderRadius: 14 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,.16)", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon.vid size={16} /></div>
-                  <div>
-                    <div style={{ fontFamily: "var(--font-head)", fontWeight: 800, fontSize: 16 }}>Quick video call</div>
-                    <div style={{ fontSize: 12, opacity: .7 }}>15 min · free intro</div>
+      <div className="wrap">
+        <div className="layout">
+          {/* ── main column ───────────────────────────────────── */}
+          <div className="col-main">
+            <div className="idcard">
+              <div className="idtop">
+                <img className="ava" src={t.img} alt={t.name} />
+                <div className="idtext">
+                  <span className="kick"><Ic n="shield" w={11} sw={2.5} /> Verified guest expert</span>
+                  <h1>{t.name} <span className="vrf" title="ID-verified"><Ic n="seal" w={20} /></span></h1>
+                  <div className="role">{t.title}</div>
+                  <div className="quickmeta">
+                    <span className="qm"><Ic n="clock" w={14} /> Responds {responds}</span>
+                    <span className="qm"><Ic n="pin" w={14} /> {loc}</span>
+                    <span className="qm"><Ic n="cal" w={14} /> {t.availability}</span>
                   </div>
                 </div>
-                <p style={{ fontSize: 12.5, opacity: .8, marginTop: 12, lineHeight: 1.55 }}>Get on a 15-minute video call to talk about your goals before booking a paid session.</p>
               </div>
-              <Field label="Pick a slot">
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-                  {["Today 6:00 PM", "Tomorrow 11 AM", "Tomorrow 5 PM", "Thu 7 PM", "Sat 10 AM", "Sun 4 PM"].map(sName => (
-                    <button key={sName} type="button" onClick={() => setSessionTime(sName)} className={"sd-chip " + (sessionTime === sName ? "sd-chip-on" : "")} style={{ justifyContent: "center", padding: "10px 6px", fontSize: 11.5 }}>{sName}</button>
-                  ))}
-                </div>
-              </Field>
-              <Field label="What you'd like to talk about">
-                <textarea className="sd-textarea" rows={3} value={sessionTopic} onChange={e => setSessionTopic(e.target.value)} placeholder="One or two lines about your goal." />
-              </Field>
-              <button onClick={submitMessage} className="sd-btn sd-btn-primary" style={{ justifyContent: "center" }} disabled={!sessionTime}><Icon.vid size={14} /> Request video call</button>
+              <div className="idskills">{(t.skills || []).map(s => <span key={s}>{s}</span>)}</div>
+              <div className="idstats">
+                <div className="s"><div className="v"><span className="o">★</span> {t.rating}</div><div className="l">{reviewN} reviews</div></div>
+                <div className="s"><div className="v">{t.sessions}</div><div className="l">Sessions taught</div></div>
+                <div className="s"><div className="v">{hasCourse && course.students != null ? course.students.toLocaleString() : "—"}</div><div className="l">Course learners</div></div>
+              </div>
             </div>
-          )}
+
+            {/* two ways to learn */}
+            <div className="ways" style={hasCourse ? null : { gridTemplateColumns: "1fr" }}>
+              <button className="way live" onClick={() => { setMode("live"); scrollToCard(); }}>
+                <span className="wk"><Ic n="camera" w={13} sw={2.2} /> Live 1-on-1</span>
+                <h4>Book hourly sessions</h4>
+                <p className="desc">Personalised, scheduled video lessons. Pay per hour, first 15 min free.</p>
+                <div className="wprice"><span className="p">₹{t.rate}</span><span className="u">/ hour</span></div>
+                <span className="wgo">Book a lesson <Ic n="arrow" w={13} /></span>
+              </button>
+              {hasCourse && (
+                <button className="way course" onClick={() => { setMode("course"); scrollToCard(); }}>
+                  <span className="wk"><Ic n="book" w={13} sw={2.2} /> Self-paced</span>
+                  <h4>Buy the full course</h4>
+                  <p className="desc">{course.hours} hrs of video, {totalLectures} lessons. Learn anytime, lifetime access.</p>
+                  <div className="wprice"><span className="p">₹{course.price.toLocaleString()}</span>{course.old && <span className="old">₹{course.old.toLocaleString()}</span>}</div>
+                  <span className="wgo">Buy course <Ic n="arrow" w={13} /></span>
+                </button>
+              )}
+            </div>
+
+            <div className="sec">
+              <h3>About {first}</h3>
+              <p>{t.bio}</p>
+            </div>
+
+            {/* Udemy-style course block */}
+            {hasCourse && (
+              <div className="csec" id="sdp-courseBlock">
+                <div className="chead">
+                  <span className="ck"><Ic n="book" w={14} sw={2.2} /> Self-paced course</span>
+                  <h2>{course.title}</h2>
+                  <div className="cmeta">
+                    {course.rating != null && <span className="cm"><span className="o">★ {course.rating}</span>{course.ratingCount != null && ` (${course.ratingCount} ratings)`}</span>}
+                    <span className="cm"><Ic n="play" w={14} /> {course.hours} hrs · {totalLectures} lessons</span>
+                    {course.students != null && <span className="cm"><Ic n="users" w={14} /> {course.students.toLocaleString()} learners</span>}
+                    <span className="cm"><Ic n="mortar" w={14} /> {course.level}</span>
+                  </div>
+                </div>
+                <div className="cbody">
+                  <h3>What you'll learn</h3>
+                  <div className="learn-grid">
+                    {course.learn.map((x, i) => <div className="li" key={i}><Ic n="check" w={16} sw={2.5} /><span>{x}</span></div>)}
+                  </div>
+
+                  <h3 style={{ marginTop: 26 }}>This course includes</h3>
+                  <div className="incl">
+                    <div className="ii"><Ic n="play" w={16} /><span><b>{course.hours} hours</b> on-demand video</span></div>
+                    <div className="ii"><Ic n="file" w={16} /><span><b>Downloadable</b> resources</span></div>
+                    <div className="ii"><Ic n="lifetime" w={16} /><span><b>Lifetime</b> access</span></div>
+                    <div className="ii"><Ic n="grad" w={16} /><span>Certificate of <b>completion</b></span></div>
+                    <div className="ii"><Ic n="qa" w={16} /><span>Q&amp;A with <b>{first}</b></span></div>
+                    <div className="ii"><Ic n="mobile" w={16} /><span>Access on <b>mobile</b> &amp; desktop</span></div>
+                  </div>
+
+                  <h3 style={{ marginTop: 26 }}>Course content</h3>
+                  <div className="csum">
+                    <span><b>{course.curriculum.length}</b> sections</span>
+                    <span><b>{totalLectures}</b> lessons</span>
+                    <span><b>{course.hours}h</b> total</span>
+                    <button className="exp" onClick={toggleAll}>{everyOpen ? "Collapse all" : "Expand all"}</button>
+                  </div>
+                  <div className="curric">
+                    {course.curriculum.map((s, i) => (
+                      <div className={"sect" + (allOpen[i] ? " open" : "")} key={i}>
+                        <div className="sect-h" onClick={() => toggleSect(i)}>
+                          <Ic n="chev" w={16} sw={2.5} cls="chev" />
+                          <span className="st">{s.t}</span>
+                          <span className="sc">{s.l.length} lessons</span>
+                        </div>
+                        <div className="sect-body">
+                          {s.l.map((le, j) => (
+                            <div className="lec" key={j}>
+                              <Ic n="lecplay" w={15} />
+                              <span className="ll">{le.n}</span>
+                              {le.p && <span className="lp">Preview</span>}
+                              <span className="lt">{le.d}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="sec">
+              <h3>What 1-on-1 sessions look like</h3>
+              <div className="freecal" style={{ marginBottom: 16 }}>
+                <Ic n="check" w={20} /><div style={{ fontSize: 13.5, color: "var(--c-ink-soft)" }}><b>1st lesson free</b> · a 15-min intro to see if you click, before you pay for anything.</div>
+              </div>
+              <ul>
+                <li><Ic n="check" w={16} sw={2.5} /> 60-minute one-on-one sessions, online — tailored to exactly what you need.</li>
+                <li><Ic n="check" w={16} sw={2.5} /> Responds {responds} · {loc}.</li>
+                <li><Ic n="check" w={16} sw={2.5} /> Available: {t.availability}. Reschedule any time up to 12h before.</li>
+              </ul>
+              <div style={{ marginTop: 18, borderTop: "1px solid var(--c-border)", paddingTop: 16 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "var(--c-forest)", textTransform: "uppercase", letterSpacing: ".5px", marginBottom: 10 }}>This week's availability</div>
+                <AvailLegend />
+                <AvailGrid tid={t.id} interactive={false} />
+                <div style={{ fontSize: 11.5, color: "var(--c-ink-soft)", marginTop: 10 }}>Booked slots are already taken — pick an open one when you book to avoid clashes.</div>
+              </div>
+            </div>
+
+            <div className="sec">
+              <div className="revhead"><h3 style={{ textTransform: "uppercase" }}>Learner reviews</h3><span className="big">★ {t.rating}</span><span className="cnt">({reviewN})</span></div>
+              {reviews.list.map((r, i) => (
+                <div className="rev" key={i}>
+                  <div className="rh"><div className="who"><div className="av2">{(r.reviewer || "?")[0]}</div><div className="nm2">{r.reviewer}</div></div><div className="stq">{"★".repeat(r.rating || 5)}</div></div>
+                  <p>{r.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── sticky offer card ─────────────────────────────── */}
+          <aside>
+            <div className="bookcard">
+              <div className="modes">
+                <button className={effMode === "live" ? "on" : ""} onClick={() => setMode("live")}>Live 1-on-1<span className="ms">₹{t.rate}/hr</span></button>
+                {hasCourse && <button className={effMode === "course" ? "on" : ""} onClick={() => setMode("course")}>Self-paced course<span className="ms">₹{course.price.toLocaleString()}</span></button>}
+              </div>
+              {effMode === "live" ? (
+                <>
+                  <div className="bc-top">
+                    <div className="price">₹{t.rate} <small>/ hour</small></div>
+                    <span className="freeline"><Ic n="check" w={13} sw={2.5} /> First lesson free</span>
+                  </div>
+                  <div className="bc-body">
+                    <button className="btn btn-accent cta" onClick={openBook}><Ic n="cal" w={15} /> Book a lesson</button>
+                    <button className="btn btn-ghost msgbtn" onClick={() => { setMsgText(""); setModal("msg"); }}><Ic n="msg" w={15} /> Message {first}</button>
+                    <div className="bc-trust">
+                      <div className="tr"><Ic n="shield" w={15} /> <b>ID-verified</b> guest expert</div>
+                      <div className="tr"><Ic n="clock" w={15} /> Responds {responds}</div>
+                      <div className="tr"><Ic n="graph" w={15} /> Pay only after your session</div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="bc-top">
+                    <div className="price">₹{course.price.toLocaleString()} {course.old && <span className="old">₹{course.old.toLocaleString()}</span>}</div>
+                    <span className="freeline"><Ic n="check" w={13} sw={2.5} /> {course.old ? `${off}% off · ends soon` : "Lifetime access"}</span>
+                  </div>
+                  <div className="bc-body">
+                    <button className="btn btn-accent cta" onClick={() => { setBuyEmail(""); setPay("UPI"); setModal("buy"); }}><Ic n="cart" w={15} /> Buy this course</button>
+                    <button className="btn btn-ghost msgbtn" onClick={() => document.getElementById("sdp-courseBlock")?.scrollIntoView({ behavior: "smooth", block: "start" })}><Ic n="playlist" w={15} /> See full curriculum</button>
+                    <div className="bc-trust">
+                      <div className="tr"><Ic n="lifetime" w={15} /> <b>Lifetime</b> access · learn anytime</div>
+                      <div className="tr"><Ic n="grad" w={15} /> Certificate of completion</div>
+                      <div className="tr"><Ic n="guard" w={15} /> 30-day money-back guarantee</div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </aside>
         </div>
       </div>
+
+      {/* mobile sticky CTA */}
+      <div className="mobcta">
+        {effMode === "live" ? (
+          <><div className="pr">₹{t.rate} <small>/hr · 1st free</small></div><button className="btn btn-accent" onClick={openBook}>Book a lesson</button></>
+        ) : (
+          <><div className="pr">₹{course.price.toLocaleString()} <small>· lifetime</small></div><button className="btn btn-accent" onClick={() => { setBuyEmail(""); setPay("UPI"); setModal("buy"); }}>Buy course</button></>
+        )}
+      </div>
+
+      {/* ── modal ───────────────────────────────────────────────── */}
+      {modal && (
+        <div className="overlay on" onClick={e => { if (e.target === e.currentTarget) setModal(null); }}>
+          <div className="modal"><div className="pane">{renderPane()}</div></div>
+        </div>
+      )}
     </div>
   );
+
+  function CloseBtn() {
+    return <button className="mclose" onClick={() => setModal(null)}><Ic n="close" w={15} sw={2.2} /></button>;
+  }
+
+  function renderPane() {
+    if (modal === "busy") {
+      return <div className="ok"><div className="ic" style={{ animation: "none" }}><Ic n="clock" w={26} /></div><h3>One moment…</h3><p>Sending this to {first}.</p></div>;
+    }
+    if (modal && modal.ok === "book") {
+      return (
+        <div className="ok">
+          <div className="ic"><Ic n="check" w={26} sw={2.5} /></div>
+          <h3>Slot requested</h3>
+          <p>Your request for <b>{modal.when}</b> was sent to {first}. Once they accept, the slot is locked for you and removed from their open times.</p>
+          <button className="btn btn-ghost" style={{ margin: "16px auto 0" }} onClick={() => setModal(null)}>Done</button>
+        </div>
+      );
+    }
+    if (modal && modal.ok === "buy") {
+      return (
+        <div className="ok">
+          <div className="ic"><Ic n="check" w={26} sw={2.5} /></div>
+          <h3>You're enrolled! 🎉</h3>
+          <p>“{course.title}” is now in your library with lifetime access. Start anytime — your first lessons are ready.</p>
+          <button className="btn btn-accent" style={{ margin: "16px auto 0" }} onClick={() => setModal(null)}>Start learning <Ic n="arrow" w={16} /></button>
+        </div>
+      );
+    }
+    if (modal && modal.ok === "msg") {
+      return (
+        <div className="ok">
+          <div className="ic"><Ic n="check" w={26} sw={2.5} /></div>
+          <h3>Message sent to {first}</h3>
+          <p>You'll get their reply in your inbox.</p>
+          <button className="btn btn-ghost" style={{ margin: "16px auto 0" }} onClick={() => setModal(null)}>Done</button>
+        </div>
+      );
+    }
+    if (modal === "book") {
+      return (
+        <>
+          <div className="mh"><div><h3>Book a lesson with {first}</h3><div className="who">{t.title} · ₹{t.rate}/hr</div></div><CloseBtn /></div>
+          <div className="field"><label>Topic / what you want to cover</label><input className="inp" value={bTopic} onChange={e => setBTopic(e.target.value)} placeholder={`e.g. Intro to ${t.skills?.[0] || "the basics"}`} /></div>
+          <div className="field"><label>Pick an open slot · {first}'s week</label><AvailLegend /><AvailGrid tid={t.id} interactive selected={slot} onPick={setSlot} /></div>
+          <div className="row2">
+            <div className="field"><label>Duration</label>
+              <select className="inp" value={bDur} onChange={e => setBDur(+e.target.value)}>
+                <option value={0}>1 hour — ₹{t.rate}</option>
+                <option value={1}>1.5 hours — ₹{Math.round(t.rate * 1.5)}</option>
+                <option value={2}>2 hours — ₹{t.rate * 2}</option>
+              </select>
+            </div>
+            <div className="field"><label>Mode</label><select className="inp"><option>Online · Shiksha room</option></select></div>
+          </div>
+          <div className="summary">First 15-min intro is <b>free</b>. {first} confirms your request, then the slot is locked. Rate: <b>₹{t.rate}/hr</b>.</div>
+          <button className="btn btn-accent" style={{ width: "100%", justifyContent: "center", fontSize: 15, padding: 14 }} onClick={confirmBook}>Request this slot <Ic n="arrow" w={16} /></button>
+        </>
+      );
+    }
+    if (modal === "buy") {
+      return (
+        <>
+          <div className="mh"><div><h3>Get this course</h3><div className="who">One-time purchase · lifetime access</div></div><CloseBtn /></div>
+          <div className="buyitem">
+            <img src={t.img} alt="" />
+            <div><div className="bt">{course.title}</div><div className="bm">By {t.name} · {course.hours} hrs · {totalLectures} lessons{course.rating != null ? ` · ★ ${course.rating}` : ""}</div></div>
+          </div>
+          <div className="field"><label>Email for access</label><input className="inp" value={buyEmail} onChange={e => setBuyEmail(e.target.value)} placeholder="you@example.com" /></div>
+          <div className="field"><label>Payment method</label>
+            <div className="paychips">
+              {["UPI", "Card", "Net banking", "Wallet"].map(p => (
+                <div key={p} className={"pc" + (pay === p ? " on" : "")} onClick={() => setPay(p)}>{p}</div>
+              ))}
+            </div>
+          </div>
+          <div className="pricelines">
+            <div className="pl"><span>Course price</span><span>{course.old && <span className="old">₹{course.old.toLocaleString()}</span>}₹{course.price.toLocaleString()}</span></div>
+            {course.old && <div className="pl save"><span>Discount ({off}%)</span><span>− ₹{(course.old - course.price).toLocaleString()}</span></div>}
+            <div className="pl tot"><span>Total</span><span>₹{course.price.toLocaleString()}</span></div>
+          </div>
+          <button className="btn btn-accent" style={{ width: "100%", justifyContent: "center", fontSize: 15, padding: 14, marginTop: 4 }} onClick={confirmBuy}><Ic n="card" w={16} /> Pay ₹{course.price.toLocaleString()}</button>
+          <div className="guarantee"><Ic n="guard" w={15} /> 30-day money-back guarantee, no questions asked.</div>
+        </>
+      );
+    }
+    if (modal === "msg") {
+      return (
+        <>
+          <div className="mh"><div><h3>Message {first}</h3><div className="who">Usually replies {responds}</div></div><CloseBtn /></div>
+          <div className="field"><label>Your message</label><textarea className="inp" value={msgText} onChange={e => setMsgText(e.target.value)} placeholder={`Hi ${first}, I'd like to learn ${t.skills?.[0] || "this skill"}. I'm a beginner with about 3 hrs a week — could we chat?`} /></div>
+          <div className="summary">Replies arrive in your inbox and by email.</div>
+          <button className="btn btn-forest" style={{ width: "100%", justifyContent: "center" }} onClick={confirmMsg} disabled={!msgText.trim()}><Ic n="send" w={16} /> Send message</button>
+        </>
+      );
+    }
+    return null;
+  }
 }

@@ -1,7 +1,6 @@
 /* Register.jsx — role chooser + guest student form + guest teacher form.
    The teacher form leads into the screening pipeline (application-status). */
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Icon } from "./icons";
 import { SKILL_CATEGORIES } from "./data";
 import { Field, FormRow, Section, ErrorBox } from "./ui";
@@ -9,7 +8,6 @@ import { registerStudent, registerTeacher } from "../../api/skillApi";
 
 /* ── Role chooser ─────────────────────────────────────────── */
 export function RoleChooser({ nav }) {
-  const navigate = useNavigate();
   return (
     <div className="sd-screen sd-grid-bg" style={{ padding: "50px 48px 60px", minHeight: 560 }}>
       <div style={{ maxWidth: 880, margin: "0 auto", textAlign: "center" }}>
@@ -21,9 +19,8 @@ export function RoleChooser({ nav }) {
           You can do both later &mdash; pick what brings you here today.
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginTop: 36 }}>
-          {/* Student → the platform's unified /signup creates a User + LearnerProfile */}
           <RoleCard color="var(--c-forest-mid)" icon={<Icon.cap size={28} />} kind="Guest student"
-            title="I'm a student" cta="Register as student" onClick={() => navigate("/signup")}
+            title="I'm a student" cta="Register as student" onClick={() => nav("student")}
             lines={["Browse master teachers from all over Mizoram", "One-on-one sessions, your choice of skill", "Pay per session, no subscription"]} />
           <RoleCard color="var(--c-orange)" icon={<Icon.spark size={26} />} kind="Guest teacher"
             title="I'm a teacher" cta="Register as teacher" onClick={() => nav("teacher")}
@@ -68,7 +65,7 @@ function RoleCard({ color, icon, kind, title, lines, cta, onClick }) {
 
 /* ── Guest student registration ───────────────────────────── */
 export function StudentSignup({ nav }) {
-  const [data, setData] = useState({ fullName: "", email: "", phone: "", location: "Aizawl", interests: [], agree: false });
+  const [data, setData] = useState({ fullName: "", email: "", phone: "", location: "Aizawl", interests: [], password: "", confirm: "", agree: false });
   const [err, setErr] = useState("");
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -78,6 +75,7 @@ export function StudentSignup({ nav }) {
   const submit = async (e) => {
     e.preventDefault();
     if (!data.fullName || !data.email || !data.phone) return setErr("Please fill name, email and phone.");
+    if (data.password !== data.confirm) return setErr("Passwords don't match.");
     if (!data.agree) return setErr("Please accept the terms.");
     if (data.interests.length === 0) return setErr("Pick at least one skill you're interested in.");
     setErr(""); setBusy(true);
@@ -127,6 +125,10 @@ export function StudentSignup({ nav }) {
                 ))}
               </div>
             </Field>
+            <FormRow>
+              <Field label="Password"><input className="sd-input" type="password" value={data.password} onChange={e => setData(d => ({ ...d, password: e.target.value }))} /></Field>
+              <Field label="Confirm password"><input className="sd-input" type="password" value={data.confirm} onChange={e => setData(d => ({ ...d, confirm: e.target.value }))} /></Field>
+            </FormRow>
             <label style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 12.5, color: "var(--c-ink-soft)", marginTop: 6, cursor: "pointer" }}>
               <input type="checkbox" checked={data.agree} onChange={e => setData(d => ({ ...d, agree: e.target.checked }))} style={{ marginTop: 2 }} />
               <span>I accept the <a href="/terms" style={{ color: "var(--c-forest)" }}>Terms</a> and Privacy Policy.</span>
@@ -146,7 +148,7 @@ export function StudentSignup({ nav }) {
 export function TeacherSignup({ nav }) {
   const [data, setData] = useState({
     fullName: "", email: "", phone: "", location: "Aizawl", headline: "", bio: "", experience: "",
-    categories: [], customSkills: [], rate: 400, modes: ["online"], availability: [], agree: false,
+    categories: [], customSkills: [], rate: 400, modes: ["online"], availability: [], password: "", confirm: "", agree: false,
   });
   const [customInput, setCustomInput] = useState("");
   const [err, setErr] = useState("");
@@ -168,19 +170,19 @@ export function TeacherSignup({ nav }) {
     e.preventDefault();
     if (!data.fullName || !data.email || !data.phone) return setErr("Please fill name, email and phone.");
     if (data.categories.length === 0 && data.customSkills.length === 0) return setErr("Add at least one master skill — pick a category or type your own.");
+    if (data.password !== data.confirm) return setErr("Passwords don't match.");
     if (!data.agree) return setErr("Please accept the terms.");
     setErr(""); setBusy(true);
     const primarySkill = data.customSkills[0]
       || (data.categories[0] && (SKILL_CATEGORIES.find(s => s.id === data.categories[0]) || {}).label)
       || "your skill";
     try {
-      const result = await registerTeacher(data);
+      await registerTeacher(data);
       nav("application-status", {
         applicant: {
           name: data.fullName, skill: primarySkill, category: data.categories[0] || "coding",
           headline: data.headline || "Guest teacher applicant", experience: data.experience || "3–5 years",
         },
-        applicationId: result.applicationId,
       });
     } catch (e2) { setErr(e2?.message || "Something went wrong. Try again."); setBusy(false); }
   };
@@ -282,6 +284,13 @@ export function TeacherSignup({ nav }) {
                   ))}
                 </div>
               </Field>
+            </Section>
+
+            <Section title="04 · Account">
+              <FormRow>
+                <Field label="Password"><input className="sd-input" type="password" value={data.password} onChange={e => setData(d => ({ ...d, password: e.target.value }))} /></Field>
+                <Field label="Confirm password"><input className="sd-input" type="password" value={data.confirm} onChange={e => setData(d => ({ ...d, confirm: e.target.value }))} /></Field>
+              </FormRow>
             </Section>
 
             <label style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 12.5, color: "var(--c-ink-soft)", cursor: "pointer" }}>
