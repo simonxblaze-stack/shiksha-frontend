@@ -1,31 +1,25 @@
 /* Profile.jsx — wired Skill Development teacher profile.
    ────────────────────────────────────────────────────────────────
-   A 1:1 React port of "Teacher Profile final.html" (the green/orange
-   ShikshaCom guest-expert profile with the two ways to learn — live
-   1-on-1 + self-paced Udemy-style course). It is wired to the Django
-   backend through ../../api/skillApi.js:
+   Wired to the Django backend through ../../api/skillApi.js:
 
      • course      → fetchExpertCourse(expert.id)   GET /skill/courses/
      • reviews     → fetchExpertReviews(expert.id)  GET /skill/teachers/<id>/reviews/
-     • book a slot → requestSession(...)            POST /skill/sessions/
+     • book a slot → nav("payment", { sessionDraft }) — goes through PaymentScreen
      • buy course  → enrollCourse(course.id)        POST /skill/courses/<id>/enroll/
      • message     → messageExpert(expert.id, txt)  POST /skill/conversations/
 
-   With USE_MOCK = true in skillApi.js it runs entirely on the bundled
-   mock data, so it's fully clickable before the backend is reachable.
-
-   Props:
-     t    — expert object in the directory shape (id, name, title, skills,
-            cat, rating, sessions, rate, img, bio, availability, badges)
-     nav  — host navigator; nav("discovery") powers "All guest experts"
-     initialMode — optional "live" | "course" */
+   CHANGES vs original:
+     1. confirmBook() now navigates to "payment" with a sessionDraft instead of
+        calling requestSession() inline — so the learner goes through PaymentScreen.
+     2. Category lookup uses (s.slug || s.id) so it works with both backend UUIDs
+        and mock data where id === slug. */
 import React, { useState, useEffect } from "react";
 import { SKILL_CATEGORIES } from "./data";
 import { SDAvail } from "./availability";
 import * as skillApi from "../../api/skillApi";
 import "./SkillProfile.css";
 
-/* ── inline icon set (matches the SVGs in the source HTML) ───────── */
+/* ── inline icon set ─────────────────────────────────────────── */
 function Ic({ n, w = 16, h, sw = 2, cls }) {
   const base = { width: w, height: h || w, viewBox: "0 0 24 24", className: cls };
   const stroke = { fill: "none", stroke: "currentColor", strokeWidth: sw, strokeLinecap: "round", strokeLinejoin: "round" };
@@ -68,7 +62,6 @@ function Ic({ n, w = 16, h, sw = 2, cls }) {
   }
 }
 
-/* ── weekly availability grid (shared store; presentational) ─────── */
 function AvailLegend() {
   return (
     <div className="avlegend">
@@ -107,16 +100,17 @@ function AvailGrid({ tid, interactive, selected, onPick }) {
 }
 
 export default function Profile({ t, nav, initialMode }) {
-  const cat = SKILL_CATEGORIES.find(s => s.id === t.cat) || SKILL_CATEGORIES[0];
+  // FIX: use slug || id so this works whether categories come from backend (UUID id + slug)
+  // or mock data (id === slug string like "coding")
+  const cat = SKILL_CATEGORIES.find(s => (s.slug || s.id) === t.cat) || SKILL_CATEGORIES[0];
   const first = (t.name || "").split(" ")[0];
 
-  const [course, setCourse] = useState(undefined);            // undefined=loading | null=none | object
+  const [course, setCourse] = useState(undefined);
   const [reviews, setReviews] = useState({ count: 0, list: [] });
   const [mode, setMode] = useState(initialMode === "course" ? "course" : "live");
-  const [modal, setModal] = useState(null);                   // null|book|buy|msg|okBook|okBuy|okMsg|busy
+  const [modal, setModal] = useState(null);
   const [slot, setSlot] = useState(null);
-  const [allOpen, setAllOpen] = useState({ 0: true });        // curriculum accordion open-state
-  // modal fields
+  const [allOpen, setAllOpen] = useState({ 0: true });
   const [bTopic, setBTopic] = useState("");
   const [bDur, setBDur] = useState(0);
   const [pay, setPay] = useState("UPI");
@@ -129,7 +123,6 @@ export default function Profile({ t, nav, initialMode }) {
     skillApi.fetchExpertReviews(t.id).then(r => {
       if (!alive) return;
       setReviews({ count: r.count, list: r.reviews });
-      // course rating/count come from the expert + reviews
       skillApi.fetchExpertCourse(t.id, { rating: t.rating, ratingCount: r.count })
         .then(c => alive && setCourse(c || null));
     }).catch(() => {
@@ -152,7 +145,6 @@ export default function Profile({ t, nav, initialMode }) {
   const responds = t.sessions > 120 ? "within 1 hour" : t.sessions > 80 ? "within 2 hours" : "within 4 hours";
   const loc = "Online only";
   const off = hasCourse && course.old ? Math.round((1 - course.price / course.old) * 100) : 0;
-
   const effMode = hasCourse ? mode : "live";
 
   function scrollToCard() {
@@ -169,19 +161,33 @@ export default function Profile({ t, nav, initialMode }) {
   }
   const everyOpen = hasCourse && course.curriculum.every((_, i) => allOpen[i]);
 
-  /* ── action handlers (wired) ──────────────────────────────────── */
-  async function confirmBook() {
-    setModal("busy");
-    const when = slot ? SDAvail.label(slot) : "your chosen time";
-    try {
-      await skillApi.requestSession({
-        expert: t.id, contact_mode: "session",
-        duration_mins: [60, 90, 120][bDur] || 60,
-        note: (bTopic ? `Topic: ${bTopic}. ` : "") + `Requested slot: ${when}.`,
-      });
-    } catch (e) { console.warn("requestSession failed (demo continues):", e?.message); }
-    setModal({ ok: "book", when });
+  /* ── action handlers ──────────────────────────────────────── */
+
+  // FIX: instead of calling requestSession() inline, build a sessionDraft and
+  // navigate to PaymentScreen which handles payment + session creation.
+  function confirmBook() {
+    const durations = [60, 90, 120];
+    const duration_mins = durations[bDur] || 60;
+    const slotLabel = slot ? SDAvail.label(slot) : null;
+
+    // Parse slot label "Mon 23 · 6 PM" into a rough date/time for the confirmation screen.
+    // The real scheduled_for is set by the teacher when they confirm via their dashboard.
+    const sessionDraft = {
+      topic:        bTopic || `Intro to ${t.skills?.[0] || "the skill"}`,
+      slot,
+      slotLabel,
+      date:         slotLabel ? slotLabel.split(" · ")[0] : null,
+      time:         slotLabel ? slotLabel.split(" · ")[1] : null,
+      mode:         "online",
+      duration_mins,
+      expertId:     t.id,
+      note:         (bTopic ? `Topic: ${bTopic}. ` : "") + (slotLabel ? `Requested slot: ${slotLabel}.` : ""),
+    };
+
+    setModal(null);
+    nav("payment", { teacher: t, sessionDraft });
   }
+
   async function confirmBuy() {
     setModal("busy");
     try { if (course?.id) await skillApi.enrollCourse(course.id); }
@@ -207,7 +213,7 @@ export default function Profile({ t, nav, initialMode }) {
 
       <div className="wrap">
         <div className="layout">
-          {/* ── main column ───────────────────────────────────── */}
+          {/* ── main column ─────────────────────────────── */}
           <div className="col-main">
             <div className="idcard">
               <div className="idtop">
@@ -231,7 +237,6 @@ export default function Profile({ t, nav, initialMode }) {
               </div>
             </div>
 
-            {/* two ways to learn */}
             <div className="ways" style={hasCourse ? null : { gridTemplateColumns: "1fr" }}>
               <button className="way live" onClick={() => { setMode("live"); scrollToCard(); }}>
                 <span className="wk"><Ic n="camera" w={13} sw={2.2} /> Live 1-on-1</span>
@@ -256,7 +261,6 @@ export default function Profile({ t, nav, initialMode }) {
               <p>{t.bio}</p>
             </div>
 
-            {/* Udemy-style course block */}
             {hasCourse && (
               <div className="csec" id="sdp-courseBlock">
                 <div className="chead">
@@ -274,7 +278,6 @@ export default function Profile({ t, nav, initialMode }) {
                   <div className="learn-grid">
                     {course.learn.map((x, i) => <div className="li" key={i}><Ic n="check" w={16} sw={2.5} /><span>{x}</span></div>)}
                   </div>
-
                   <h3 style={{ marginTop: 26 }}>This course includes</h3>
                   <div className="incl">
                     <div className="ii"><Ic n="play" w={16} /><span><b>{course.hours} hours</b> on-demand video</span></div>
@@ -284,7 +287,6 @@ export default function Profile({ t, nav, initialMode }) {
                     <div className="ii"><Ic n="qa" w={16} /><span>Q&amp;A with <b>{first}</b></span></div>
                     <div className="ii"><Ic n="mobile" w={16} /><span>Access on <b>mobile</b> &amp; desktop</span></div>
                   </div>
-
                   <h3 style={{ marginTop: 26 }}>Course content</h3>
                   <div className="csum">
                     <span><b>{course.curriculum.length}</b> sections</span>
@@ -346,7 +348,7 @@ export default function Profile({ t, nav, initialMode }) {
             </div>
           </div>
 
-          {/* ── sticky offer card ─────────────────────────────── */}
+          {/* ── sticky offer card ───────────────────────── */}
           <aside>
             <div className="bookcard">
               <div className="modes">
@@ -400,7 +402,6 @@ export default function Profile({ t, nav, initialMode }) {
         )}
       </div>
 
-      {/* ── modal ───────────────────────────────────────────────── */}
       {modal && (
         <div className="overlay on" onClick={e => { if (e.target === e.currentTarget) setModal(null); }}>
           <div className="modal"><div className="pane">{renderPane()}</div></div>
@@ -417,22 +418,12 @@ export default function Profile({ t, nav, initialMode }) {
     if (modal === "busy") {
       return <div className="ok"><div className="ic" style={{ animation: "none" }}><Ic n="clock" w={26} /></div><h3>One moment…</h3><p>Sending this to {first}.</p></div>;
     }
-    if (modal && modal.ok === "book") {
-      return (
-        <div className="ok">
-          <div className="ic"><Ic n="check" w={26} sw={2.5} /></div>
-          <h3>Slot requested</h3>
-          <p>Your request for <b>{modal.when}</b> was sent to {first}. Once they accept, the slot is locked for you and removed from their open times.</p>
-          <button className="btn btn-ghost" style={{ margin: "16px auto 0" }} onClick={() => setModal(null)}>Done</button>
-        </div>
-      );
-    }
     if (modal && modal.ok === "buy") {
       return (
         <div className="ok">
           <div className="ic"><Ic n="check" w={26} sw={2.5} /></div>
           <h3>You're enrolled! 🎉</h3>
-          <p>“{course.title}” is now in your library with lifetime access. Start anytime — your first lessons are ready.</p>
+          <p>"{course.title}" is now in your library with lifetime access. Start anytime — your first lessons are ready.</p>
           <button className="btn btn-accent" style={{ margin: "16px auto 0" }} onClick={() => setModal(null)}>Start learning <Ic n="arrow" w={16} /></button>
         </div>
       );
@@ -464,7 +455,9 @@ export default function Profile({ t, nav, initialMode }) {
             <div className="field"><label>Mode</label><select className="inp"><option>Online · Shiksha room</option></select></div>
           </div>
           <div className="summary">First 15-min intro is <b>free</b>. {first} confirms your request, then the slot is locked. Rate: <b>₹{t.rate}/hr</b>.</div>
-          <button className="btn btn-accent" style={{ width: "100%", justifyContent: "center", fontSize: 15, padding: 14 }} onClick={confirmBook}>Request this slot <Ic n="arrow" w={16} /></button>
+          <button className="btn btn-accent" style={{ width: "100%", justifyContent: "center", fontSize: 15, padding: 14 }} onClick={confirmBook}>
+            Continue to payment <Ic n="arrow" w={16} />
+          </button>
         </>
       );
     }
