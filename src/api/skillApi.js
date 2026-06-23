@@ -31,6 +31,24 @@ export async function fetchTeacher(id) {
   return data;
 }
 
+/* ── Payment config ───────────────────────────────────────────
+   GET /skill/payment-config/ → active payment mode + payee details.
+   Booking / course-buy screens call this on load to decide between a
+   one-tap free enroll, the UPI form, or a gateway button. The mode is
+   set by the admin in GlobalSettings (no restart). */
+export async function fetchSkillPaymentConfig() {
+  if (USE_MOCK) {
+    await wait(120);
+    return {
+      provider: "free", label: "Free (no payment)",
+      requires_manual_proof: false, auto_activate: true,
+      collects_money: false, is_free: true,
+    };
+  }
+  const { data } = await api.get("/skill/payment-config/");
+  return data;
+}
+
 /* ── Teacher profile: reviews + self-paced course ─────────────
    The wired "Teacher Profile final" screen reads through these. */
 
